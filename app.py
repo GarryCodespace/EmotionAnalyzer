@@ -285,7 +285,7 @@ uploaded_file = st.file_uploader("Upload an image for expression analysis", type
 if uploaded_file is not None:
     # Display uploaded image
     image = cv2.imdecode(np.frombuffer(uploaded_file.read(), np.uint8), cv2.IMREAD_COLOR)
-    st.image(image, caption="Uploaded Image", use_column_width=True)
+    st.image(image, caption="Uploaded Image", use_container_width=True)
     
     # Process image for facial analysis
     rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -316,6 +316,8 @@ if uploaded_file is not None:
 
 # Demo Mode
 st.markdown("#### 🎭 Demo Mode - Expression Simulation")
+st.markdown("*Test the AI analysis without needing a camera*")
+
 demo_expressions = [
     "smile, raised eyebrows",
     "frown, brow furrow",
@@ -329,13 +331,25 @@ demo_expressions = [
 
 selected_demo = st.selectbox("Choose a demo expression to analyze:", demo_expressions)
 
-if st.button("🔍 Analyze Demo Expression"):
-    try:
-        demo_analysis = analyze_expression(selected_demo)
-        st.success(f"🎯 **Demo Expression**: {selected_demo}")
-        st.info(f"💬 **AI Analysis**: {demo_analysis}")
-    except Exception as e:
-        st.error(f"Demo analysis error: {str(e)}")
+col1, col2 = st.columns(2)
+with col1:
+    if st.button("🔍 Analyze Demo Expression"):
+        try:
+            demo_analysis = analyze_expression(selected_demo)
+            st.success(f"🎯 **Demo Expression**: {selected_demo}")
+            st.info(f"💬 **AI Analysis**: {demo_analysis}")
+        except Exception as e:
+            st.error(f"Demo analysis error: {str(e)}")
+
+with col2:
+    if st.button("✨ Quick Test"):
+        try:
+            quick_test = "subtle smile, eye contact, relaxed expression"
+            quick_analysis = analyze_expression(quick_test)
+            st.success(f"🎯 **Quick Test**: {quick_test}")
+            st.info(f"💬 **AI Analysis**: {quick_analysis}")
+        except Exception as e:
+            st.error(f"Quick test error: {str(e)}")
 
 # Instructions
 st.markdown("---")
