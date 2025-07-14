@@ -161,7 +161,7 @@ st.markdown("""
 <style>
 /* Style navigation buttons */
 [data-testid="stColumns"] [data-testid="stButton"] > button {
-    background-color: transparent;
+    background-color: #1f1f1f;
     border: none;
     color: #ffffff;
     font-size: 16px;
