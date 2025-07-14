@@ -53,14 +53,32 @@ Preferred communication style: Simple, everyday language.
 - **Analysis Trigger**: Gesture detection triggers AI analysis
 - **Display**: Live video feed with overlaid analysis results
 
+### 5. Video Analysis System
+- **Smart Detection**: Analyzes only significant expression changes to reduce noise
+- **Significance Threshold**: Configurable threshold for determining meaningful changes
+- **Temporal Analysis**: Compares consecutive frames for landmark movement patterns
+- **Batch Processing**: Processes uploaded videos efficiently with frame skipping
+- **Timeline Generation**: Creates expression timeline with significant moments
+
 ## Data Flow
 
+### Live Processing
 1. **Video Input**: Camera captures live video frames
 2. **Face Detection**: MediaPipe processes frames to extract facial landmarks
 3. **Gesture Analysis**: Custom algorithms evaluate landmark positions against gesture definitions
 4. **AI Processing**: Detected gestures are sent to OpenAI for emotional analysis
 5. **Database Storage**: Analysis results are stored in PostgreSQL with session tracking
 6. **Result Display**: Analysis results are shown in the Streamlit interface alongside live video
+
+### Video Upload Processing
+1. **Video Upload**: User uploads video file (MP4, AVI, MOV, MKV)
+2. **Temporary Storage**: Video saved to temporary file for processing
+3. **Frame Analysis**: Process frames with intelligent skipping for performance
+4. **Significance Detection**: Compare consecutive frames for meaningful expression changes
+5. **Selective Analysis**: Only analyze frames with significant changes (configurable threshold)
+6. **Timeline Generation**: Create expression timeline with timestamps and significance scores
+7. **Database Storage**: Save significant moments with video analysis type
+8. **Summary Display**: Show dominant emotions, timeline, and detailed analysis
 
 ## External Dependencies
 

@@ -4,8 +4,11 @@ import mediapipe as mp
 import numpy as np
 import time
 import uuid
+import tempfile
+import os
 from openai_analyzer import analyze_expression
 from database import init_database, save_emotion_analysis, get_user_history, get_expression_statistics
+from video_analyzer import VideoEmotionAnalyzer
 
 # Setup MediaPipe
 mp_face_mesh = mp.solutions.face_mesh
@@ -335,6 +338,72 @@ if uploaded_file is not None:
     else:
         st.warning("⚪ No face detected in the uploaded image")
 
+# Video Upload Feature
+st.markdown("#### 🎬 Video Analysis")
+st.markdown("*Upload a video for intelligent expression analysis - AI analyzes only significant expression changes*")
+
+uploaded_video = st.file_uploader("Upload a video for expression analysis", type=['mp4', 'avi', 'mov', 'mkv'])
+
+if uploaded_video is not None:
+    # Save uploaded video to temporary file
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp_file:
+        tmp_file.write(uploaded_video.read())
+        tmp_video_path = tmp_file.name
+    
+    try:
+        # Display video
+        st.video(uploaded_video)
+        
+        # Process video with progress bar
+        with st.spinner('Analyzing video for significant expression changes...'):
+            video_analyzer = VideoEmotionAnalyzer(significance_threshold=0.12)
+            analyses = video_analyzer.process_video(tmp_video_path, max_analyses=15)
+            video_summary = video_analyzer.get_video_summary()
+        
+        if analyses:
+            st.success(f"🎯 **Found {len(analyses)} significant expression moments**")
+            
+            # Display video summary
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("Total Analyses", video_summary['total_analyses'])
+                if video_summary['dominant_emotions']:
+                    st.markdown("**Dominant Emotions:**")
+                    for emotion, count in video_summary['dominant_emotions']:
+                        st.write(f"• {emotion}: {count} times")
+            
+            with col2:
+                st.markdown("**Expression Timeline:**")
+                for moment in video_summary['timeline'][:5]:
+                    st.write(f"⏰ {moment['timestamp']:.1f}s: {', '.join(moment['expressions'])}")
+            
+            # Display detailed analyses
+            st.markdown("**🔍 Detailed Analysis of Significant Moments:**")
+            for i, analysis in enumerate(analyses[:8]):  # Show top 8 analyses
+                with st.expander(f"Moment {i+1} - {analysis['timestamp']:.1f}s (Significance: {analysis['significance_score']:.2f})"):
+                    st.write(f"**Detected Expressions**: {', '.join(analysis['expressions'])}")
+                    st.write(f"**AI Analysis**: {analysis['ai_analysis']}")
+                    st.write(f"**Frame**: {analysis['frame_number']}")
+                    
+                    # Save significant analyses to database
+                    save_emotion_analysis(
+                        session_id=st.session_state.session_id,
+                        expressions=analysis['expressions'],
+                        ai_analysis=analysis['ai_analysis'],
+                        analysis_type="video",
+                        confidence=analysis['significance_score']
+                    )
+        
+        else:
+            st.info("⚪ No significant expression changes detected in this video")
+            
+    except Exception as e:
+        st.error(f"Video analysis error: {str(e)}")
+    finally:
+        # Clean up temporary file
+        if os.path.exists(tmp_video_path):
+            os.unlink(tmp_video_path)
+
 # Demo Mode
 st.markdown("#### 🎭 Demo Mode - Expression Simulation")
 st.markdown("*Test the AI analysis without needing a camera*")
@@ -432,18 +501,21 @@ st.markdown("### 📋 Instructions")
 st.markdown("""
 1. **Webcam Mode**: Click ▶ Start for live emotion detection (requires camera access)
 2. **Image Upload**: Upload a photo to analyze facial expressions
-3. **Demo Mode**: Test AI analysis with simulated expressions
-4. **AI Analysis**: OpenAI GPT provides psychological insights for all modes
-5. **Local Setup**: For full webcam features, run this app locally
+3. **Video Analysis**: Upload a video for intelligent analysis of significant expression changes
+4. **Demo Mode**: Test AI analysis with simulated expressions
+5. **AI Analysis**: OpenAI GPT provides psychological insights for all modes
+6. **Session Data**: View your personal analysis history and overall statistics
 """)
 
 st.markdown("### 🔧 Features")
 st.markdown("""
 - **Real-time processing**: Live webcam feed with instant gesture detection
 - **100+ Gestures**: Comprehensive micro-expression recognition
+- **Video analysis**: Smart detection of significant expression changes in videos
 - **AI-powered insights**: OpenAI GPT analysis of emotional states
-- **Cooldown system**: Prevents spam detection of the same gesture
-- **Error handling**: Robust error management for gesture detection
+- **Database storage**: Persistent storage of analysis history and statistics
+- **Multi-modal input**: Webcam, image upload, and video upload support
+- **Intelligent filtering**: Only analyzes significant expression changes to reduce noise
 """)
 
 st.markdown("### ⚙️ Technical Details")
