@@ -157,10 +157,11 @@ cooldown_seconds = 5
 st.set_page_config(page_title="Emoticon – Emotion Detector", layout="wide")
 
 # Header with logo
-header_col1, header_col2 = st.columns([1, 12])
+header_col1, header_col2 = st.columns([1, 8])
 with header_col1:
+    st.markdown("<br><br>", unsafe_allow_html=True)  # Push logo down to align with subtitle
     try:
-        st.image("logo.png", width=60)
+        st.image("logo.png", width=100)
     except:
         st.markdown("🎭")
 with header_col2:
