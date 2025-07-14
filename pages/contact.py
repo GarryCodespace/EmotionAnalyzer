@@ -120,6 +120,11 @@ with header_col3:
 
 st.markdown("---")
 
+# Instagram link at the top
+st.markdown("### 📸 Follow us on Instagram: [@emoticon.ai](https://www.instagram.com/emoticon.ai)")
+
+st.markdown("---")
+
 # Contact form and information
 col1, col2 = st.columns([3, 2])
 
