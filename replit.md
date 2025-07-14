@@ -19,6 +19,7 @@ Preferred communication style: Simple, everyday language.
 - **Computer Vision**: MediaPipe Face Mesh for facial landmark detection
 - **Expression Detection**: Custom gesture recognition system using 100+ predefined facial expressions
 - **AI Analysis**: OpenAI GPT-4o integration for emotional interpretation
+- **Database**: PostgreSQL for storing analysis results, user sessions, and statistics
 - **Processing Pipeline**: Real-time video frame analysis with gesture detection and AI interpretation
 
 ## Key Components
@@ -58,7 +59,8 @@ Preferred communication style: Simple, everyday language.
 2. **Face Detection**: MediaPipe processes frames to extract facial landmarks
 3. **Gesture Analysis**: Custom algorithms evaluate landmark positions against gesture definitions
 4. **AI Processing**: Detected gestures are sent to OpenAI for emotional analysis
-5. **Result Display**: Analysis results are shown in the Streamlit interface alongside live video
+5. **Database Storage**: Analysis results are stored in PostgreSQL with session tracking
+6. **Result Display**: Analysis results are shown in the Streamlit interface alongside live video
 
 ## External Dependencies
 
@@ -67,11 +69,14 @@ Preferred communication style: Simple, everyday language.
 - **opencv-python (cv2)**: Computer vision and video processing
 - **mediapipe**: Google's ML framework for face detection
 - **openai**: Official OpenAI API client
+- **psycopg2-binary**: PostgreSQL adapter for Python
+- **sqlalchemy**: Database ORM for Python
 - **time**: Built-in Python module for timing operations
 
 ### API Dependencies
 - **OpenAI API**: Requires valid API key stored in environment variable `OPENAI_API_KEY`
 - **Model**: Specifically uses GPT-4o model (latest as of May 2024)
+- **PostgreSQL Database**: Requires DATABASE_URL environment variable for data persistence
 
 ### Hardware Requirements
 - **Camera**: Webcam or built-in camera for video input

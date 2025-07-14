@@ -3,7 +3,9 @@ import cv2
 import mediapipe as mp
 import numpy as np
 import time
+import uuid
 from openai_analyzer import analyze_expression
+from database import init_database, save_emotion_analysis, get_user_history, get_expression_statistics
 
 # Setup MediaPipe
 mp_face_mesh = mp.solutions.face_mesh
@@ -153,6 +155,13 @@ st.set_page_config(page_title="Emoticon – Emotion Detector", layout="wide")
 st.title("🎭 Emoticon")
 st.write("Live AI Emotion Interpretation from Micro-Expressions")
 
+# Initialize database
+try:
+    init_database()
+    st.success("✅ Database connected successfully")
+except Exception as e:
+    st.error(f"❌ Database connection issue: {str(e)}")
+
 # API Key Status Check
 try:
     import os
@@ -164,9 +173,13 @@ try:
 except Exception as e:
     st.error(f"❌ OpenAI connection issue: {str(e)}")
 
-# Initialize session state for camera control
+# Initialize session state
+if 'session_id' not in st.session_state:
+    st.session_state.session_id = str(uuid.uuid4())
 if 'camera_running' not in st.session_state:
     st.session_state.camera_running = False
+
+
 
 # Display placeholders
 frame_display = st.empty()
@@ -307,6 +320,14 @@ if uploaded_file is not None:
             try:
                 analysis = analyze_expression(", ".join(detected_expressions))
                 st.info(f"💬 **AI Analysis**: {analysis}")
+                
+                # Save to database
+                save_emotion_analysis(
+                    session_id=st.session_state.session_id,
+                    expressions=detected_expressions[:5],
+                    ai_analysis=analysis,
+                    analysis_type="image"
+                )
             except Exception as e:
                 st.error(f"Analysis error: {str(e)}")
         else:
@@ -338,6 +359,15 @@ with col1:
             demo_analysis = analyze_expression(selected_demo)
             st.success(f"🎯 **Demo Expression**: {selected_demo}")
             st.info(f"💬 **AI Analysis**: {demo_analysis}")
+            
+            # Save to database
+            expressions = selected_demo.split(", ")
+            save_emotion_analysis(
+                session_id=st.session_state.session_id,
+                expressions=expressions,
+                ai_analysis=demo_analysis,
+                analysis_type="demo"
+            )
         except Exception as e:
             st.error(f"Demo analysis error: {str(e)}")
 
@@ -348,8 +378,53 @@ with col2:
             quick_analysis = analyze_expression(quick_test)
             st.success(f"🎯 **Quick Test**: {quick_test}")
             st.info(f"💬 **AI Analysis**: {quick_analysis}")
+            
+            # Save to database
+            expressions = quick_test.split(", ")
+            save_emotion_analysis(
+                session_id=st.session_state.session_id,
+                expressions=expressions,
+                ai_analysis=quick_analysis,
+                analysis_type="demo"
+            )
         except Exception as e:
             st.error(f"Quick test error: {str(e)}")
+
+# User History and Statistics
+st.markdown("---")
+st.markdown("### 📊 Your Session Data")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.markdown("#### 🕐 Recent Analysis History")
+    try:
+        history = get_user_history(st.session_state.session_id, limit=5)
+        if history:
+            for i, record in enumerate(history):
+                with st.expander(f"Analysis {i+1} - {record['analysis_type'].title()} ({record['timestamp'].strftime('%H:%M:%S')})"):
+                    st.write(f"**Expressions**: {', '.join(record['expressions'])}")
+                    st.write(f"**AI Analysis**: {record['ai_analysis']}")
+        else:
+            st.info("No analysis history yet. Try the demo mode or upload an image!")
+    except Exception as e:
+        st.error(f"Error loading history: {str(e)}")
+
+with col2:
+    st.markdown("#### 📈 Overall Statistics")
+    try:
+        stats = get_expression_statistics()
+        
+        st.metric("Total Analyses", stats['total_analyses'])
+        st.metric("Unique Users", stats['unique_users'])
+        
+        if stats['top_expressions']:
+            st.markdown("**Top Detected Expressions:**")
+            for expr in stats['top_expressions'][:5]:
+                st.write(f"• {expr['name']}: {expr['count']} times")
+        
+    except Exception as e:
+        st.error(f"Error loading statistics: {str(e)}")
 
 # Instructions
 st.markdown("---")
