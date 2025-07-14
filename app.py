@@ -259,6 +259,9 @@ with header_col3:
     if st.button(theme_button_text, key="theme_toggle"):
         st.session_state.dark_mode = not st.session_state.dark_mode
         st.rerun()
+    
+    if st.button("ℹ️ About", key="about_button"):
+        st.switch_page("pages/about.py")
 
 # Initialize database
 try:
