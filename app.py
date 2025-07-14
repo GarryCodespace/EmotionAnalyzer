@@ -158,7 +158,7 @@ st.set_page_config(page_title="Emoticon – Emotion Detector", layout="wide")
 
 # Initialize theme state
 if 'dark_mode' not in st.session_state:
-    st.session_state.dark_mode = False
+    st.session_state.dark_mode = True
 
 # Apply theme
 if st.session_state.dark_mode:
