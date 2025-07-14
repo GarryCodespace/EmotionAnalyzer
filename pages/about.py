@@ -92,9 +92,30 @@ header_col1, header_col2, header_col3 = st.columns([2, 6, 2])
 with header_col1:
     st.markdown("<br><br><br>", unsafe_allow_html=True)
     try:
-        st.image("logo.png", width=120)
+        # Create a clickable logo container
+        logo_container = st.container()
+        with logo_container:
+            if st.button("", key="logo_home_button", help="Click to go to main page"):
+                st.switch_page("app.py")
+            # Hide the button appearance with CSS
+            st.markdown("""
+            <style>
+            button[data-testid="stButton"][title="Click to go to main page"] {
+                background: none !important;
+                border: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                height: 0 !important;
+                width: 0 !important;
+                position: absolute !important;
+                z-index: 10;
+            }
+            </style>
+            """, unsafe_allow_html=True)
+            st.image("logo.png", width=120)
     except:
-        st.markdown("🎭")
+        if st.button("🎭", key="logo_emoji_home", help="Click to go to main page"):
+            st.switch_page("app.py")
 with header_col2:
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;<h1 style='font-size: 3rem; margin: 0; margin-bottom: -35px;'>About Emoticon</h1>", unsafe_allow_html=True)
