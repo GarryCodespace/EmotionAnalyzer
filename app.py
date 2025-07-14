@@ -205,6 +205,7 @@ with header_col1:
     except:
         st.markdown("🎭")
 with header_col2:
+    st.markdown("<br><br>", unsafe_allow_html=True)  # Add spacing to push text down
     st.markdown("# Emoticon")
     st.write("Live AI Emotion Interpretation from Micro-Expressions")
 with header_col3:
