@@ -246,36 +246,9 @@ header_col1, header_col2, header_col3 = st.columns([2, 6, 2])
 with header_col1:
     st.markdown("<br><br>", unsafe_allow_html=True)  # Push logo down to align with subtitle
     try:
-        # Create invisible clickable button overlay on logo
-        if st.button("", key="logo_home_nav", help="Click to go to main page"):
-            st.switch_page("app.py")
-        
-        # Style to make button invisible and position over logo
-        st.markdown("""
-        <style>
-        button[data-testid="stButton"][title="Click to go to main page"] {
-            position: absolute !important;
-            background: transparent !important;
-            border: none !important;
-            color: transparent !important;
-            width: 120px !important;
-            height: 120px !important;
-            z-index: 10 !important;
-            margin-top: -140px !important;
-            cursor: pointer !important;
-        }
-        button[data-testid="stButton"][title="Click to go to main page"]:hover {
-            background: transparent !important;
-            border: none !important;
-        }
-        </style>
-        """, unsafe_allow_html=True)
-        
-        # Display the logo
         st.image("logo.png", width=120)
     except:
-        if st.button("🎭", key="logo_emoji_nav", help="Click to go to main page"):
-            st.switch_page("app.py")
+        st.markdown("🎭")
 with header_col2:
     st.markdown("<br>", unsafe_allow_html=True)  # Reduce spacing for closer text
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;<h1 style='font-size: 3rem; margin: 0; margin-bottom: -35px;'>Emoticon</h1>", unsafe_allow_html=True)
