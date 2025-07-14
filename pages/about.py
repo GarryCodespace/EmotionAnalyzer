@@ -92,32 +92,18 @@ header_col1, header_col2, header_col3 = st.columns([2, 6, 2])
 with header_col1:
     st.markdown("<br><br>", unsafe_allow_html=True)  # Push logo down to align with subtitle
     try:
-        # Make the logo clickable using custom HTML
+        # Create clickable logo with JavaScript
         import base64
         with open("logo.png", "rb") as f:
             logo_data = base64.b64encode(f.read()).decode()
         
-        if st.button("logo_click", key="logo_click_button", help="Click logo to go to main page"):
-            st.switch_page("app.py")
-        
         st.markdown(f"""
-        <style>
-        button[title="Click logo to go to main page"] {{
-            position: absolute;
-            background: transparent;
-            border: none;
-            z-index: 10;
-            width: 120px;
-            height: 120px;
-            cursor: pointer;
-            margin-top: -140px;
-        }}
-        </style>
-        <img src="data:image/png;base64,{logo_data}" width="120" style="cursor: pointer;">
+        <div onclick="window.location.href='/';" style="cursor: pointer; display: inline-block;">
+            <img src="data:image/png;base64,{logo_data}" width="120" style="cursor: pointer;" title="Click to go to main page">
+        </div>
         """, unsafe_allow_html=True)
     except:
-        if st.button("🎭", key="logo_emoji_home", help="Click to go to main page"):
-            st.switch_page("app.py")
+        st.markdown('<div onclick="window.location.href=\'/\';" style="cursor: pointer; font-size: 60px; display: inline-block;" title="Click to go to main page">🎭</div>', unsafe_allow_html=True)
 with header_col2:
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;<h1 style='font-size: 3rem; margin: 0; margin-bottom: -35px;'>About Emoticon</h1>", unsafe_allow_html=True)
@@ -128,6 +114,9 @@ with header_col3:
     if st.button(theme_button_text, key="theme_toggle"):
         st.session_state.dark_mode = not st.session_state.dark_mode
         st.rerun()
+    
+    if st.button("📞 Contact", key="contact_button"):
+        st.switch_page("pages/contact.py")
 
 st.markdown("---")
 
