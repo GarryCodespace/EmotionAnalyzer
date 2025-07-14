@@ -197,17 +197,17 @@ else:
     """, unsafe_allow_html=True)
 
 # Header with logo and theme toggle
-header_col1, header_col2, header_col3 = st.columns([1, 8, 1])
+header_col1, header_col2, header_col3 = st.columns([2, 6, 2])
 with header_col1:
     st.markdown("<br><br>", unsafe_allow_html=True)  # Push logo down to align with subtitle
     try:
-        st.image("logo.png", width=100)
+        st.image("logo.png", width=120)
     except:
         st.markdown("🎭")
 with header_col2:
     st.markdown("<br><br>", unsafe_allow_html=True)  # Add spacing to push text down
-    st.markdown("# Emoticon")
-    st.write("Live AI Emotion Interpretation from Micro-Expressions")
+    st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;# Emoticon", unsafe_allow_html=True)
+    st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;Live AI Emotion Interpretation from Micro-Expressions", unsafe_allow_html=True)
 with header_col3:
     st.markdown("<br>", unsafe_allow_html=True)  # Add some spacing
     theme_button_text = "🌙 Dark" if not st.session_state.dark_mode else "☀️ Light"
