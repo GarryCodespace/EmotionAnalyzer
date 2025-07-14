@@ -90,29 +90,31 @@ else:
 # Header with logo and theme toggle
 header_col1, header_col2, header_col3 = st.columns([2, 6, 2])
 with header_col1:
-    st.markdown("<br><br><br>", unsafe_allow_html=True)
+    st.markdown("<br><br>", unsafe_allow_html=True)  # Push logo down to align with subtitle
     try:
-        # Create a clickable logo container
-        logo_container = st.container()
-        with logo_container:
-            if st.button("", key="logo_home_button", help="Click to go to main page"):
-                st.switch_page("app.py")
-            # Hide the button appearance with CSS
-            st.markdown("""
-            <style>
-            button[data-testid="stButton"][title="Click to go to main page"] {
-                background: none !important;
-                border: none !important;
-                padding: 0 !important;
-                margin: 0 !important;
-                height: 0 !important;
-                width: 0 !important;
-                position: absolute !important;
-                z-index: 10;
-            }
-            </style>
-            """, unsafe_allow_html=True)
-            st.image("logo.png", width=120)
+        # Make the logo clickable using custom HTML
+        import base64
+        with open("logo.png", "rb") as f:
+            logo_data = base64.b64encode(f.read()).decode()
+        
+        if st.button("logo_click", key="logo_click_button", help="Click logo to go to main page"):
+            st.switch_page("app.py")
+        
+        st.markdown(f"""
+        <style>
+        button[title="Click logo to go to main page"] {{
+            position: absolute;
+            background: transparent;
+            border: none;
+            z-index: 10;
+            width: 120px;
+            height: 120px;
+            cursor: pointer;
+            margin-top: -140px;
+        }}
+        </style>
+        <img src="data:image/png;base64,{logo_data}" width="120" style="cursor: pointer;">
+        """, unsafe_allow_html=True)
     except:
         if st.button("🎭", key="logo_emoji_home", help="Click to go to main page"):
             st.switch_page("app.py")
