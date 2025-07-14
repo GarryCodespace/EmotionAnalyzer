@@ -420,7 +420,7 @@ lie_detector_display = st.empty()
 gpt_display = st.empty()
 
 # Control buttons
-col1, col2, col3, col4 = st.columns([1, 1, 1, 1.5])
+col1, col2, col3 = st.columns(3)
 with col1:
     if st.button('▶ Start Webcam'):
         st.session_state.camera_running = True
@@ -435,13 +435,6 @@ with col3:
     if st.button('🔄 Refresh'):
         st.session_state.camera_running = True
         st.rerun()
-
-with col4:
-    live_lie_detector = st.checkbox('🔍 Live Lie Detector', key='live_lie_detector')
-    if live_lie_detector:
-        st.session_state.enable_live_lie_detector = True
-    else:
-        st.session_state.enable_live_lie_detector = False
 
 # Camera processing
 if st.session_state.camera_running:
@@ -806,8 +799,17 @@ if uploaded_file is not None:
         st.warning("⚪ No face detected in the uploaded image")
 
 # Video Upload Feature
-st.markdown("#### 🎬 Video Analysis")
-st.markdown("*Upload a video for intelligent expression analysis - AI analyzes only significant expression changes*")
+video_col1, video_col2 = st.columns([2, 1])
+with video_col1:
+    st.markdown("#### 🎬 Video Analysis")
+    st.markdown("*Upload a video for intelligent expression analysis - AI analyzes only significant expression changes*")
+
+with video_col2:
+    live_lie_detector = st.checkbox('🔍 Live Lie Detector', key='live_lie_detector')
+    if live_lie_detector:
+        st.session_state.enable_live_lie_detector = True
+    else:
+        st.session_state.enable_live_lie_detector = False
 
 uploaded_video = st.file_uploader("Upload a video for expression analysis", type=['mp4', 'avi', 'mov', 'mkv'])
 
