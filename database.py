@@ -17,8 +17,7 @@ engine = sa.create_engine(
     pool_size=5,         # Number of connections to maintain
     max_overflow=10,     # Maximum overflow connections
     connect_args={
-        "connect_timeout": 30,
-        "options": "-c default_transaction_isolation=read_committed"
+        "connect_timeout": 30
     }
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
