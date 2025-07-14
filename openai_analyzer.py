@@ -22,24 +22,56 @@ def analyze_expression(event_text):
         str: AI-generated emotional analysis and interpretation
     """
     try:
-        prompt = f"""The user displayed the following facial expressions and gestures: {event_text}.
+        # Check if body language patterns are included
+        body_language_patterns = [
+            "crossed_arms", "hands_on_hips", "arms_open", "defensive_posture", 
+            "confident_stance", "leaning_forward", "leaning_back", "crossed_legs",
+            "wide_stance", "closed_stance", "hand_to_face", "hand_to_neck",
+            "hand_to_chest", "covering_mouth", "covering_eyes", "fidgeting",
+            "pointing", "open_palms", "clenched_fists", "self_soothing",
+            "territorial_stance", "submissive_posture", "power_pose",
+            "anxiety_indicators", "engagement_signals"
+        ]
         
-        Please provide a concise emotional analysis that includes:
-        1. The likely emotional state or mood
-        2. Possible underlying feelings or thoughts
-        3. Social or psychological context if applicable
+        has_body_language = any(pattern in event_text for pattern in body_language_patterns)
         
-        Keep your response under 150 words and focus on psychological insights rather than technical descriptions."""
+        if has_body_language:
+            prompt = f"""The user displayed the following facial expressions, gestures, and body language: {event_text}.
+            
+            Please provide a comprehensive emotional analysis that includes:
+            1. The likely emotional state or mood
+            2. Possible underlying feelings or thoughts
+            3. Social or psychological context if applicable
+            4. How their body language and posture reflect their confidence, comfort level, or emotional barriers
+            5. What their positioning and gestures might suggest about their intentions or psychological state
+            
+            Keep your response under 150 words and focus on psychological insights combining both facial and body language."""
+            
+            system_content = """You are an expert psychologist specializing in facial expression analysis, body language, and emotional intelligence. 
+            You have deep knowledge of micro-expressions, emotional psychology, non-verbal communication, and body language interpretation. 
+            Provide insightful, empathetic, and accurate emotional interpretations based on facial gestures, expressions, and body positioning.
+            Always maintain a professional and supportive tone."""
+        else:
+            prompt = f"""The user displayed the following facial expressions and gestures: {event_text}.
+            
+            Please provide a concise emotional analysis that includes:
+            1. The likely emotional state or mood
+            2. Possible underlying feelings or thoughts
+            3. Social or psychological context if applicable
+            
+            Keep your response under 150 words and focus on psychological insights rather than technical descriptions."""
+            
+            system_content = """You are an expert psychologist specializing in facial expression analysis and emotional intelligence. 
+            You have deep knowledge of micro-expressions, emotional psychology, and non-verbal communication. 
+            Provide insightful, empathetic, and accurate emotional interpretations based on facial gestures and expressions.
+            Always maintain a professional and supportive tone."""
 
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
                 {
                     "role": "system", 
-                    "content": """You are an expert psychologist specializing in facial expression analysis and emotional intelligence. 
-                    You have deep knowledge of micro-expressions, emotional psychology, and non-verbal communication. 
-                    Provide insightful, empathetic, and accurate emotional interpretations based on facial gestures and expressions.
-                    Always maintain a professional and supportive tone."""
+                    "content": system_content
                 },
                 {
                     "role": "user", 

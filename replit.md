@@ -44,14 +44,34 @@ UI Design: Dark mode default, proper capitalization (first letter only), seamles
 - **Sensitivity**: Adjustable thresholds for different gesture types
 - **Live Confidence Display**: Visual confidence bars showing detection accuracy
 
-### 3. AI Expression Analysis
-- **Model**: OpenAI GPT-4o
-- **Purpose**: Provide psychological insights and emotional interpretation
-- **Input**: Comma-separated list of detected gestures
-- **Output**: Emotional analysis including mood, underlying feelings, and social context
-- **Response Limit**: 150 words maximum for concise insights
+### 3. Full Body Language Detection
+- **Technology**: MediaPipe Pose and Hand detection
+- **Purpose**: Analyze body posture, hand positioning, and gestural patterns
+- **Detection Patterns**: 25+ body language patterns including:
+  - **Defensive Postures**: crossed arms, defensive stance, closed posture
+  - **Confident Gestures**: hands on hips, wide stance, power pose, territorial stance
+  - **Engagement Signals**: leaning forward, open arms, open palms
+  - **Anxiety Indicators**: fidgeting, self-soothing, submissive posture
+  - **Hand-to-Body Contact**: hand to face/neck/chest (stress/thinking/protection)
+  - **Covering Behaviors**: covering mouth/eyes (surprise/shame/deception)
+  - **Leg Positioning**: crossed legs, wide/closed stance
+  - **Pointing and Gesturing**: directional emphasis, clenched fists
+- **Confidence Scoring**: Real-time confidence calculation for each body language pattern
+- **Contextual Analysis**: Combines facial expressions with body language for comprehensive insights
 
-### 4. Real-time Processing Pipeline
+### 4. AI Expression Analysis
+- **Model**: OpenAI GPT-4o
+- **Purpose**: Provide comprehensive psychological insights and emotional interpretation
+- **Input**: Combined facial expressions and body language patterns
+- **Analysis Types**:
+  - **Facial-Only Analysis**: Traditional micro-expression interpretation
+  - **Body-Language-Only Analysis**: Posture and gesture interpretation
+  - **Combined Analysis**: Holistic facial + body language psychological assessment
+- **Output**: Comprehensive emotional analysis including mood, underlying feelings, social context, confidence levels, and psychological barriers
+- **Response Limit**: 150 words maximum for concise insights
+- **Enhanced Prompting**: Different analysis approaches for facial vs. combined body language input
+
+### 5. Real-time Processing Pipeline
 - **Video Capture**: OpenCV camera integration
 - **Frame Processing**: Real-time landmark detection and gesture analysis
 - **Analysis Trigger**: Gesture detection triggers AI analysis
