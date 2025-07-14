@@ -268,6 +268,10 @@ st.markdown("""
     transition: all 0.3s ease;
     cursor: pointer;
 }
+.nav-item:link, .nav-item:visited {
+    text-decoration: none;
+    color: #ffffff;
+}
 .nav-item:hover {
     background-color: #333;
     color: #ffffff;
@@ -309,12 +313,6 @@ with header_col3:
     if st.button(theme_button_text, key="theme_toggle"):
         st.session_state.dark_mode = not st.session_state.dark_mode
         st.rerun()
-    
-    if st.button("ℹ️ About", key="about_button"):
-        st.switch_page("pages/about.py")
-    
-    if st.button("📞 Contact", key="contact_button"):
-        st.switch_page("pages/contact.py")
 
 # Initialize database
 try:

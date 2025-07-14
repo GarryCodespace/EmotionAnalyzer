@@ -114,6 +114,10 @@ st.markdown("""
     transition: all 0.3s ease;
     cursor: pointer;
 }
+.nav-item:link, .nav-item:visited {
+    text-decoration: none;
+    color: #ffffff;
+}
 .nav-item:hover {
     background-color: #333;
     color: #ffffff;
