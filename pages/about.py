@@ -129,10 +129,10 @@ st.markdown("""
 </style>
 <div class="nav-container">
     <div class="nav-menu">
-        <span class="nav-item">Home</span>
-        <span class="nav-item active">About</span>
-        <span class="nav-item">Contact</span>
-        <span class="nav-item">Screen Recorder</span>
+        <span class="nav-item">HOME</span>
+        <span class="nav-item active">ABOUT</span>
+        <span class="nav-item">CONTACT</span>
+        <span class="nav-item">SCREEN RECORDER</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
