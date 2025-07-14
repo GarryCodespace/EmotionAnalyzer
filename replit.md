@@ -7,6 +7,7 @@ This application is a real-time facial expression analysis system that combines 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+UI Design: Dark mode default, proper capitalization (first letter only), seamless button integration with black background matching navigation bar.
 
 ## System Architecture
 
@@ -27,18 +28,21 @@ Preferred communication style: Simple, everyday language.
 ### 1. Facial Landmark Detection
 - **Technology**: MediaPipe Face Mesh
 - **Purpose**: Detect 468 facial landmarks in real-time
-- **Configuration**: Single face detection with refined landmarks
+- **Configuration**: Multi-face detection (up to 5 faces) with refined landmarks
 - **Output**: 3D coordinates (x, y, z) for each facial point
+- **Multi-Face Support**: Simultaneous detection and analysis of multiple people
 
 ### 2. Gesture Recognition System
 - **Implementation**: 100+ predefined gestures using lambda functions
 - **Detection Method**: Geometric analysis of facial landmark positions
+- **Confidence Scoring**: Real-time confidence calculation for each detected expression
 - **Gesture Types**: 
   - Basic expressions (smile, frown, blink)
   - Complex combinations (brow furrow + frown)
   - Micro-expressions (subtle smile, lip bite)
   - Head movements (tilts, turns)
 - **Sensitivity**: Adjustable thresholds for different gesture types
+- **Live Confidence Display**: Visual confidence bars showing detection accuracy
 
 ### 3. AI Expression Analysis
 - **Model**: OpenAI GPT-4o
