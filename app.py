@@ -315,9 +315,9 @@ st.markdown("""
 <style>
 /* Style navigation buttons */
 [data-testid="stColumns"] [data-testid="stButton"] > button {
-    background-color: #1f1f1f;
-    border: none;
-    color: #ffffff;
+    background-color: #1f1f1f !important;
+    border: none !important;
+    color: #ffffff !important;
     font-size: 16px;
     font-weight: 500;
     padding: 12px 20px;
