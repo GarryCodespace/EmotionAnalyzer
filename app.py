@@ -490,17 +490,59 @@ with col2:
     st.markdown("4. Click 'Start Recording' in the recorder")
     st.markdown("5. Get live analysis popups during your call")
 
-if st.button("🎬 Launch Screen Recorder", type="primary"):
-    st.info("🚀 Starting screen recorder in a new window...")
-    try:
-        import subprocess
-        import sys
-        subprocess.Popen([sys.executable, "screen_recorder.py"])
-        st.success("✅ Screen recorder launched! Check for the new window.")
-        st.markdown("**Note:** The screen recorder runs independently. You can close this web app if needed.")
-    except Exception as e:
-        st.error(f"Error launching screen recorder: {str(e)}")
-        st.markdown("**Manual launch:** Run `python screen_recorder.py` in your terminal")
+col1, col2 = st.columns(2)
+with col1:
+    if st.button("🎬 Launch Screen Recorder", type="primary"):
+        st.info("🚀 Screen recorder ready to launch!")
+        st.markdown("**To open the screen recorder:**")
+        st.markdown("1. Right-click the link below and select 'Open in new tab'")
+        st.markdown("2. Or copy the command below to run manually")
+        
+        # Direct link (will work when running locally)
+        port = 5000
+        st.markdown(f"**Direct link:** [Screen Recorder Mode](http://localhost:{port}/screen_recorder)")
+        
+        # Manual command
+        st.code("streamlit run screen_recorder_standalone.py --server.port 5001", language="bash")
+
+with col2:
+    st.markdown("**Quick Demo Mode:**")
+    st.markdown("*Test the screen recorder functionality*")
+    
+    if st.button("🎯 Test Screen Recorder", type="secondary"):
+        st.info("Testing screen recorder analysis...")
+        try:
+            # Initialize analyzer
+            analyzer = VideoEmotionAnalyzer(significance_threshold=0.2)
+            
+            # Try to capture a frame
+            camera = cv2.VideoCapture(0)
+            if camera.isOpened():
+                ret, frame = camera.read()
+                if ret:
+                    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                    
+                    # Display the frame
+                    st.image(frame_rgb, channels="RGB", caption="Live camera feed", use_column_width=True)
+                    
+                    # Analyze the frame
+                    result = analyzer.analyze_video_frame(frame_rgb, time.time())
+                    
+                    if result:
+                        st.success("✅ Screen recorder analysis working!")
+                        st.write(f"**Detected:** {', '.join(result.get('expressions', []))}")
+                        st.write(f"**Analysis:** {result.get('ai_analysis', 'No analysis')}")
+                        st.write(f"**Significance:** {result.get('significance_score', 0.0):.2f}")
+                    else:
+                        st.info("No significant expression changes detected in this frame.")
+                else:
+                    st.error("Could not capture frame from camera")
+                
+                camera.release()
+            else:
+                st.error("Camera not available")
+        except Exception as e:
+            st.error(f"Screen recorder test failed: {str(e)}")
 
 # User History and Statistics
 st.markdown("---")
