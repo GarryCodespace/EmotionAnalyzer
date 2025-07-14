@@ -60,6 +60,15 @@ Preferred communication style: Simple, everyday language.
 - **Batch Processing**: Processes uploaded videos efficiently with frame skipping
 - **Timeline Generation**: Creates expression timeline with significant moments
 
+### 6. Screen Recorder Mode
+- **External Application Recording**: Captures entire screen for video calls (Zoom, Teams, etc.)
+- **Live Analysis Popups**: Shows real-time emotion analysis in overlay windows
+- **Major Change Detection**: Only triggers popups for significant expression changes
+- **Configurable Sensitivity**: Adjustable threshold for analysis triggering
+- **Independent Operation**: Runs separately from main Streamlit app
+- **Cooldown System**: 10-second intervals between analyses to prevent spam
+- **Desktop Integration**: Tkinter-based GUI with always-on-top positioning
+
 ## Data Flow
 
 ### Live Processing
@@ -89,6 +98,9 @@ Preferred communication style: Simple, everyday language.
 - **openai**: Official OpenAI API client
 - **psycopg2-binary**: PostgreSQL adapter for Python
 - **sqlalchemy**: Database ORM for Python
+- **mss**: Multi-platform screen capture library
+- **pillow**: Image processing library
+- **tkinter**: GUI framework (built-in with Python)
 - **time**: Built-in Python module for timing operations
 
 ### API Dependencies

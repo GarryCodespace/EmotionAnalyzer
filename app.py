@@ -468,6 +468,40 @@ with col2:
         except Exception as e:
             st.error(f"Quick test error: {str(e)}")
 
+# Screen Recorder Mode
+st.markdown("---")
+st.markdown("### 📱 Screen Recorder Mode")
+st.markdown("*Record external applications like Zoom, Teams, or any video call with live emotion analysis*")
+
+col1, col2 = st.columns(2)
+with col1:
+    st.markdown("**Features:**")
+    st.markdown("• Records your entire screen")
+    st.markdown("• Detects faces during video calls")
+    st.markdown("• Shows popup analysis for major changes")
+    st.markdown("• Configurable sensitivity settings")
+    st.markdown("• Runs independently from this app")
+
+with col2:
+    st.markdown("**How to use:**")
+    st.markdown("1. Click 'Launch Screen Recorder' below")
+    st.markdown("2. A new window will open")
+    st.markdown("3. Start your video call (Zoom, Teams, etc.)")
+    st.markdown("4. Click 'Start Recording' in the recorder")
+    st.markdown("5. Get live analysis popups during your call")
+
+if st.button("🎬 Launch Screen Recorder", type="primary"):
+    st.info("🚀 Starting screen recorder in a new window...")
+    try:
+        import subprocess
+        import sys
+        subprocess.Popen([sys.executable, "screen_recorder.py"])
+        st.success("✅ Screen recorder launched! Check for the new window.")
+        st.markdown("**Note:** The screen recorder runs independently. You can close this web app if needed.")
+    except Exception as e:
+        st.error(f"Error launching screen recorder: {str(e)}")
+        st.markdown("**Manual launch:** Run `python screen_recorder.py` in your terminal")
+
 # User History and Statistics
 st.markdown("---")
 st.markdown("### 📊 Your Session Data")
