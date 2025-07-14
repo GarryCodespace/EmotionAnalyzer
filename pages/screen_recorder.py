@@ -54,10 +54,10 @@ def main():
     </style>
     <div class="nav-container">
         <div class="nav-menu">
-            <span class="nav-item">HOME</span>
-            <span class="nav-item">ABOUT</span>
-            <span class="nav-item">CONTACT</span>
-            <span class="nav-item active">SCREEN RECORDER</span>
+            <span class="nav-item">Home</span>
+            <span class="nav-item">About</span>
+            <span class="nav-item">Contact</span>
+            <span class="nav-item active">Screen Recorder</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -66,19 +66,19 @@ def main():
     nav_col1, nav_col2, nav_col3, nav_col4 = st.columns([1, 1, 1, 7])
 
     with nav_col1:
-        if st.button("HOME", key="nav_home", use_container_width=True):
+        if st.button("Home", key="nav_home", use_container_width=True):
             st.switch_page("app.py")
 
     with nav_col2:
-        if st.button("ABOUT", key="nav_about", use_container_width=True):
+        if st.button("About", key="nav_about", use_container_width=True):
             st.switch_page("pages/about.py")
 
     with nav_col3:
-        if st.button("CONTACT", key="nav_contact", use_container_width=True):
+        if st.button("Contact", key="nav_contact", use_container_width=True):
             st.switch_page("pages/contact.py")
 
     with nav_col4:
-        if st.button("SCREEN RECORDER", key="nav_screen", use_container_width=True):
+        if st.button("Screen Recorder", key="nav_screen", use_container_width=True):
             st.switch_page("pages/screen_recorder.py")
 
     # Style the navigation buttons to match the design
