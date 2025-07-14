@@ -283,29 +283,48 @@ st.markdown("""
 </style>
 <div class="nav-container">
     <div class="nav-menu">
-        <span class="nav-item active" id="nav-home">Home</span>
-        <span class="nav-item" id="nav-about">About</span>
-        <span class="nav-item" id="nav-contact">Contact</span>
-        <span class="nav-item" id="nav-screen">Screen Recorder</span>
+        <span class="nav-item active">Home</span>
+        <span class="nav-item">About</span>
+        <span class="nav-item">Contact</span>
+        <span class="nav-item">Screen Recorder</span>
     </div>
 </div>
+""", unsafe_allow_html=True)
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('nav-home').addEventListener('click', function() {
-        window.location.href = window.location.origin;
-    });
-    document.getElementById('nav-about').addEventListener('click', function() {
-        window.location.href = window.location.origin + '/pages/about.py';
-    });
-    document.getElementById('nav-contact').addEventListener('click', function() {
-        window.location.href = window.location.origin + '/pages/contact.py';
-    });
-    document.getElementById('nav-screen').addEventListener('click', function() {
-        window.location.href = window.location.origin + '/pages/screen_recorder.py';
-    });
-});
-</script>
+# Navigation functionality using columns
+nav_col1, nav_col2, nav_col3, nav_col4 = st.columns([1, 1, 1, 7])
+
+with nav_col1:
+    if st.button("Home", key="nav_home", use_container_width=True):
+        st.switch_page("app.py")
+
+with nav_col2:
+    if st.button("About", key="nav_about", use_container_width=True):
+        st.switch_page("pages/about.py")
+
+with nav_col3:
+    if st.button("Contact", key="nav_contact", use_container_width=True):
+        st.switch_page("pages/contact.py")
+
+# Style the navigation buttons to match the visual design
+st.markdown("""
+<style>
+/* Hide the navigation buttons but keep them functional */
+[data-testid="stColumns"] [data-testid="stButton"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    z-index: 10;
+}
+
+/* Position the navigation container relatively */
+.nav-container {
+    position: relative;
+}
+</style>
 """, unsafe_allow_html=True)
 
 
