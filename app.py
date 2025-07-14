@@ -1,6 +1,7 @@
 import streamlit as st
 import cv2
 import mediapipe as mp
+import numpy as np
 import time
 from openai_analyzer import analyze_expression
 
@@ -152,6 +153,17 @@ st.set_page_config(page_title="Emoticon – Emotion Detector", layout="wide")
 st.title("🎭 Emoticon")
 st.write("Live AI Emotion Interpretation from Micro-Expressions")
 
+# API Key Status Check
+try:
+    import os
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if api_key:
+        st.success("✅ OpenAI API connected successfully")
+    else:
+        st.error("❌ OpenAI API key not found")
+except Exception as e:
+    st.error(f"❌ OpenAI connection issue: {str(e)}")
+
 # Initialize session state for camera control
 if 'camera_running' not in st.session_state:
     st.session_state.camera_running = False
@@ -184,7 +196,13 @@ if st.session_state.camera_running:
         cap = cv2.VideoCapture(0)
         
         if not cap.isOpened():
-            st.error("❌ Could not access webcam. Please check your camera permissions.")
+            st.error("❌ Could not access webcam. This is common in containerized environments.")
+            st.info("💡 **Alternative Options:**")
+            st.markdown("""
+            - **Upload Image**: Use the image upload feature below to test expression analysis
+            - **Demo Mode**: Try the gesture simulation feature
+            - **Local Setup**: Download and run this application locally for full webcam access
+            """)
             st.session_state.camera_running = False
         else:
             # Set camera properties for better performance
@@ -256,15 +274,78 @@ if st.session_state.camera_running:
         st.error(f"❌ Camera error: {str(e)}")
         st.session_state.camera_running = False
 
+# Alternative Testing Methods
+st.markdown("---")
+st.markdown("### 🧪 Alternative Testing Methods")
+
+# Image Upload Feature
+st.markdown("#### 📸 Image Upload Analysis")
+uploaded_file = st.file_uploader("Upload an image for expression analysis", type=['jpg', 'jpeg', 'png'])
+
+if uploaded_file is not None:
+    # Display uploaded image
+    image = cv2.imdecode(np.frombuffer(uploaded_file.read(), np.uint8), cv2.IMREAD_COLOR)
+    st.image(image, caption="Uploaded Image", use_column_width=True)
+    
+    # Process image for facial analysis
+    rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    results = face_mesh.process(rgb_image)
+    
+    if results.multi_face_landmarks:
+        detected_expressions = []
+        for face_landmarks in results.multi_face_landmarks:
+            landmarks = face_landmarks.landmark
+            for name, condition in GESTURES:
+                try:
+                    if condition(landmarks):
+                        detected_expressions.append(name)
+                except:
+                    continue
+        
+        if detected_expressions:
+            st.success(f"🟢 **Detected Expressions**: {', '.join(detected_expressions[:5])}")
+            try:
+                analysis = analyze_expression(", ".join(detected_expressions))
+                st.info(f"💬 **AI Analysis**: {analysis}")
+            except Exception as e:
+                st.error(f"Analysis error: {str(e)}")
+        else:
+            st.warning("⚪ No clear expressions detected in this image")
+    else:
+        st.warning("⚪ No face detected in the uploaded image")
+
+# Demo Mode
+st.markdown("#### 🎭 Demo Mode - Expression Simulation")
+demo_expressions = [
+    "smile, raised eyebrows",
+    "frown, brow furrow",
+    "surprise, mouth open, eyes wide",
+    "contemplation, lip bite, eye squint",
+    "confusion, head tilt, raised eyebrow",
+    "happiness, wide smile, cheek raise",
+    "concern, brow furrow, lip compression",
+    "interest, eyebrow flash, slight smile"
+]
+
+selected_demo = st.selectbox("Choose a demo expression to analyze:", demo_expressions)
+
+if st.button("🔍 Analyze Demo Expression"):
+    try:
+        demo_analysis = analyze_expression(selected_demo)
+        st.success(f"🎯 **Demo Expression**: {selected_demo}")
+        st.info(f"💬 **AI Analysis**: {demo_analysis}")
+    except Exception as e:
+        st.error(f"Demo analysis error: {str(e)}")
+
 # Instructions
 st.markdown("---")
 st.markdown("### 📋 Instructions")
 st.markdown("""
-1. **Start Webcam**: Click the ▶ Start button to begin emotion detection
-2. **Position yourself**: Look directly at the camera for best results
-3. **Express naturally**: The system detects micro-expressions and gestures
-4. **AI Analysis**: OpenAI GPT provides emotional insights based on detected expressions
-5. **Stop anytime**: Use the ⏹ Stop button to end the session
+1. **Webcam Mode**: Click ▶ Start for live emotion detection (requires camera access)
+2. **Image Upload**: Upload a photo to analyze facial expressions
+3. **Demo Mode**: Test AI analysis with simulated expressions
+4. **AI Analysis**: OpenAI GPT provides psychological insights for all modes
+5. **Local Setup**: For full webcam features, run this app locally
 """)
 
 st.markdown("### 🔧 Features")
