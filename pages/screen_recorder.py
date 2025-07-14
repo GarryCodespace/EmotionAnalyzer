@@ -50,25 +50,15 @@ def main():
     </style>
     <div class="nav-container">
         <div class="nav-menu">
-            <span class="nav-item">Home</span>
-            <span class="nav-item">About</span>
-            <span class="nav-item">Contact</span>
-            <span class="nav-item active">Screen Recorder</span>
+            <a href="/" class="nav-item">Home</a>
+            <a href="/about" class="nav-item">About</a>
+            <a href="/contact" class="nav-item">Contact</a>
+            <a href="/screen_recorder" class="nav-item active">Screen Recorder</a>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # Navigation functionality
-    nav_col1, nav_col2, nav_col3, nav_col4 = st.columns([1, 1, 1, 7])
-    with nav_col1:
-        if st.button("Home", key="nav_home", use_container_width=True):
-            st.switch_page("app.py")
-    with nav_col2:
-        if st.button("About", key="nav_about", use_container_width=True):
-            st.switch_page("pages/about.py")
-    with nav_col3:
-        if st.button("Contact", key="nav_contact", use_container_width=True):
-            st.switch_page("pages/contact.py")
+
     
     # Header with logo
     col1, col2 = st.columns([1, 4])
