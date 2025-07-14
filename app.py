@@ -156,8 +156,48 @@ cooldown_seconds = 5
 
 st.set_page_config(page_title="Emoticon – Emotion Detector", layout="wide")
 
-# Header with logo
-header_col1, header_col2 = st.columns([1, 8])
+# Initialize theme state
+if 'dark_mode' not in st.session_state:
+    st.session_state.dark_mode = False
+
+# Apply theme
+if st.session_state.dark_mode:
+    st.markdown("""
+    <style>
+    .stApp {
+        background-color: #1e1e1e;
+        color: #ffffff;
+    }
+    .stMarkdown {
+        color: #ffffff;
+    }
+    .stButton > button {
+        background-color: #2d2d2d;
+        color: #ffffff;
+        border: 1px solid #444;
+    }
+    .stSelectbox > div > div {
+        background-color: #2d2d2d;
+        color: #ffffff;
+    }
+    .stTextInput > div > div > input {
+        background-color: #2d2d2d;
+        color: #ffffff;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+else:
+    st.markdown("""
+    <style>
+    .stApp {
+        background-color: #ffffff;
+        color: #000000;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+# Header with logo and theme toggle
+header_col1, header_col2, header_col3 = st.columns([1, 8, 1])
 with header_col1:
     st.markdown("<br><br>", unsafe_allow_html=True)  # Push logo down to align with subtitle
     try:
@@ -167,6 +207,12 @@ with header_col1:
 with header_col2:
     st.markdown("# Emoticon")
     st.write("Live AI Emotion Interpretation from Micro-Expressions")
+with header_col3:
+    st.markdown("<br>", unsafe_allow_html=True)  # Add some spacing
+    theme_button_text = "🌙 Dark" if not st.session_state.dark_mode else "☀️ Light"
+    if st.button(theme_button_text, key="theme_toggle"):
+        st.session_state.dark_mode = not st.session_state.dark_mode
+        st.rerun()
 
 # Initialize database
 try:
