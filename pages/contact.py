@@ -164,15 +164,15 @@ with col2:
     
     ---
     
-    ### Follow Us
+    ### FOLLOW US
     
-    📸 **Instagram**: [@emoticon.ai](https://www.instagram.com/emoticon.ai)
+    📸 **INSTAGRAM**: [@EMOTICON.AI](https://www.instagram.com/emoticon.ai)
     
-    🐦 **Twitter**: [@EmoticonAI](https://twitter.com/emoticon)
+    🐦 **TWITTER**: [@EMOTICONAI](https://twitter.com/emoticon)
     
-    💼 **LinkedIn**: [Emoticon](https://linkedin.com/company/emoticon)
+    💼 **LINKEDIN**: [EMOTICON](https://linkedin.com/company/emoticon)
     
-    🐙 **GitHub**: [github.com/emoticon](https://github.com/emoticon)
+    🐙 **GITHUB**: [GITHUB.COM/EMOTICON](https://github.com/emoticon)
     
     ---
     
