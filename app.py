@@ -206,8 +206,8 @@ with header_col1:
         st.markdown("🎭")
 with header_col2:
     st.markdown("<br>", unsafe_allow_html=True)  # Reduce spacing for closer text
-    st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;<h1 style='font-size: 3rem; margin: 0; margin-bottom: -10px;'>Emoticon</h1>", unsafe_allow_html=True)
-    st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;Live AI Emotion Interpretation from Micro-Expressions", unsafe_allow_html=True)
+    st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;<h1 style='font-size: 3rem; margin: 0; margin-bottom: -20px;'>Emoticon</h1>", unsafe_allow_html=True)
+    st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;<p style='margin-top: -10px;'>Live AI Emotion Interpretation from Micro-Expressions</p>", unsafe_allow_html=True)
 with header_col3:
     st.markdown("<br>", unsafe_allow_html=True)  # Add some spacing
     theme_button_text = "🌙 Dark" if not st.session_state.dark_mode else "☀️ Light"
