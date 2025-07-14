@@ -97,18 +97,62 @@ else:
     """, unsafe_allow_html=True)
 
 # Top navigation menu
+st.markdown("""
+<style>
+.nav-container {
+    background-color: #1f1f1f;
+    padding: 15px 0;
+    margin: -1rem -1rem 2rem -1rem;
+    border-bottom: 1px solid #333;
+}
+.nav-menu {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+.nav-item {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+.nav-item:hover {
+    background-color: #333;
+    color: #ffffff;
+}
+.nav-item.active {
+    background-color: #0066cc;
+    color: #ffffff;
+}
+</style>
+<div class="nav-container">
+    <div class="nav-menu">
+        <span class="nav-item">Home</span>
+        <span class="nav-item">About</span>
+        <span class="nav-item active">Contact</span>
+        <span class="nav-item">Screen Recorder</span>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# Navigation functionality
 nav_col1, nav_col2, nav_col3, nav_col4 = st.columns([1, 1, 1, 7])
 with nav_col1:
-    if st.button("🏠 Home", key="nav_home"):
+    if st.button("Home", key="nav_home", use_container_width=True):
         st.switch_page("app.py")
 with nav_col2:
-    if st.button("ℹ️ About", key="nav_about"):
+    if st.button("About", key="nav_about", use_container_width=True):
         st.switch_page("pages/about.py")
 with nav_col3:
-    if st.button("📞 Contact", key="nav_contact"):
+    if st.button("Contact", key="nav_contact", use_container_width=True):
         st.switch_page("pages/contact.py")
-
-st.markdown("---")
 
 # Header with logo and theme toggle
 header_col1, header_col2, header_col3 = st.columns([2, 6, 2])
