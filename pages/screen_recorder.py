@@ -63,7 +63,7 @@ def main():
     """, unsafe_allow_html=True)
 
     # Navigation functionality using columns - styled buttons
-    nav_col1, nav_col2, nav_col3, nav_col4 = st.columns([1, 1, 1, 7])
+    nav_col1, nav_col2, nav_col3, nav_col4 = st.columns([1, 1, 1, 2])
 
     with nav_col1:
         if st.button("Home", key="nav_home", use_container_width=True):
