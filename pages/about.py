@@ -137,38 +137,57 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Navigation functionality using columns
+# Navigation functionality using columns - styled buttons
 nav_col1, nav_col2, nav_col3, nav_col4 = st.columns([1, 1, 1, 7])
 
 with nav_col1:
-    if st.button("Home", key="nav_home", use_container_width=True):
+    if st.button("HOME", key="nav_home", use_container_width=True):
         st.switch_page("app.py")
 
 with nav_col2:
-    if st.button("About", key="nav_about", use_container_width=True):
+    if st.button("ABOUT", key="nav_about", use_container_width=True):
         st.switch_page("pages/about.py")
 
 with nav_col3:
-    if st.button("Contact", key="nav_contact", use_container_width=True):
+    if st.button("CONTACT", key="nav_contact", use_container_width=True):
         st.switch_page("pages/contact.py")
 
-# Style the navigation buttons to match the visual design
+with nav_col4:
+    if st.button("SCREEN RECORDER", key="nav_screen", use_container_width=True):
+        st.switch_page("pages/screen_recorder.py")
+
+# Style the navigation buttons to match the design
 st.markdown("""
 <style>
-/* Hide the navigation buttons but keep them functional */
-[data-testid="stColumns"] [data-testid="stButton"] {
-    position: absolute;
-    top: 0;
-    left: 0;
+/* Style navigation buttons */
+[data-testid="stColumns"] [data-testid="stButton"] > button {
+    background-color: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
     width: 100%;
-    height: 100%;
-    opacity: 0;
-    z-index: 10;
 }
 
-/* Position the navigation container relatively */
+/* Active state for about button */
+[data-testid="stColumns"] [data-testid="stButton"]:nth-child(2) > button {
+    background-color: #0066cc;
+    color: #ffffff;
+}
+
+/* Hover effects */
+[data-testid="stColumns"] [data-testid="stButton"] > button:hover {
+    background-color: #0066cc;
+    color: #ffffff;
+}
+
+/* Remove the visual navigation bar since we're using real buttons now */
 .nav-container {
-    position: relative;
+    display: none;
 }
 </style>
 """, unsafe_allow_html=True)
