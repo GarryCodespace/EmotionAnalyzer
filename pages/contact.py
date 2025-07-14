@@ -166,6 +166,8 @@ with col2:
     
     ### Follow Us
     
+    📸 **Instagram**: [@emoticon.ai](https://www.instagram.com/emoticon.ai)
+    
     🐦 **Twitter**: [@EmoticonAI](https://twitter.com/emoticon)
     
     💼 **LinkedIn**: [Emoticon](https://linkedin.com/company/emoticon)
