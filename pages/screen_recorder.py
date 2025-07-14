@@ -54,34 +54,32 @@ def main():
     </style>
     <div class="nav-container">
         <div class="nav-menu">
-            <span class="nav-item">Home</span>
-            <span class="nav-item">About</span>
-            <span class="nav-item">Contact</span>
-            <span class="nav-item active">Screen Recorder</span>
+            <span class="nav-item" id="nav-home">Home</span>
+            <span class="nav-item" id="nav-about">About</span>
+            <span class="nav-item" id="nav-contact">Contact</span>
+            <span class="nav-item active" id="nav-screen">Screen Recorder</span>
         </div>
     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('nav-home').addEventListener('click', function() {
+            window.location.href = window.location.origin;
+        });
+        document.getElementById('nav-about').addEventListener('click', function() {
+            window.location.href = window.location.origin + '/pages/about.py';
+        });
+        document.getElementById('nav-contact').addEventListener('click', function() {
+            window.location.href = window.location.origin + '/pages/contact.py';
+        });
+        document.getElementById('nav-screen').addEventListener('click', function() {
+            window.location.href = window.location.origin + '/pages/screen_recorder.py';
+        });
+    });
+    </script>
     """, unsafe_allow_html=True)
 
-    # Navigation buttons (hidden but functional)
-    nav_col1, nav_col2, nav_col3, nav_col4 = st.columns([1, 1, 1, 7])
-    with nav_col1:
-        if st.button("🏠 Home", key="nav_home"):
-            st.switch_page("app.py")
-    with nav_col2:
-        if st.button("ℹ️ About", key="nav_about"):
-            st.switch_page("pages/about.py")
-    with nav_col3:
-        if st.button("📞 Contact", key="nav_contact"):
-            st.switch_page("pages/contact.py")
 
-    # Hide navigation buttons with CSS
-    st.markdown("""
-    <style>
-    [data-testid="stColumns"] [data-testid="stButton"] {
-        display: none;
-    }
-    </style>
-    """, unsafe_allow_html=True)
 
 
     
