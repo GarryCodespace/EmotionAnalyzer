@@ -193,6 +193,51 @@ else:
         background-color: #ffffff;
         color: #000000;
     }
+    .stButton > button {
+        background-color: #f0f0f0;
+        color: #000000;
+        border: 1px solid #ccc;
+    }
+    .stButton > button:hover {
+        background-color: #e0e0e0;
+        border: 1px solid #aaa;
+    }
+    .stSelectbox > div > div {
+        background-color: #f8f8f8;
+        color: #000000;
+        border: 1px solid #ddd;
+    }
+    .stTextInput > div > div > input {
+        background-color: #f8f8f8;
+        color: #000000;
+        border: 1px solid #ddd;
+    }
+    div[data-testid="stAlert"] > div {
+        background-color: #fff3cd;
+        border: 1px solid #ffeaa7;
+        color: #856404;
+    }
+    div[data-testid="stSuccess"] > div {
+        background-color: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+    }
+    div[data-testid="stError"] > div {
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+    }
+    div[data-testid="stInfo"] > div {
+        background-color: #d1ecf1;
+        border: 1px solid #bee5eb;
+        color: #0c5460;
+    }
+    .stMarkdown {
+        color: #000000 !important;
+    }
+    .stText {
+        color: #000000 !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
