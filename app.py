@@ -157,14 +157,14 @@ cooldown_seconds = 5
 st.set_page_config(page_title="Emoticon – Emotion Detector", layout="wide")
 
 # Header with logo
-col1, col2 = st.columns([1, 4])
-with col1:
+header_col1, header_col2 = st.columns([1, 12])
+with header_col1:
     try:
-        st.image("logo.png", width=80)
+        st.image("logo.png", width=60)
     except:
-        st.write("🎭")
-with col2:
-    st.title("Emoticon")
+        st.markdown("🎭")
+with header_col2:
+    st.markdown("# Emoticon")
     st.write("Live AI Emotion Interpretation from Micro-Expressions")
 
 # Initialize database
