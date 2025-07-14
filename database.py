@@ -10,7 +10,17 @@ DATABASE_URL = os.environ.get("DATABASE_URL")
 if not DATABASE_URL:
     raise ValueError("DATABASE_URL environment variable is required")
 
-engine = sa.create_engine(DATABASE_URL)
+engine = sa.create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,  # Enable connection health checks
+    pool_recycle=3600,   # Recycle connections after 1 hour
+    pool_size=5,         # Number of connections to maintain
+    max_overflow=10,     # Maximum overflow connections
+    connect_args={
+        "connect_timeout": 30,
+        "options": "-c default_transaction_isolation=read_committed"
+    }
+)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
@@ -50,20 +60,92 @@ def init_database():
     Base.metadata.create_all(bind=engine)
 
 def get_db():
-    """Get database session"""
-    db = SessionLocal()
-    try:
-        return db
-    finally:
-        pass
+    """Get database session with retry logic"""
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            db = SessionLocal()
+            # Test the connection
+            db.execute(sa.text("SELECT 1"))
+            return db
+        except Exception as e:
+            if attempt == max_retries - 1:
+                raise e
+            print(f"Database connection attempt {attempt + 1} failed: {e}")
+            if db:
+                db.close()
 
 def close_db(db):
-    """Close database session"""
-    db.close()
+    """Close database session safely"""
+    try:
+        if db:
+            db.close()
+    except Exception as e:
+        print(f"Error closing database connection: {e}")
+
+def safe_db_operation(operation_func, *args, **kwargs):
+    """Execute database operation with automatic retry and error handling"""
+    max_retries = 3
+    for attempt in range(max_retries):
+        db = None
+        try:
+            db = get_db()
+            result = operation_func(db, *args, **kwargs)
+            return result
+        except Exception as e:
+            if attempt == max_retries - 1:
+                print(f"Database operation failed after {max_retries} attempts: {e}")
+                return False
+            print(f"Database operation attempt {attempt + 1} failed: {e}")
+        finally:
+            close_db(db)
+
+def _save_emotion_analysis_impl(db, session_id, expressions, ai_analysis, analysis_type="demo", confidence=None):
+    """Internal implementation of save_emotion_analysis"""
+    # Save the analysis
+    analysis = EmotionAnalysis(
+        session_id=session_id,
+        detected_expressions=json.dumps(expressions),
+        ai_analysis=ai_analysis,
+        analysis_type=analysis_type,
+        confidence_score=confidence
+    )
+    db.add(analysis)
+    
+    # Update or create user session
+    user_session = db.query(UserSession).filter(UserSession.session_id == session_id).first()
+    if user_session:
+        user_session.last_activity = datetime.utcnow()
+        user_session.total_analyses += 1
+    else:
+        user_session = UserSession(
+            session_id=session_id,
+            total_analyses=1
+        )
+        db.add(user_session)
+    
+    # Update expression statistics
+    for expr in expressions:
+        expr_stat = db.query(ExpressionStats).filter(ExpressionStats.expression_name == expr).first()
+        if expr_stat:
+            expr_stat.detection_count += 1
+            expr_stat.last_detected = datetime.utcnow()
+            if confidence:
+                expr_stat.avg_confidence = ((expr_stat.avg_confidence or 0) + confidence) / 2
+        else:
+            expr_stat = ExpressionStats(
+                expression_name=expr,
+                detection_count=1,
+                avg_confidence=confidence
+            )
+            db.add(expr_stat)
+    
+    db.commit()
+    return True
 
 def save_emotion_analysis(session_id, expressions, ai_analysis, analysis_type="demo", confidence=None):
     """
-    Save emotion analysis to database
+    Save emotion analysis to database with retry logic
     
     Args:
         session_id (str): User session ID
@@ -75,61 +157,32 @@ def save_emotion_analysis(session_id, expressions, ai_analysis, analysis_type="d
     Returns:
         bool: Success status
     """
-    try:
-        db = get_db()
-        
-        # Save the analysis
-        analysis = EmotionAnalysis(
-            session_id=session_id,
-            detected_expressions=json.dumps(expressions),
-            ai_analysis=ai_analysis,
-            analysis_type=analysis_type,
-            confidence_score=confidence
-        )
-        db.add(analysis)
-        
-        # Update or create user session
-        user_session = db.query(UserSession).filter(UserSession.session_id == session_id).first()
-        if user_session:
-            user_session.last_activity = datetime.utcnow()
-            user_session.total_analyses += 1
-        else:
-            user_session = UserSession(
-                session_id=session_id,
-                total_analyses=1
-            )
-            db.add(user_session)
-        
-        # Update expression statistics
-        for expr in expressions:
-            expr_stat = db.query(ExpressionStats).filter(ExpressionStats.expression_name == expr).first()
-            if expr_stat:
-                expr_stat.detection_count += 1
-                expr_stat.last_detected = datetime.utcnow()
-                if confidence:
-                    expr_stat.avg_confidence = ((expr_stat.avg_confidence or 0) + confidence) / 2
-            else:
-                expr_stat = ExpressionStats(
-                    expression_name=expr,
-                    detection_count=1,
-                    avg_confidence=confidence
-                )
-                db.add(expr_stat)
-        
-        db.commit()
-        close_db(db)
-        return True
-        
-    except Exception as e:
-        print(f"Database error: {e}")
-        if 'db' in locals():
-            db.rollback()
-            close_db(db)
-        return False
+    return safe_db_operation(
+        _save_emotion_analysis_impl,
+        session_id, expressions, ai_analysis, analysis_type, confidence
+    )
+
+def _get_user_history_impl(db, session_id, limit=10):
+    """Internal implementation of get_user_history"""
+    analyses = db.query(EmotionAnalysis).filter(
+        EmotionAnalysis.session_id == session_id
+    ).order_by(EmotionAnalysis.timestamp.desc()).limit(limit).all()
+    
+    result = []
+    for analysis in analyses:
+        result.append({
+            'timestamp': analysis.timestamp,
+            'expressions': json.loads(analysis.detected_expressions),
+            'ai_analysis': analysis.ai_analysis,
+            'analysis_type': analysis.analysis_type,
+            'confidence': analysis.confidence_score
+        })
+    
+    return result
 
 def get_user_history(session_id, limit=10):
     """
-    Get user's emotion analysis history
+    Get user's emotion analysis history with retry logic
     
     Args:
         session_id (str): User session ID
@@ -138,30 +191,8 @@ def get_user_history(session_id, limit=10):
     Returns:
         list: List of analysis records
     """
-    try:
-        db = get_db()
-        analyses = db.query(EmotionAnalysis).filter(
-            EmotionAnalysis.session_id == session_id
-        ).order_by(EmotionAnalysis.timestamp.desc()).limit(limit).all()
-        
-        result = []
-        for analysis in analyses:
-            result.append({
-                'timestamp': analysis.timestamp,
-                'expressions': json.loads(analysis.detected_expressions),
-                'ai_analysis': analysis.ai_analysis,
-                'analysis_type': analysis.analysis_type,
-                'confidence': analysis.confidence_score
-            })
-        
-        close_db(db)
-        return result
-        
-    except Exception as e:
-        print(f"Database error: {e}")
-        if 'db' in locals():
-            close_db(db)
-        return []
+    result = safe_db_operation(_get_user_history_impl, session_id, limit)
+    return result if result else []
 
 def get_expression_statistics():
     """
