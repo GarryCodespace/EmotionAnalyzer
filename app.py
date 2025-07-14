@@ -9,10 +9,14 @@ import os
 from openai_analyzer import analyze_expression
 from database import init_database, save_emotion_analysis, get_user_history, get_expression_statistics
 from video_analyzer import VideoEmotionAnalyzer
+from body_language_analyzer import BodyLanguageAnalyzer
 
 # Setup MediaPipe
 mp_face_mesh = mp.solutions.face_mesh
 face_mesh = mp_face_mesh.FaceMesh(static_image_mode=False, max_num_faces=5, refine_landmarks=True)
+
+# Initialize body language analyzer
+body_analyzer = BodyLanguageAnalyzer()
 
 # Define 100+ gestures (some with reduced sensitivity thresholds)
 GESTURES = [
@@ -409,6 +413,7 @@ if 'camera_running' not in st.session_state:
 # Display placeholders
 frame_display = st.empty()
 detected_display = st.empty()
+body_language_display = st.empty()
 gpt_display = st.empty()
 
 # Control buttons
@@ -467,6 +472,10 @@ if st.session_state.camera_running:
 
                 current_time = time.time()
                 detected_now = []
+                
+                # Analyze body language
+                body_language_data = body_analyzer.analyze_body_language(frame)
+                body_patterns = body_language_data.get("detected_patterns", [])
 
                 if results.multi_face_landmarks:
                     face_detections = []
@@ -497,6 +506,16 @@ if st.session_state.camera_running:
                 # Update displays
                 frame_display.image(frame, channels="BGR", use_column_width=True)
 
+                # Display body language analysis
+                if body_patterns:
+                    body_text = f"🚶 **Body Language Analysis**:\n\n"
+                    for pattern in body_patterns[:5]:  # Show top 5 patterns
+                        confidence_bar = "█" * int(pattern['confidence'] * 10)
+                        body_text += f"• {pattern['pattern'].replace('_', ' ').title()}: {pattern['confidence']:.1%} {confidence_bar}\n"
+                    body_language_display.markdown(body_text)
+                else:
+                    body_language_display.markdown("🚶 **Body Language**: Monitoring for posture and gestures...")
+
                 if detected_now:
                     # Display multi-face detection results
                     if 'face_detections' in locals() and face_detections:
@@ -511,9 +530,14 @@ if st.session_state.camera_running:
                     else:
                         detected_display.markdown(f"🟢 **Detected Gesture(s)**: {', '.join(detected_now)}")
                     
+                    # Combine facial and body language for AI analysis
+                    all_signals = detected_now.copy()
+                    for pattern in body_patterns:
+                        all_signals.append(pattern['pattern'])
+                    
                     try:
-                        description = analyze_expression(", ".join(detected_now))
-                        gpt_display.markdown(f"💬 **GPT Insight:** _{description}_")
+                        description = analyze_expression(", ".join(all_signals))
+                        gpt_display.markdown(f"💬 **AI Insight (Face + Body):** _{description}_")
                     except Exception as e:
                         gpt_display.markdown(f"⚠️ **Error getting AI insight:** {str(e)}")
                 else:
@@ -551,9 +575,33 @@ if uploaded_file is not None:
     image = cv2.imdecode(np.frombuffer(uploaded_file.read(), np.uint8), cv2.IMREAD_COLOR)
     st.image(image, caption="Uploaded Image", use_container_width=True)
     
-    # Process image for facial analysis
+    # Process image for facial and body language analysis
     rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     results = face_mesh.process(rgb_image)
+    
+    # Analyze body language in the image
+    body_language_data = body_analyzer.analyze_body_language(image)
+    body_patterns = body_language_data.get("detected_patterns", [])
+    
+    # Display body language analysis
+    if body_patterns:
+        st.success(f"🚶 **Body Language Analysis - {len(body_patterns)} Pattern(s) Detected**")
+        
+        body_col1, body_col2 = st.columns(2)
+        for idx, pattern in enumerate(body_patterns[:8]):  # Show top 8 patterns
+            confidence_bar = "█" * int(pattern['confidence'] * 10)
+            pattern_text = f"{pattern['pattern'].replace('_', ' ').title()}: {pattern['confidence']:.1%} {confidence_bar}"
+            
+            if idx % 2 == 0:
+                body_col1.markdown(f"• {pattern_text}")
+            else:
+                body_col2.markdown(f"• {pattern_text}")
+        
+        # Get body language interpretation
+        body_interpretation = body_analyzer.get_body_language_interpretation(body_patterns)
+        st.info(f"📊 **Body Language Interpretation**:\n{body_interpretation}")
+    else:
+        st.info("🚶 **Body Language**: No significant body language patterns detected in this image")
     
     if results.multi_face_landmarks:
         face_detections = []
@@ -594,14 +642,19 @@ if uploaded_file is not None:
                 for expr in face_data['expressions']:
                     all_expressions.append(expr['name'])
             
+            # Combine facial expressions and body language for comprehensive analysis
+            all_signals = all_expressions[:10].copy()
+            for pattern in body_patterns[:5]:  # Add top 5 body language patterns
+                all_signals.append(pattern['pattern'])
+            
             try:
-                analysis = analyze_expression(", ".join(all_expressions[:10]))
-                st.info(f"💬 **AI Analysis**: {analysis}")
+                analysis = analyze_expression(", ".join(all_signals))
+                st.info(f"💬 **Comprehensive AI Analysis (Face + Body)**: {analysis}")
                 
                 # Save to database
                 save_emotion_analysis(
                     session_id=st.session_state.session_id,
-                    expressions=all_expressions[:10],
+                    expressions=all_signals,
                     ai_analysis=analysis,
                     analysis_type="image"
                 )
