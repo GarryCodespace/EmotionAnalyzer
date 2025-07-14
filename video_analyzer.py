@@ -18,7 +18,7 @@ class VideoEmotionAnalyzer:
         self.mp_face_mesh = mp.solutions.face_mesh
         self.face_mesh = self.mp_face_mesh.FaceMesh(
             static_image_mode=False,
-            max_num_faces=1,
+            max_num_faces=5,  # Support up to 5 faces
             refine_landmarks=True,
             min_detection_confidence=0.5,
             min_tracking_confidence=0.5
@@ -60,20 +60,85 @@ class VideoEmotionAnalyzer:
         
         return total_distance / key_points if key_points > 0 else 0
     
-    def detect_expressions(self, landmarks) -> List[str]:
-        """Detect facial expressions from landmarks"""
+    def _calculate_smile_confidence(self, landmarks) -> float:
+        """Calculate confidence score for smile detection"""
+        mouth_width = abs(landmarks[61].x - landmarks[291].x)
+        mouth_curve = (landmarks[13].y - landmarks[14].y) * 0.5
+        confidence = min(1.0, max(0.0, (mouth_width - 0.04) * 10 + mouth_curve * 5))
+        return confidence if confidence > 0.3 else 0.0
+    
+    def _calculate_frown_confidence(self, landmarks) -> float:
+        """Calculate confidence score for frown detection"""
+        mouth_width = abs(landmarks[61].x - landmarks[291].x)
+        mouth_curve = (landmarks[14].y - landmarks[13].y) * 0.5
+        confidence = min(1.0, max(0.0, (0.045 - mouth_width) * 10 + mouth_curve * 5))
+        return confidence if confidence > 0.3 else 0.0
+    
+    def _calculate_raised_eyebrows_confidence(self, landmarks) -> float:
+        """Calculate confidence score for raised eyebrows"""
+        eyebrow_height = (landmarks[159].y - landmarks[65].y) + (landmarks[386].y - landmarks[295].y)
+        confidence = min(1.0, max(0.0, (eyebrow_height - 0.03) * 15))
+        return confidence if confidence > 0.3 else 0.0
+    
+    def _calculate_squint_confidence(self, landmarks) -> float:
+        """Calculate confidence score for squinting"""
+        eye_openness = abs(landmarks[159].y - landmarks[145].y) + abs(landmarks[386].y - landmarks[374].y)
+        confidence = min(1.0, max(0.0, (0.015 - eye_openness) * 20))
+        return confidence if confidence > 0.3 else 0.0
+    
+    def _calculate_mouth_open_confidence(self, landmarks) -> float:
+        """Calculate confidence score for mouth open"""
+        mouth_openness = abs(landmarks[13].y - landmarks[14].y)
+        confidence = min(1.0, max(0.0, (mouth_openness - 0.02) * 20))
+        return confidence if confidence > 0.3 else 0.0
+    
+    def _calculate_brow_furrow_confidence(self, landmarks) -> float:
+        """Calculate confidence score for brow furrow"""
+        brow_distance = abs(landmarks[65].x - landmarks[295].x)
+        confidence = min(1.0, max(0.0, (0.035 - brow_distance) * 15))
+        return confidence if confidence > 0.3 else 0.0
+    
+    def _calculate_surprise_confidence(self, landmarks) -> float:
+        """Calculate confidence score for surprise expression"""
+        eyebrow_height = (landmarks[159].y - landmarks[65].y) + (landmarks[386].y - landmarks[295].y)
+        mouth_openness = abs(landmarks[13].y - landmarks[14].y)
+        confidence = min(1.0, max(0.0, (eyebrow_height - 0.05) * 10 + (mouth_openness - 0.03) * 10))
+        return confidence if confidence > 0.3 else 0.0
+    
+    def detect_expressions_with_confidence(self, landmarks) -> List[Dict[str, float]]:
+        """Detect facial expressions from landmarks with confidence scores"""
         expressions = []
         
-        # Define gesture detection functions (subset of main gestures for video)
+        # Define gesture detection functions with confidence calculation
         gesture_functions = {
-            "smile": lambda lm: abs(lm[61].x - lm[291].x) > 0.05,
-            "frown": lambda lm: abs(lm[61].x - lm[291].x) < 0.035,
-            "raised_eyebrows": lambda lm: (lm[159].y - lm[65].y) > 0.04,
-            "squint": lambda lm: abs(lm[159].y - lm[145].y) < 0.01,
-            "mouth_open": lambda lm: abs(lm[13].y - lm[14].y) > 0.04,
-            "brow_furrow": lambda lm: abs(lm[65].x - lm[295].x) < 0.03,
-            "surprise": lambda lm: (lm[159].y - lm[65].y) > 0.06 and abs(lm[13].y - lm[14].y) > 0.05,
-            "concentration": lambda lm: abs(lm[65].x - lm[295].x) < 0.035 and abs(lm[159].y - lm[145].y) < 0.012,
+            "smile": lambda lm: self._calculate_smile_confidence(lm),
+            "frown": lambda lm: self._calculate_frown_confidence(lm),
+            "raised_eyebrows": lambda lm: self._calculate_raised_eyebrows_confidence(lm),
+            "squint": lambda lm: self._calculate_squint_confidence(lm),
+            "mouth_open": lambda lm: self._calculate_mouth_open_confidence(lm),
+            "brow_furrow": lambda lm: self._calculate_brow_furrow_confidence(lm),
+            "surprise": lambda lm: self._calculate_surprise_confidence(lm),
+        }
+        
+        # Detect expressions with confidence scores
+        for gesture_name, confidence_func in gesture_functions.items():
+            try:
+                confidence = confidence_func(landmarks)
+                if confidence > 0.0:
+                    expressions.append({
+                        "name": gesture_name,
+                        "confidence": confidence
+                    })
+            except Exception as e:
+                # Skip gestures that fail due to missing landmarks
+                continue
+        
+        return expressions
+    
+    def detect_expressions(self, landmarks) -> List[str]:
+        """Detect facial expressions from landmarks (legacy method)"""
+        expressions_with_confidence = self.detect_expressions_with_confidence(landmarks)
+        return [expr["name"] for expr in expressions_with_confidence if expr["confidence"] > 0.5]
             "confusion": lambda lm: (lm[159].y - lm[65].y) > 0.03 and abs(lm[61].x - lm[291].x) < 0.025,
             "contempt": lambda lm: abs(lm[61].y - lm[291].y) > 0.015,
             "disgust": lambda lm: lm[12].y < lm[15].y - 0.015 and abs(lm[6].y - lm[168].y) < 0.02,
