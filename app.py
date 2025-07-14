@@ -10,13 +10,15 @@ from openai_analyzer import analyze_expression
 from database import init_database, save_emotion_analysis, get_user_history, get_expression_statistics
 from video_analyzer import VideoEmotionAnalyzer
 from body_language_analyzer import BodyLanguageAnalyzer
+from lie_detector import LieDetector
 
 # Setup MediaPipe
 mp_face_mesh = mp.solutions.face_mesh
 face_mesh = mp_face_mesh.FaceMesh(static_image_mode=False, max_num_faces=5, refine_landmarks=True)
 
-# Initialize body language analyzer
+# Initialize body language analyzer and lie detector
 body_analyzer = BodyLanguageAnalyzer()
+lie_detector = LieDetector()
 
 # Define 100+ gestures (some with reduced sensitivity thresholds)
 GESTURES = [
@@ -414,10 +416,11 @@ if 'camera_running' not in st.session_state:
 frame_display = st.empty()
 detected_display = st.empty()
 body_language_display = st.empty()
+lie_detector_display = st.empty()
 gpt_display = st.empty()
 
 # Control buttons
-col1, col2, col3 = st.columns(3)
+col1, col2, col3, col4 = st.columns(4)
 with col1:
     if st.button('▶ Start Webcam'):
         st.session_state.camera_running = True
@@ -432,6 +435,13 @@ with col3:
     if st.button('🔄 Refresh'):
         st.session_state.camera_running = True
         st.rerun()
+
+with col4:
+    live_lie_detector = st.checkbox('🔍 Live Lie Detector', key='live_lie_detector')
+    if live_lie_detector:
+        st.session_state.enable_live_lie_detector = True
+    else:
+        st.session_state.enable_live_lie_detector = False
 
 # Camera processing
 if st.session_state.camera_running:
@@ -540,8 +550,45 @@ if st.session_state.camera_running:
                         gpt_display.markdown(f"💬 **AI Insight (Face + Body):** _{description}_")
                     except Exception as e:
                         gpt_display.markdown(f"⚠️ **Error getting AI insight:** {str(e)}")
+                        
+                    # Live lie detector analysis if enabled
+                    if st.session_state.get('enable_live_lie_detector', False) and frame_count % 30 == 0:  # Analyze every 30 frames
+                        try:
+                            deception_analysis = lie_detector.analyze_deception(
+                                facial_expressions=detected_now,
+                                body_patterns=body_patterns,
+                                expression_history=None
+                            )
+                            
+                            probability = deception_analysis['deception_probability']
+                            confidence_level = deception_analysis['confidence_level']
+                            
+                            # Color coding for live display
+                            if probability < 0.3:
+                                status_color = "🟢"
+                                status_text = "Low Risk"
+                            elif probability < 0.6:
+                                status_color = "🟡"
+                                status_text = "Medium Risk"
+                            else:
+                                status_color = "🔴"
+                                status_text = "High Risk"
+                            
+                            lie_detector_display.markdown(f"""
+                            🕵️ **Live Lie Detector**: {status_color} {status_text}
+                            
+                            **Deception Probability**: {probability:.1%} ({confidence_level})
+                            
+                            **Key Indicators**: {', '.join(deception_analysis['key_indicators'][:3])}
+                            """)
+                        except Exception as e:
+                            lie_detector_display.markdown(f"🕵️ **Live Lie Detector**: Analysis error")
+                    elif not st.session_state.get('enable_live_lie_detector', False):
+                        lie_detector_display.markdown("🕵️ **Live Lie Detector**: Disabled")
                 else:
                     detected_display.markdown("⚪ **Status**: Monitoring for expressions...")
+                    if st.session_state.get('enable_live_lie_detector', False):
+                        lie_detector_display.markdown("🕵️ **Live Lie Detector**: Waiting for expressions...")
 
                 # Check for stop button press
                 if stop_placeholder.button("⏹ Stop Camera", key=f"stop_{frame_count}"):
@@ -660,6 +707,99 @@ if uploaded_file is not None:
                 )
             except Exception as e:
                 st.error(f"Analysis error: {str(e)}")
+            
+            # Add lie detector button and analysis
+            st.markdown("---")
+            lie_detector_col1, lie_detector_col2 = st.columns([1, 2])
+            
+            with lie_detector_col1:
+                if st.button("🔍 AI Lie Detector Analysis", key="lie_detector_image"):
+                    st.session_state.run_lie_detector = True
+            
+            with lie_detector_col2:
+                st.markdown("*Analyze micro-expressions and body language for deception indicators*")
+            
+            # Run lie detector analysis if button pressed
+            if st.session_state.get('run_lie_detector', False):
+                try:
+                    with st.spinner('Analyzing behavioral patterns for deception indicators...'):
+                        # Run deception analysis
+                        deception_analysis = lie_detector.analyze_deception(
+                            facial_expressions=all_expressions,
+                            body_patterns=body_patterns,
+                            expression_history=None
+                        )
+                        
+                        # Get AI-powered analysis
+                        ai_analysis = lie_detector.get_ai_deception_analysis(
+                            facial_expressions=all_expressions,
+                            body_patterns=body_patterns,
+                            deception_analysis=deception_analysis
+                        )
+                    
+                    # Display results
+                    st.markdown("### 🕵️ Deception Analysis Results")
+                    
+                    # Main probability display
+                    probability = deception_analysis['deception_probability']
+                    confidence_level = deception_analysis['confidence_level']
+                    
+                    # Color coding based on probability
+                    if probability < 0.3:
+                        color = "green"
+                        icon = "✅"
+                    elif probability < 0.6:
+                        color = "orange"
+                        icon = "⚠️"
+                    else:
+                        color = "red"
+                        icon = "🚨"
+                    
+                    st.markdown(f"""
+                    <div style="background-color: {color}; padding: 15px; border-radius: 10px; margin: 10px 0;">
+                        <h3 style="color: white; margin: 0;">{icon} Deception Probability: {probability:.1%}</h3>
+                        <p style="color: white; margin: 5px 0;">Confidence Level: {confidence_level}</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # Key indicators
+                    if deception_analysis['key_indicators']:
+                        st.markdown("**🔍 Key Deception Indicators:**")
+                        for indicator in deception_analysis['key_indicators']:
+                            st.markdown(f"• {indicator.replace('_', ' ').title()}")
+                    
+                    # Detailed breakdown
+                    st.markdown("**📊 Analysis Breakdown:**")
+                    breakdown_col1, breakdown_col2 = st.columns(2)
+                    
+                    with breakdown_col1:
+                        micro_score = deception_analysis['analysis_breakdown']['micro_expressions']['score']
+                        st.metric("Micro-expressions", f"{micro_score:.1%}")
+                        
+                        timing_score = deception_analysis['analysis_breakdown']['timing_patterns']['score']
+                        st.metric("Timing Patterns", f"{timing_score:.1%}")
+                    
+                    with breakdown_col2:
+                        body_score = deception_analysis['analysis_breakdown']['body_language']['score']
+                        st.metric("Body Language", f"{body_score:.1%}")
+                        
+                        consistency_score = deception_analysis['analysis_breakdown']['consistency_analysis']['score']
+                        st.metric("Consistency", f"{consistency_score:.1%}")
+                    
+                    # Interpretation
+                    st.markdown("**🧠 Interpretation:**")
+                    st.info(deception_analysis['interpretation'])
+                    
+                    # AI Analysis
+                    st.markdown("**🤖 AI Psychological Analysis:**")
+                    st.warning(ai_analysis)
+                    
+                    # Reset the button state
+                    st.session_state.run_lie_detector = False
+                    
+                except Exception as e:
+                    st.error(f"Lie detector analysis error: {str(e)}")
+                    st.session_state.run_lie_detector = False
         else:
             st.warning("⚪ No clear expressions detected in this image")
     else:

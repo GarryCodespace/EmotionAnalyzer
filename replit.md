@@ -71,20 +71,34 @@ UI Design: Dark mode default, proper capitalization (first letter only), seamles
 - **Response Limit**: 150 words maximum for concise insights
 - **Enhanced Prompting**: Different analysis approaches for facial vs. combined body language input
 
-### 5. Real-time Processing Pipeline
+### 6. AI Lie Detector System
+- **Technology**: Advanced behavioral analysis combining micro-expressions and body language
+- **Purpose**: Detect deception indicators and assess truthfulness probability
+- **Analysis Components**:
+  - **Micro-Expression Analysis**: Brief facial expressions, forced smiles, eye contact patterns
+  - **Body Language Analysis**: Defensive postures, self-soothing behaviors, barrier creation
+  - **Timing Pattern Analysis**: Expression suppression, rapid changes, inconsistent sequences
+  - **Consistency Analysis**: Conflicts between facial expressions and body language
+- **Weighted Scoring System**: Different indicator types weighted based on deception research
+- **Live Detection**: Real-time deception probability during camera sessions
+- **Comprehensive Reports**: Detailed breakdown with key indicators and AI psychological analysis
+- **Risk Assessment**: Color-coded probability levels (Low/Medium/High risk)
+- **Behavioral Interpretation**: What detected patterns suggest about thoughts and intentions
+
+### 7. Real-time Processing Pipeline
 - **Video Capture**: OpenCV camera integration
 - **Frame Processing**: Real-time landmark detection and gesture analysis
 - **Analysis Trigger**: Gesture detection triggers AI analysis
 - **Display**: Live video feed with overlaid analysis results
 
-### 5. Video Analysis System
+### 8. Video Analysis System
 - **Smart Detection**: Analyzes only significant expression changes to reduce noise
 - **Significance Threshold**: Configurable threshold for determining meaningful changes
 - **Temporal Analysis**: Compares consecutive frames for landmark movement patterns
 - **Batch Processing**: Processes uploaded videos efficiently with frame skipping
 - **Timeline Generation**: Creates expression timeline with significant moments
 
-### 6. Screen Recorder Mode
+### 9. Screen Recorder Mode
 - **External Application Recording**: Captures entire screen for video calls (Zoom, Teams, etc.)
 - **Live Analysis Popups**: Shows real-time emotion analysis in overlay windows
 - **Major Change Detection**: Only triggers popups for significant expression changes
