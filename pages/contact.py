@@ -172,6 +172,8 @@ st.markdown("""
 [data-testid="stColumns"] [data-testid="stButton"] > button {
     background-color: #1f1f1f !important;
     border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
     color: #ffffff !important;
     font-size: 16px;
     font-weight: 500;
@@ -180,6 +182,13 @@ st.markdown("""
     cursor: pointer;
     transition: all 0.3s ease;
     width: 100%;
+}
+
+/* Remove focus outline */
+[data-testid="stColumns"] [data-testid="stButton"] > button:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
 }
 
 /* Active state for contact button */
