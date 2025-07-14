@@ -206,7 +206,7 @@ with header_col1:
         st.markdown("🎭")
 with header_col2:
     st.markdown("<br><br>", unsafe_allow_html=True)  # Add spacing to push text down
-    st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;# Emoticon", unsafe_allow_html=True)
+    st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;<h1 style='font-size: 3rem; margin: 0;'>Emoticon</h1>", unsafe_allow_html=True)
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;Live AI Emotion Interpretation from Micro-Expressions", unsafe_allow_html=True)
 with header_col3:
     st.markdown("<br>", unsafe_allow_html=True)  # Add some spacing
