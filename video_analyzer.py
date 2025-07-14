@@ -139,28 +139,6 @@ class VideoEmotionAnalyzer:
         """Detect facial expressions from landmarks (legacy method)"""
         expressions_with_confidence = self.detect_expressions_with_confidence(landmarks)
         return [expr["name"] for expr in expressions_with_confidence if expr["confidence"] > 0.5]
-            "confusion": lambda lm: (lm[159].y - lm[65].y) > 0.03 and abs(lm[61].x - lm[291].x) < 0.025,
-            "contempt": lambda lm: abs(lm[61].y - lm[291].y) > 0.015,
-            "disgust": lambda lm: lm[12].y < lm[15].y - 0.015 and abs(lm[6].y - lm[168].y) < 0.02,
-            "fear": lambda lm: abs(lm[159].y - lm[145].y) > 0.025 and (lm[159].y - lm[65].y) > 0.04,
-            "anger": lambda lm: abs(lm[65].x - lm[295].x) < 0.025 and abs(lm[61].x - lm[291].x) < 0.03,
-            "sadness": lambda lm: lm[61].y > lm[13].y + 0.015 and lm[291].y > lm[13].y + 0.015,
-            "joy": lambda lm: abs(lm[61].x - lm[291].x) > 0.07 and abs(lm[159].y - lm[145].y) > 0.02,
-            "neutral": lambda lm: abs(lm[159].y - lm[145].y) > 0.015 and abs(lm[13].y - lm[14].y) > 0.01,
-            "thinking": lambda lm: abs(lm[65].x - lm[295].x) < 0.04 and lm[13].y > lm[14].y + 0.015,
-            "skeptical": lambda lm: (lm[159].y - lm[65].y) > 0.04 and abs(lm[61].x - lm[291].x) < 0.025,
-            "amused": lambda lm: abs(lm[61].x - lm[291].x) > 0.06 and abs(lm[159].y - lm[145].y) < 0.015,
-            "interested": lambda lm: (lm[159].y - lm[65].y) > 0.035 and lm[10].y < lm[152].y - 0.05
-        }
-        
-        for expression, detector in gesture_functions.items():
-            try:
-                if detector(landmarks):
-                    expressions.append(expression)
-            except (IndexError, AttributeError):
-                continue
-        
-        return expressions
     
     def is_significant_change(self, current_landmarks, current_expressions) -> bool:
         """Determine if there's a significant change in expression"""

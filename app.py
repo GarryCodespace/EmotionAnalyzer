@@ -12,7 +12,7 @@ from video_analyzer import VideoEmotionAnalyzer
 
 # Setup MediaPipe
 mp_face_mesh = mp.solutions.face_mesh
-face_mesh = mp_face_mesh.FaceMesh(static_image_mode=False, max_num_faces=1, refine_landmarks=True)
+face_mesh = mp_face_mesh.FaceMesh(static_image_mode=False, max_num_faces=5, refine_landmarks=True)
 
 # Define 100+ gestures (some with reduced sensitivity thresholds)
 GESTURES = [
@@ -469,23 +469,48 @@ if st.session_state.camera_running:
                 detected_now = []
 
                 if results.multi_face_landmarks:
-                    for face_landmarks in results.multi_face_landmarks:
+                    face_detections = []
+                    for face_idx, face_landmarks in enumerate(results.multi_face_landmarks):
                         landmarks = face_landmarks.landmark
-                        for name, condition in GESTURES:
-                            try:
-                                if condition(landmarks):
-                                    if name not in last_detected or (current_time - last_detect_time.get(name, 0)) > cooldown_seconds:
-                                        detected_now.append(name)
-                                        last_detected.add(name)
-                                        last_detect_time[name] = current_time
-                            except Exception as e:
-                                st.write(f"⚠️ Error in gesture '{name}': {e}")
+                        face_expressions = []
+                        
+                        # Use video analyzer for confidence scores
+                        video_analyzer = VideoEmotionAnalyzer()
+                        expressions_with_confidence = video_analyzer.detect_expressions_with_confidence(landmarks)
+                        
+                        for expr in expressions_with_confidence:
+                            if expr["confidence"] > 0.4:  # Lower threshold for live detection
+                                face_expressions.append(expr)
+                        
+                        if face_expressions:
+                            face_detections.append({
+                                "face_id": face_idx + 1,
+                                "expressions": face_expressions
+                            })
+                    
+                    # Update detected_now for compatibility
+                    detected_now = []
+                    for face_data in face_detections:
+                        for expr in face_data["expressions"]:
+                            detected_now.append(expr["name"])
 
                 # Update displays
                 frame_display.image(frame, channels="BGR", use_column_width=True)
 
                 if detected_now:
-                    detected_display.markdown(f"🟢 **Detected Gesture(s)**: {', '.join(detected_now)}")
+                    # Display multi-face detection results
+                    if 'face_detections' in locals() and face_detections:
+                        detection_text = f"🟢 **Detected {len(face_detections)} Face(s)**:\n\n"
+                        for face_data in face_detections:
+                            detection_text += f"**Face {face_data['face_id']}:**\n"
+                            for expr in face_data['expressions']:
+                                confidence_bar = "█" * int(expr['confidence'] * 10)
+                                detection_text += f"  • {expr['name']}: {expr['confidence']:.1%} {confidence_bar}\n"
+                            detection_text += "\n"
+                        detected_display.markdown(detection_text)
+                    else:
+                        detected_display.markdown(f"🟢 **Detected Gesture(s)**: {', '.join(detected_now)}")
+                    
                     try:
                         description = analyze_expression(", ".join(detected_now))
                         gpt_display.markdown(f"💬 **GPT Insight:** _{description}_")
@@ -522,6 +547,7 @@ uploaded_file = st.file_uploader("Upload an image for expression analysis", type
 
 if uploaded_file is not None:
     # Display uploaded image
+    uploaded_file.seek(0)  # Reset file pointer
     image = cv2.imdecode(np.frombuffer(uploaded_file.read(), np.uint8), cv2.IMREAD_COLOR)
     st.image(image, caption="Uploaded Image", use_container_width=True)
     
@@ -530,26 +556,52 @@ if uploaded_file is not None:
     results = face_mesh.process(rgb_image)
     
     if results.multi_face_landmarks:
-        detected_expressions = []
-        for face_landmarks in results.multi_face_landmarks:
-            landmarks = face_landmarks.landmark
-            for name, condition in GESTURES:
-                try:
-                    if condition(landmarks):
-                        detected_expressions.append(name)
-                except:
-                    continue
+        face_detections = []
+        video_analyzer = VideoEmotionAnalyzer()
         
-        if detected_expressions:
-            st.success(f"🟢 **Detected Expressions**: {', '.join(detected_expressions[:5])}")
+        for face_idx, face_landmarks in enumerate(results.multi_face_landmarks):
+            landmarks = face_landmarks.landmark
+            expressions_with_confidence = video_analyzer.detect_expressions_with_confidence(landmarks)
+            
+            if expressions_with_confidence:
+                face_detections.append({
+                    "face_id": face_idx + 1,
+                    "expressions": expressions_with_confidence
+                })
+        
+        if face_detections:
+            st.success(f"🟢 **Detected {len(face_detections)} Face(s) with Confidence Scores**")
+            
+            # Display results for each face
+            for face_data in face_detections:
+                st.markdown(f"**Face {face_data['face_id']}:**")
+                
+                # Create columns for better display
+                expr_col1, expr_col2 = st.columns(2)
+                
+                for idx, expr in enumerate(face_data['expressions'][:8]):  # Show top 8 expressions
+                    confidence_bar = "█" * int(expr['confidence'] * 10)
+                    confidence_text = f"{expr['name']}: {expr['confidence']:.1%} {confidence_bar}"
+                    
+                    if idx % 2 == 0:
+                        expr_col1.markdown(f"• {confidence_text}")
+                    else:
+                        expr_col2.markdown(f"• {confidence_text}")
+            
+            # Get all expression names for AI analysis
+            all_expressions = []
+            for face_data in face_detections:
+                for expr in face_data['expressions']:
+                    all_expressions.append(expr['name'])
+            
             try:
-                analysis = analyze_expression(", ".join(detected_expressions))
+                analysis = analyze_expression(", ".join(all_expressions[:10]))
                 st.info(f"💬 **AI Analysis**: {analysis}")
                 
                 # Save to database
                 save_emotion_analysis(
                     session_id=st.session_state.session_id,
-                    expressions=detected_expressions[:5],
+                    expressions=all_expressions[:10],
                     ai_analysis=analysis,
                     analysis_type="image"
                 )
