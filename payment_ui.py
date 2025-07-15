@@ -180,6 +180,7 @@ class PaymentUI:
         features = [
             ("Save History", "save_history"),
             ("Lie Detector", "lie_detector"),
+            ("Stress Analysis", "stress_detector"),
             ("Advanced Features", "advanced_features"),
             ("API Access", "api_access")
         ]
