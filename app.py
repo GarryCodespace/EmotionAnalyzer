@@ -859,6 +859,17 @@ tools_col5, tools_col6, tools_col7, tools_col8 = st.columns(4)
 with tools_col5:
     st.markdown("""
     <div style="text-align: center; padding: 10px;">
+        <div style="font-size: 14px; font-weight: 600;">Deception Level</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    if st.button("➕", key="deception_level_tool", use_container_width=True):
+        st.session_state.show_deception_level_tool = True
+        st.rerun()
+
+with tools_col6:
+    st.markdown("""
+    <div style="text-align: center; padding: 10px;">
         <div style="font-size: 14px; font-weight: 600;">Screen Record</div>
     </div>
     """, unsafe_allow_html=True)
@@ -1139,6 +1150,77 @@ if st.session_state.get('show_stress_analyzer_tool', False):
             st.session_state.show_stress_analyzer_tool = False
             st.rerun()
 
+# Show Deception Level Tool if activated
+if st.session_state.get('show_deception_level_tool', False):
+    st.markdown("---")
+    st.markdown("### Deception Level Analyzer")
+    
+    # Check daily usage limit
+    if not PaymentPlans.check_lie_detection_limit():
+        st.error("Daily deception analysis limit reached (1 per day)")
+        st.info("Upgrade to Professional for unlimited deception analysis")
+        if st.button("Upgrade to Professional", key="upgrade_deception_unlimited"):
+            st.switch_page("pages/pricing.py")
+    else:
+        st.success("Deception Level Analyzer Active - Upload an image to analyze deception level")
+        st.info("This tool provides precise deception percentage and confidence levels (1 use per day)")
+        
+        # Upload image for deception level analysis
+        deception_uploaded_file = st.file_uploader("Choose image file for deception analysis", type=['jpg', 'jpeg', 'png'], key="deception_level_upload")
+        
+        if deception_uploaded_file is not None:
+            image = cv2.imdecode(np.frombuffer(deception_uploaded_file.read(), np.uint8), cv2.IMREAD_COLOR)
+            
+            # Process with lie detector
+            with st.spinner('Analyzing deception level...'):
+                context = st.session_state.get('analysis_context', 'Analyze this person for deception level and truthfulness percentage.')
+                ai_analysis = ai_vision.analyze_emotion_context(image, [context])
+                
+                # Run deception analysis
+                facial_expressions = ai_analysis.get('facial_expressions', [])
+                body_patterns = []
+                
+                deception_analysis = lie_detector.analyze_deception(facial_expressions, body_patterns)
+                
+                # Increment lie detection usage
+                PaymentPlans.increment_lie_detection()
+                
+                # Display results
+                st.image(image, channels="BGR", caption="Analyzed Image")
+                
+                # Calculate deception percentage
+                deception_probability = deception_analysis.get('deception_probability', 0.0)
+                deception_percentage = int(deception_probability * 100)
+                confidence_level = deception_analysis.get('confidence_level', 'Low')
+                
+                # Display deception level with color coding
+                if deception_percentage >= 70:
+                    st.error(f"**Deception Level**: {deception_percentage}% (HIGH RISK)")
+                elif deception_percentage >= 40:
+                    st.warning(f"**Deception Level**: {deception_percentage}% (MEDIUM RISK)")
+                else:
+                    st.success(f"**Deception Level**: {deception_percentage}% (LOW RISK)")
+                
+                st.info(f"**Analysis Confidence**: {confidence_level}")
+                
+                # Show key indicators
+                key_indicators = deception_analysis.get('key_indicators', [])
+                if key_indicators:
+                    st.markdown("**Key Deception Indicators:**")
+                    for indicator in key_indicators[:4]:
+                        st.markdown(f"• {indicator}")
+                
+                # AI interpretation
+                ai_interpretation = deception_analysis.get('ai_interpretation', '')
+                if ai_interpretation:
+                    st.markdown("**AI Analysis:**")
+                    st.markdown(ai_interpretation)
+        
+        # Reset tool state
+        if st.button("Close Tool", key="close_deception_level"):
+            st.session_state.show_deception_level_tool = False
+            st.rerun()
+
 
 
 
@@ -1314,41 +1396,7 @@ with col2:
         except Exception as e:
             st.error(f"Screen recorder test failed: {str(e)}")
 
-# User History and Statistics
-st.markdown("---")
-st.markdown("### 📊 Your Session Data")
 
-col1, col2 = st.columns(2)
-
-with col1:
-    st.markdown("#### 🕐 Recent Analysis History")
-    try:
-        history = get_user_history(st.session_state.session_id, limit=5)
-        if history:
-            for i, record in enumerate(history):
-                with st.expander(f"Analysis {i+1} - {record['analysis_type'].title()} ({record['timestamp'].strftime('%H:%M:%S')})"):
-                    st.write(f"**Expressions**: {', '.join(record['expressions'])}")
-                    st.write(f"**AI Analysis**: {record['ai_analysis']}")
-        else:
-            st.info("No analysis history yet. Try the demo mode or upload an image!")
-    except Exception as e:
-        st.error(f"Error loading history: {str(e)}")
-
-with col2:
-    st.markdown("#### 📈 Overall Statistics")
-    try:
-        stats = get_expression_statistics()
-        
-        st.metric("Total Analyses", stats['total_analyses'])
-        st.metric("Unique Users", stats['unique_users'])
-        
-        if stats['top_expressions']:
-            st.markdown("**Top Detected Expressions:**")
-            for expr in stats['top_expressions'][:5]:
-                st.write(f"• {expr['name']}: {expr['count']} times")
-        
-    except Exception as e:
-        st.error(f"Error loading statistics: {str(e)}")
 
 # Instructions
 st.markdown("---")
