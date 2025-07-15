@@ -351,44 +351,57 @@ div[data-testid="stInfo"] > div {
 [data-testid="stSidebar"] * {
     text-transform: capitalize !important;
 }
+
+/* Force capitalization on all sidebar text */
+[data-testid="stSidebar"] {
+    text-transform: capitalize !important;
+}
+
+/* Override Streamlit's default styles */
+.css-1d391kg, .css-1629p8f, .css-10trblm, .css-1v0mbdj {
+    text-transform: capitalize !important;
+}
 </style>
 
 <script>
-// JavaScript to capitalize sidebar navigation
+// JavaScript to aggressively capitalize sidebar navigation
 function capitalizeSidebarNavigation() {
     const sidebar = document.querySelector('[data-testid="stSidebar"]');
     if (!sidebar) return;
     
-    // Target navigation links specifically
-    const navLinks = sidebar.querySelectorAll('a[href], button[data-testid]');
-    navLinks.forEach(link => {
-        if (link.textContent) {
-            const text = link.textContent.trim();
-            // Only capitalize if it's a page name (single word, lowercase)
-            if (text && text.length > 0 && text.length < 20 && text === text.toLowerCase()) {
+    // Target ALL text elements in sidebar
+    const allElements = sidebar.querySelectorAll('*');
+    allElements.forEach(element => {
+        // Skip if element has children (to avoid modifying parent containers)
+        if (element.children.length === 0 && element.textContent) {
+            const text = element.textContent.trim();
+            const knownPages = ['app', 'about', 'billing', 'career', 'contact', 'pricing', 'screen recorder'];
+            
+            // Check if this is a known page name
+            if (knownPages.includes(text.toLowerCase())) {
                 const words = text.split(' ');
                 const capitalizedWords = words.map(word => 
                     word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
                 );
-                link.textContent = capitalizedWords.join(' ');
+                element.textContent = capitalizedWords.join(' ');
+                
+                // Also try to set innerHTML in case textContent doesn't work
+                element.innerHTML = capitalizedWords.join(' ');
             }
         }
     });
     
-    // Also target any paragraph elements that might contain page names
-    const paragraphs = sidebar.querySelectorAll('p');
-    paragraphs.forEach(p => {
-        if (p.textContent) {
-            const text = p.textContent.trim();
-            if (text && text.length > 0 && text.length < 20 && text === text.toLowerCase()) {
-                const words = text.split(' ');
-                const capitalizedWords = words.map(word => 
-                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-                );
-                p.textContent = capitalizedWords.join(' ');
-            }
+    // Also apply CSS styles directly via JavaScript
+    const style = document.createElement('style');
+    style.textContent = `
+        [data-testid="stSidebar"] * {
+            text-transform: capitalize !important;
         }
-    });
+        [data-testid="stSidebar"] {
+            text-transform: capitalize !important;
+        }
+    `;
+    document.head.appendChild(style);
 }
 
 // Run on page load
@@ -403,8 +416,8 @@ if (document.readyState === 'loading') {
     capitalizeSidebarNavigation();
 }
 
-// Run periodically to catch dynamic updates
-setInterval(capitalizeSidebarNavigation, 1000);
+// Run periodically to catch dynamic updates - more frequently
+setInterval(capitalizeSidebarNavigation, 200);
 
 // Set up mutation observer for when navigation changes
 const observer = new MutationObserver(function(mutations) {
@@ -429,6 +442,42 @@ setTimeout(function() {
         });
     }
 }, 500);
+
+// Nuclear option - Override all text in sidebar with proper capitalization
+function nuclearCapitalizationFix() {
+    const sidebar = document.querySelector('[data-testid="stSidebar"]');
+    if (!sidebar) return;
+    
+    // Define proper capitalization mapping
+    const pageMapping = {
+        'app': 'App',
+        'about': 'About',
+        'billing': 'Billing',
+        'career': 'Career',
+        'contact': 'Contact',
+        'pricing': 'Pricing',
+        'screen recorder': 'Screen Recorder'
+    };
+    
+    // Find all text nodes and replace them
+    function replaceTextInNode(node) {
+        if (node.nodeType === Node.TEXT_NODE) {
+            const text = node.textContent.trim().toLowerCase();
+            if (pageMapping[text]) {
+                node.textContent = pageMapping[text];
+            }
+        } else {
+            for (let i = 0; i < node.childNodes.length; i++) {
+                replaceTextInNode(node.childNodes[i]);
+            }
+        }
+    }
+    
+    replaceTextInNode(sidebar);
+}
+
+// Run nuclear option frequently
+setInterval(nuclearCapitalizationFix, 100);
 </script>
 
 <style>
@@ -441,123 +490,7 @@ setTimeout(function() {
 </style>
 """, unsafe_allow_html=True)
 
-# Top navigation menu
-st.markdown("""
-<style>
-.nav-container {
-    background-color: #1f1f1f;
-    padding: 15px 0;
-    margin: -1rem -1rem 2rem -1rem;
-    border-bottom: 1px solid #333;
-}
-.nav-menu {
-    display: flex;
-    justify-content: center;
-    gap: 40px;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-.nav-item {
-    color: #ffffff;
-    text-decoration: none;
-    font-size: 16px;
-    font-weight: 500;
-    padding: 8px 16px;
-    border-radius: 4px;
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-.nav-item:link, .nav-item:visited {
-    text-decoration: none;
-    color: #ffffff;
-}
-.nav-item:hover {
-    background-color: #333;
-    color: #ffffff;
-}
-.nav-item.active {
-    background-color: #0066cc;
-    color: #ffffff;
-}
-</style>
-<div class="nav-container">
-    <div class="nav-menu">
-        <span class="nav-item active">Home</span>
-        <span class="nav-item">About</span>
-        <span class="nav-item">Contact</span>
-        <span class="nav-item">Screen Recorder</span>
-    </div>
-</div>
-""", unsafe_allow_html=True)
 
-# Navigation functionality using columns - styled buttons
-nav_col1, nav_col2, nav_col3, nav_col4, nav_col5 = st.columns([1, 1, 1, 1, 1])
-
-with nav_col1:
-    if st.button("Home", key="nav_home", use_container_width=True):
-        st.switch_page("app.py")
-
-with nav_col2:
-    if st.button("About", key="nav_about", use_container_width=True):
-        st.switch_page("pages/about.py")
-
-with nav_col3:
-    if st.button("Pricing", key="nav_pricing", use_container_width=True):
-        st.switch_page("pages/pricing.py")
-
-with nav_col4:
-    if st.button("Contact", key="nav_contact", use_container_width=True):
-        st.switch_page("pages/contact.py")
-
-with nav_col5:
-    if st.button("Career", key="nav_career", use_container_width=True):
-        st.switch_page("pages/career.py")
-
-# Style the navigation buttons to match the design
-st.markdown("""
-<style>
-/* Style navigation buttons */
-[data-testid="stColumns"] [data-testid="stButton"] > button {
-    background-color: #1f1f1f !important;
-    border: none !important;
-    outline: none !important;
-    box-shadow: none !important;
-    color: #ffffff !important;
-    font-size: 16px;
-    font-weight: 500;
-    padding: 12px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    width: 100%;
-}
-
-/* Remove focus outline */
-[data-testid="stColumns"] [data-testid="stButton"] > button:focus {
-    outline: none !important;
-    box-shadow: none !important;
-    border: none !important;
-}
-
-/* Active state for home button */
-[data-testid="stColumns"] [data-testid="stButton"]:first-child > button {
-    background-color: #0066cc;
-    color: #ffffff;
-}
-
-/* Hover effects */
-[data-testid="stColumns"] [data-testid="stButton"] > button:hover {
-    background-color: #0066cc;
-    color: #ffffff;
-}
-
-/* Remove the visual navigation bar since we're using real buttons now */
-.nav-container {
-    display: none;
-}
-</style>
-""", unsafe_allow_html=True)
 
 
 
