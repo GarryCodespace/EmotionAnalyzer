@@ -45,7 +45,7 @@ def analyze_expression(event_text):
             4. How their body language and posture reflect their confidence, comfort level, or emotional barriers
             5. What their positioning and gestures might suggest about their intentions or psychological state
             
-            Keep your response under 150 words and focus on psychological insights combining both facial and body language."""
+            Keep your response between 150-250 words and focus on comprehensive psychological insights combining both facial and body language. Provide detailed interpretation and behavioral analysis."""
             
             system_content = """You are an expert psychologist specializing in facial expression analysis, body language, and emotional intelligence. 
             You have deep knowledge of micro-expressions, emotional psychology, non-verbal communication, and body language interpretation. 
@@ -59,7 +59,7 @@ def analyze_expression(event_text):
             2. Possible underlying feelings or thoughts
             3. Social or psychological context if applicable
             
-            Keep your response under 150 words and focus on psychological insights rather than technical descriptions."""
+            Keep your response between 150-250 words and focus on comprehensive psychological insights rather than technical descriptions. Provide detailed emotional interpretation and behavioral analysis."""
             
             system_content = """You are an expert psychologist specializing in facial expression analysis and emotional intelligence. 
             You have deep knowledge of micro-expressions, emotional psychology, and non-verbal communication. 
