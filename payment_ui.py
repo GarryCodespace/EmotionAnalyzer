@@ -39,7 +39,7 @@ class PaymentUI:
     
     def show_pricing_page(self):
         """Display pricing plans page"""
-        st.title("💳 Pricing Plans")
+        st.title("Pricing Plans")
         st.markdown("*Choose the plan that fits your needs*")
         
         # Display current plan if user is logged in
@@ -67,7 +67,7 @@ class PaymentUI:
             
             # Plan header
             if plan_info['recommended']:
-                st.markdown("**⭐ RECOMMENDED**")
+                st.markdown("**RECOMMENDED**")
             
             st.markdown(f"### {plan_info['name']}")
             st.markdown(f"**{plan_info['price_display']}**")

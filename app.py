@@ -623,7 +623,7 @@ with st.sidebar:
             st.session_state.session_id = session_id
             st.rerun()
     else:
-        st.markdown("### 🚀 Get Started")
+        st.markdown("### Get Started")
         st.info("Create an account to save your analysis history and unlock premium features!")
         
         col1, col2 = st.columns(2)
@@ -638,32 +638,32 @@ with st.sidebar:
                 st.rerun()
         
         st.markdown("---")
-        st.markdown("### 🎯 Try It Now")
+        st.markdown("### Try It Now")
         st.success("Upload an image below to experience AI emotion analysis!")
         
         # Show basic plan info
-        st.markdown("### 📋 Current Plan")
+        st.markdown("### Current Plan")
         st.markdown("**Free Trial**: 5 analyses per day")
         
         # Show upgrade option
-        if st.button("💎 Upgrade Plan", key="upgrade_sidebar", use_container_width=True):
+        if st.button("Upgrade Plan", key="upgrade_sidebar", use_container_width=True):
             st.switch_page("pages/pricing.py")
 
 # Welcome message for new users
 if not st.session_state.get('logged_in', False):
     st.markdown("---")
-    st.markdown("### 🎯 Try Emoticon Now - No Login Required!")
+    st.markdown("### Try Emoticon Now - No Login Required!")
     
     # Show demo benefits
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.markdown("**🔍 AI Vision Analysis**")
+        st.markdown("**AI Vision Analysis**")
         st.markdown("Advanced facial expression detection")
     with col2:
-        st.markdown("**💡 Emotional Insights**")
+        st.markdown("**Emotional Insights**")
         st.markdown("Psychological interpretation of expressions")
     with col3:
-        st.markdown("**⚡ Instant Results**")
+        st.markdown("**Instant Results**")
         st.markdown("Get analysis in seconds")
 
 # Combined Upload Analysis with Use Cases
@@ -694,48 +694,44 @@ tools_col1, tools_col2, tools_col3, tools_col4 = st.columns(4)
 with tools_col1:
     st.markdown("""
     <div style="text-align: center; padding: 10px;">
-        <div style="font-size: 24px; margin-bottom: 5px;">📁</div>
         <div style="font-size: 14px; font-weight: 600;">Upload Image</div>
     </div>
     """, unsafe_allow_html=True)
     
-    if st.button("➕", key="upload_image_tool", use_container_width=True):
+    if st.button("+", key="upload_image_tool", use_container_width=True):
         st.session_state.show_upload_image = True
         st.rerun()
 
 with tools_col2:
     st.markdown("""
     <div style="text-align: center; padding: 10px;">
-        <div style="font-size: 24px; margin-bottom: 5px;">📹</div>
         <div style="font-size: 14px; font-weight: 600;">Upload Video</div>
     </div>
     """, unsafe_allow_html=True)
     
-    if st.button("➕", key="upload_video_tool", use_container_width=True):
+    if st.button("+", key="upload_video_tool", use_container_width=True):
         st.session_state.show_upload_video = True
         st.rerun()
 
 with tools_col3:
     st.markdown("""
     <div style="text-align: center; padding: 10px;">
-        <div style="font-size: 24px; margin-bottom: 5px;">🔍</div>
         <div style="font-size: 14px; font-weight: 600;">AI Lie Detector</div>
     </div>
     """, unsafe_allow_html=True)
     
-    if st.button("➕", key="lie_detector_tool", use_container_width=True):
+    if st.button("+", key="lie_detector_tool", use_container_width=True):
         st.session_state.show_lie_detector_tool = True
         st.rerun()
 
 with tools_col4:
     st.markdown("""
     <div style="text-align: center; padding: 10px;">
-        <div style="font-size: 24px; margin-bottom: 5px;">📊</div>
         <div style="font-size: 14px; font-weight: 600;">Analytics</div>
     </div>
     """, unsafe_allow_html=True)
     
-    if st.button("➕", key="analytics_tool", use_container_width=True):
+    if st.button("+", key="analytics_tool", use_container_width=True):
         st.switch_page("pages/analytics.py")
 
 # Show upload interfaces when tools are activated

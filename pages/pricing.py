@@ -15,7 +15,7 @@ from login_ui import check_authentication
 
 def show_pricing_page():
     """Main pricing page"""
-    st.set_page_config(page_title="Emoticon - Pricing", page_icon="💳", layout="wide")
+    st.set_page_config(page_title="Emoticon - Pricing", layout="wide")
     
     # Check for payment success/cancel
     if 'success' in st.query_params:
@@ -31,7 +31,7 @@ def show_pricing_page():
     # Header
     st.markdown("""
     <div style="text-align: center; margin-bottom: 2rem;">
-        <h1>💳 Pricing Plans</h1>
+        <h1>Pricing Plans</h1>
         <p style="font-size: 1.2rem; color: #666;">Choose the perfect plan for your emotion analysis needs</p>
     </div>
     """, unsafe_allow_html=True)
@@ -44,7 +44,7 @@ def show_pricing_page():
     
     # Add feature comparison table
     st.markdown("---")
-    st.markdown("### 📋 Feature Comparison")
+    st.markdown("### Feature Comparison")
     
     # Create comparison table
     features = [
