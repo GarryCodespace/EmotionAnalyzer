@@ -8,6 +8,7 @@ This application is a real-time facial expression analysis system that combines 
 
 Preferred communication style: Simple, everyday language.
 UI Design: Dark mode default, proper capitalization (first letter only), seamless button integration with black background matching navigation bar.
+User Experience: Homepage-first approach - users can try the product before being prompted to login. Authentication is optional for basic features, required only for saving history and premium features.
 
 ## System Architecture
 
