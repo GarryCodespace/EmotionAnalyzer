@@ -3,92 +3,64 @@ import streamlit as st
 st.set_page_config(page_title="About - Emoticon", layout="wide")
 
 # Initialize theme state based on time of day
-if 'dark_mode' not in st.session_state:
-    from datetime import datetime
-    current_hour = datetime.now().hour
-    # Default to light mode during daytime (6 AM - 6 PM)
-    st.session_state.dark_mode = not (6 <= current_hour < 18)
 
-# Apply theme
-if st.session_state.dark_mode:
-    st.markdown("""
-    <style>
-    .stApp {
-        background-color: #1e1e1e;
-        color: #ffffff;
-    }
-    .stMarkdown {
-        color: #ffffff;
-    }
-    .stButton > button {
-        background-color: #2d2d2d;
-        color: #ffffff;
-        border: 1px solid #444;
-    }
-    .stSelectbox > div > div {
-        background-color: #2d2d2d;
-        color: #ffffff;
-    }
-    .stTextInput > div > div > input {
-        background-color: #2d2d2d;
-        color: #ffffff;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-else:
-    st.markdown("""
-    <style>
-    .stApp {
-        background-color: #ffffff;
-        color: #000000;
-    }
-    .stButton > button {
-        background-color: #f0f0f0;
-        color: #000000;
-        border: 1px solid #ccc;
-    }
-    .stButton > button:hover {
-        background-color: #e0e0e0;
-        border: 1px solid #aaa;
-    }
-    .stSelectbox > div > div {
-        background-color: #f8f8f8;
-        color: #000000;
-        border: 1px solid #ddd;
-    }
-    .stTextInput > div > div > input {
-        background-color: #f8f8f8;
-        color: #000000;
-        border: 1px solid #ddd;
-    }
-    div[data-testid="stAlert"] > div {
-        background-color: #fff3cd;
-        border: 1px solid #ffeaa7;
-        color: #856404;
-    }
-    div[data-testid="stSuccess"] > div {
-        background-color: #d4edda;
-        border: 1px solid #c3e6cb;
-        color: #155724;
-    }
-    div[data-testid="stError"] > div {
-        background-color: #f8d7da;
-        border: 1px solid #f5c6cb;
-        color: #721c24;
-    }
-    div[data-testid="stInfo"] > div {
-        background-color: #d1ecf1;
-        border: 1px solid #bee5eb;
-        color: #0c5460;
-    }
-    .stMarkdown {
-        color: #000000 !important;
-    }
-    .stText {
-        color: #000000 !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+
+# Apply light theme
+st.markdown("""
+<style>
+.stApp {
+    background-color: #ffffff;
+    color: #000000;
+}
+.stButton > button {
+    background-color: #f0f0f0;
+    color: #000000;
+    border: 1px solid #ccc;
+}
+.stButton > button:hover {
+    background-color: #e0e0e0;
+    border: 1px solid #aaa;
+}
+.stSelectbox > div > div {
+    background-color: #f8f8f8;
+    color: #000000;
+    border: 1px solid #ddd;
+}
+.stTextInput > div > div > input {
+    background-color: #f8f8f8;
+    color: #000000;
+    border: 1px solid #ddd;
+}
+
+/* Change yellow alert/warning boxes to blue */
+div[data-testid="stAlert"] > div {
+    background-color: #e3f2fd;
+    border: 1px solid #90caf9;
+    color: #1565c0;
+}
+div[data-testid="stSuccess"] > div {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+div[data-testid="stError"] > div {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+div[data-testid="stInfo"] > div {
+    background-color: #d1ecf1;
+    border: 1px solid #bee5eb;
+    color: #0c5460;
+}
+.stMarkdown {
+    color: #000000 !important;
+}
+.stText {
+    color: #000000 !important;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # Top navigation menu
 st.markdown("""
@@ -226,10 +198,6 @@ with header_col2:
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;<p style='margin-top: -35px;'>Understanding the Technology Behind Emotion Detection</p>", unsafe_allow_html=True)
 with header_col3:
     st.markdown("<br>", unsafe_allow_html=True)
-    theme_button_text = "🌙 Dark" if not st.session_state.dark_mode else "☀️ Light"
-    if st.button(theme_button_text, key="theme_toggle"):
-        st.session_state.dark_mode = not st.session_state.dark_mode
-        st.rerun()
 
 st.markdown("---")
 
