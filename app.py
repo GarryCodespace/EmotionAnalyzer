@@ -548,8 +548,7 @@ if st.session_state.camera_running:
                 if body_patterns:
                     body_text = f"🚶 **Body Language Analysis**:\n\n"
                     for pattern in body_patterns[:5]:  # Show top 5 patterns
-                        confidence_bar = "█" * int(pattern['confidence'] * 10)
-                        body_text += f"• {pattern['pattern'].replace('_', ' ').title()}: {pattern['confidence']:.1%} {confidence_bar}\n"
+                        body_text += f"• {pattern['pattern'].replace('_', ' ').title()}\n"
                     body_language_display.markdown(body_text)
                 else:
                     body_language_display.markdown("🚶 **Body Language**: Monitoring for posture and gestures...")
@@ -561,8 +560,7 @@ if st.session_state.camera_running:
                         for face_data in face_detections:
                             detection_text += f"**Face {face_data['face_id']}:**\n"
                             for expr in face_data['expressions']:
-                                confidence_bar = "█" * int(expr['confidence'] * 10)
-                                detection_text += f"  • {expr['name']}: {expr['confidence']:.1%} {confidence_bar}\n"
+                                detection_text += f"  • {expr['name']}\n"
                             detection_text += "\n"
                         detected_display.markdown(detection_text)
                     else:
@@ -678,8 +676,7 @@ if uploaded_file is not None:
         
         body_col1, body_col2 = st.columns(2)
         for idx, pattern in enumerate(detected_body_language[:8]):
-            confidence_bar = "█" * int(0.8 * 10)  # Default confidence for AI-detected patterns
-            pattern_text = f"{pattern.title()}: 80% {confidence_bar}"
+            pattern_text = f"{pattern.title()}"
             
             if idx % 2 == 0:
                 body_col1.markdown(f"• {pattern_text}")
@@ -703,14 +700,12 @@ if uploaded_file is not None:
         confidence_scores = ai_vision.get_expression_confidence(detected_expressions)
         
         for idx, expr in enumerate(detected_expressions[:8]):
-            confidence = confidence_scores.get(expr, 0.8)
-            confidence_bar = "█" * int(confidence * 10)
-            confidence_text = f"{expr.title()}: {confidence:.1%} {confidence_bar}"
+            expression_text = f"{expr.title()}"
             
             if idx % 2 == 0:
-                expr_col1.markdown(f"• {confidence_text}")
+                expr_col1.markdown(f"• {expression_text}")
             else:
-                expr_col2.markdown(f"• {confidence_text}")
+                expr_col2.markdown(f"• {expression_text}")
         
         # Create face detection format for compatibility
         face_detections = [{
