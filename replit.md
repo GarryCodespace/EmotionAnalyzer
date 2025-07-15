@@ -32,17 +32,17 @@ UI Design: Dark mode default, proper capitalization (first letter only), seamles
 - **Output**: 3D coordinates (x, y, z) for each facial point
 - **Multi-Face Support**: Simultaneous detection and analysis of multiple people
 
-### 2. Gesture Recognition System
-- **Implementation**: 100+ predefined gestures using lambda functions
-- **Detection Method**: Geometric analysis of facial landmark positions
-- **Confidence Scoring**: Real-time confidence calculation for each detected expression
-- **Gesture Types**: 
-  - Basic expressions (smile, frown, blink)
-  - Complex combinations (brow furrow + frown)
-  - Micro-expressions (subtle smile, lip bite)
-  - Head movements (tilts, turns)
-- **Sensitivity**: Adjustable thresholds for different gesture types
-- **Live Confidence Display**: Visual confidence bars showing detection accuracy
+### 2. AI Vision Recognition System
+- **Implementation**: OpenAI GPT-4o vision API for comprehensive expression analysis
+- **Detection Method**: Advanced AI vision analysis of facial expressions and body language
+- **Comprehensive Analysis**: Single API call analyzes all aspects simultaneously
+- **Expression Types**: 
+  - Facial micro-expressions (genuine vs forced smiles, eye contact patterns)
+  - Body language patterns (defensive postures, confidence signals)
+  - Emotional states (primary emotions with contextual analysis)
+  - Deception indicators (inconsistencies, forced expressions)
+- **Confidence Scoring**: AI-generated confidence levels with detailed explanations
+- **Performance**: Smart caching system analyzes every 30 frames for optimal performance
 
 ### 3. Full Body Language Detection
 - **Technology**: MediaPipe Pose and Hand detection

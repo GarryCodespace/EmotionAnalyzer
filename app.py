@@ -11,14 +11,16 @@ from database import init_database, save_emotion_analysis, get_user_history, get
 from video_analyzer import VideoEmotionAnalyzer
 from body_language_analyzer import BodyLanguageAnalyzer
 from lie_detector import LieDetector
+from ai_vision_analyzer import AIVisionAnalyzer
 
 # Setup MediaPipe
 mp_face_mesh = mp.solutions.face_mesh
 face_mesh = mp_face_mesh.FaceMesh(static_image_mode=False, max_num_faces=5, refine_landmarks=True)
 
-# Initialize body language analyzer and lie detector
+# Initialize analyzers
 body_analyzer = BodyLanguageAnalyzer()
 lie_detector = LieDetector()
+ai_vision = AIVisionAnalyzer()
 
 # Define 100+ gestures (some with reduced sensitivity thresholds)
 GESTURES = [
@@ -470,41 +472,70 @@ if st.session_state.camera_running:
 
                 # Flip frame horizontally for mirror effect
                 frame = cv2.flip(frame, 1)
-                rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                results = face_mesh.process(rgb_frame)
-
-                current_time = time.time()
-                detected_now = []
                 
-                # Analyze body language
-                body_language_data = body_analyzer.analyze_body_language(frame)
-                body_patterns = body_language_data.get("detected_patterns", [])
-
-                if results.multi_face_landmarks:
-                    face_detections = []
-                    for face_idx, face_landmarks in enumerate(results.multi_face_landmarks):
-                        landmarks = face_landmarks.landmark
-                        face_expressions = []
-                        
-                        # Use video analyzer for confidence scores
-                        video_analyzer = VideoEmotionAnalyzer()
-                        expressions_with_confidence = video_analyzer.detect_expressions_with_confidence(landmarks)
-                        
-                        for expr in expressions_with_confidence:
-                            if expr["confidence"] > 0.4:  # Lower threshold for live detection
-                                face_expressions.append(expr)
-                        
-                        if face_expressions:
-                            face_detections.append({
-                                "face_id": face_idx + 1,
-                                "expressions": face_expressions
-                            })
+                # Use AI vision analysis every 30 frames for performance
+                if frame_count % 30 == 0:
+                    # Analyze frame with AI vision
+                    ai_analysis = ai_vision.analyze_facial_expressions(frame)
                     
-                    # Update detected_now for compatibility
-                    detected_now = []
-                    for face_data in face_detections:
-                        for expr in face_data["expressions"]:
-                            detected_now.append(expr["name"])
+                    # Store analysis for reuse
+                    st.session_state.current_ai_analysis = ai_analysis
+                    
+                    # Extract detected information
+                    detected_expressions = ai_analysis.get("facial_expressions", [])
+                    detected_body_language = ai_analysis.get("body_language", [])
+                    
+                    # Create face detection format for display
+                    if detected_expressions:
+                        confidence_scores = ai_vision.get_expression_confidence(detected_expressions)
+                        face_detections = [{
+                            'face_id': 1,
+                            'expressions': [
+                                {'name': expr, 'confidence': confidence_scores.get(expr, 0.8)}
+                                for expr in detected_expressions[:8]
+                            ]
+                        }]
+                    else:
+                        face_detections = []
+                    
+                    # Create body patterns from AI analysis
+                    body_patterns = [
+                        {'pattern': pattern.replace(' ', '_'), 'confidence': 0.8}
+                        for pattern in detected_body_language
+                    ]
+                    
+                    # Combine for detected_now
+                    detected_now = detected_expressions + detected_body_language
+                    
+                else:
+                    # Use cached analysis
+                    if hasattr(st.session_state, 'current_ai_analysis'):
+                        ai_analysis = st.session_state.current_ai_analysis
+                        detected_expressions = ai_analysis.get("facial_expressions", [])
+                        detected_body_language = ai_analysis.get("body_language", [])
+                        
+                        if detected_expressions:
+                            confidence_scores = ai_vision.get_expression_confidence(detected_expressions)
+                            face_detections = [{
+                                'face_id': 1,
+                                'expressions': [
+                                    {'name': expr, 'confidence': confidence_scores.get(expr, 0.8)}
+                                    for expr in detected_expressions[:8]
+                                ]
+                            }]
+                        else:
+                            face_detections = []
+                        
+                        body_patterns = [
+                            {'pattern': pattern.replace(' ', '_'), 'confidence': 0.8}
+                            for pattern in detected_body_language
+                        ]
+                        
+                        detected_now = detected_expressions + detected_body_language
+                    else:
+                        face_detections = []
+                        body_patterns = []
+                        detected_now = []
 
                 # Update displays
                 frame_display.image(frame, channels="BGR", use_column_width=True)
@@ -615,188 +646,164 @@ if uploaded_file is not None:
     image = cv2.imdecode(np.frombuffer(uploaded_file.read(), np.uint8), cv2.IMREAD_COLOR)
     st.image(image, caption="Uploaded Image", use_container_width=True)
     
-    # Process image for facial and body language analysis
-    rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    results = face_mesh.process(rgb_image)
+    # Process image with AI vision analysis
+    with st.spinner('Analyzing image with AI vision...'):
+        ai_analysis = ai_vision.analyze_facial_expressions(image)
     
-    # Analyze body language in the image
-    body_language_data = body_analyzer.analyze_body_language(image)
-    body_patterns = body_language_data.get("detected_patterns", [])
+    # Extract analysis results
+    detected_expressions = ai_analysis.get("facial_expressions", [])
+    detected_body_language = ai_analysis.get("body_language", [])
+    emotional_state = ai_analysis.get("emotional_state", "neutral")
+    confidence_level = ai_analysis.get("confidence_level", "medium")
+    detailed_analysis = ai_analysis.get("detailed_analysis", "")
+    
+    # Display AI analysis summary
+    st.success(f"🤖 **AI Vision Analysis Complete** - Confidence: {confidence_level.title()}")
+    
+    # Display emotional state
+    if emotional_state and emotional_state != "neutral":
+        st.info(f"😊 **Primary Emotional State**: {emotional_state.title()}")
+    
+    # Display detailed analysis
+    if detailed_analysis:
+        st.markdown(f"**🔍 AI Analysis**: {detailed_analysis}")
     
     # Display body language analysis
-    if body_patterns:
-        st.success(f"🚶 **Body Language Analysis - {len(body_patterns)} Pattern(s) Detected**")
+    if detected_body_language:
+        st.success(f"🚶 **Body Language Patterns Detected**: {len(detected_body_language)}")
         
         body_col1, body_col2 = st.columns(2)
-        for idx, pattern in enumerate(body_patterns[:8]):  # Show top 8 patterns
-            confidence_bar = "█" * int(pattern['confidence'] * 10)
-            pattern_text = f"{pattern['pattern'].replace('_', ' ').title()}: {pattern['confidence']:.1%} {confidence_bar}"
+        for idx, pattern in enumerate(detected_body_language[:8]):
+            confidence_bar = "█" * int(0.8 * 10)  # Default confidence for AI-detected patterns
+            pattern_text = f"{pattern.title()}: 80% {confidence_bar}"
             
             if idx % 2 == 0:
                 body_col1.markdown(f"• {pattern_text}")
             else:
                 body_col2.markdown(f"• {pattern_text}")
         
-        # Get body language interpretation
-        body_interpretation = body_analyzer.get_body_language_interpretation(body_patterns)
-        st.info(f"📊 **Body Language Interpretation**:\n{body_interpretation}")
+        # Create body patterns for compatibility
+        body_patterns = [
+            {'pattern': pattern.replace(' ', '_'), 'confidence': 0.8}
+            for pattern in detected_body_language
+        ]
     else:
-        st.info("🚶 **Body Language**: No significant body language patterns detected in this image")
+        st.info("🚶 **Body Language**: No significant body language patterns detected")
+        body_patterns = []
     
-    if results.multi_face_landmarks:
-        face_detections = []
-        video_analyzer = VideoEmotionAnalyzer()
+    # Display facial expressions from AI analysis
+    if detected_expressions:
+        st.success(f"😊 **Facial Expressions Detected**: {len(detected_expressions)}")
         
-        for face_idx, face_landmarks in enumerate(results.multi_face_landmarks):
-            landmarks = face_landmarks.landmark
-            expressions_with_confidence = video_analyzer.detect_expressions_with_confidence(landmarks)
-            
-            if expressions_with_confidence:
-                face_detections.append({
-                    "face_id": face_idx + 1,
-                    "expressions": expressions_with_confidence
-                })
+        expr_col1, expr_col2 = st.columns(2)
+        confidence_scores = ai_vision.get_expression_confidence(detected_expressions)
         
-        if face_detections:
-            st.success(f"🟢 **Detected {len(face_detections)} Face(s) with Confidence Scores**")
+        for idx, expr in enumerate(detected_expressions[:8]):
+            confidence = confidence_scores.get(expr, 0.8)
+            confidence_bar = "█" * int(confidence * 10)
+            confidence_text = f"{expr.title()}: {confidence:.1%} {confidence_bar}"
             
-            # Display results for each face
-            for face_data in face_detections:
-                st.markdown(f"**Face {face_data['face_id']}:**")
-                
-                # Create columns for better display
-                expr_col1, expr_col2 = st.columns(2)
-                
-                for idx, expr in enumerate(face_data['expressions'][:8]):  # Show top 8 expressions
-                    confidence_bar = "█" * int(expr['confidence'] * 10)
-                    confidence_text = f"{expr['name']}: {expr['confidence']:.1%} {confidence_bar}"
-                    
-                    if idx % 2 == 0:
-                        expr_col1.markdown(f"• {confidence_text}")
-                    else:
-                        expr_col2.markdown(f"• {confidence_text}")
+            if idx % 2 == 0:
+                expr_col1.markdown(f"• {confidence_text}")
+            else:
+                expr_col2.markdown(f"• {confidence_text}")
+        
+        # Create face detection format for compatibility
+        face_detections = [{
+            'face_id': 1,
+            'expressions': [
+                {'name': expr, 'confidence': confidence_scores.get(expr, 0.8)}
+                for expr in detected_expressions
+            ]
+        }]
+        
+        # Get all expressions for analysis
+        all_expressions = detected_expressions
+        
+        # Combine facial expressions and body language for comprehensive analysis
+        all_signals = detected_expressions + detected_body_language
+        
+        try:
+            analysis = ai_vision.analyze_emotion_context(image, all_signals)
+            st.info(f"💬 **Comprehensive AI Analysis (Face + Body)**: {analysis}")
             
-            # Get all expression names for AI analysis
-            all_expressions = []
-            for face_data in face_detections:
-                for expr in face_data['expressions']:
-                    all_expressions.append(expr['name'])
-            
-            # Combine facial expressions and body language for comprehensive analysis
-            all_signals = all_expressions[:10].copy()
-            for pattern in body_patterns[:5]:  # Add top 5 body language patterns
-                all_signals.append(pattern['pattern'])
-            
+            # Save to database
+            save_emotion_analysis(
+                session_id=st.session_state.session_id,
+                expressions=all_signals,
+                ai_analysis=analysis,
+                analysis_type="image"
+            )
+        except Exception as e:
+            st.error(f"Analysis error: {str(e)}")
+        
+        # Add lie detector button and analysis
+        st.markdown("---")
+        lie_detector_col1, lie_detector_col2 = st.columns([1, 2])
+        
+        with lie_detector_col1:
+            if st.button("🔍 AI Lie Detector Analysis", key="lie_detector_image"):
+                st.session_state.run_lie_detector = True
+        
+        with lie_detector_col2:
+            st.markdown("*Analyze micro-expressions and body language for deception indicators*")
+        
+        # Run lie detector analysis if button pressed
+        if st.session_state.get('run_lie_detector', False):
             try:
-                analysis = analyze_expression(", ".join(all_signals))
-                st.info(f"💬 **Comprehensive AI Analysis (Face + Body)**: {analysis}")
+                with st.spinner('Analyzing behavioral patterns for deception indicators...'):
+                    # Get deception indicators from AI analysis
+                    deception_indicators = ai_analysis.get("deception_indicators", [])
+                    
+                    # Run AI-powered deception analysis
+                    deception_analysis = ai_vision.analyze_deception_probability(image, deception_indicators)
                 
-                # Save to database
-                save_emotion_analysis(
-                    session_id=st.session_state.session_id,
-                    expressions=all_signals,
-                    ai_analysis=analysis,
-                    analysis_type="image"
-                )
+                # Display results
+                st.markdown("### 🕵️ Deception Analysis Results")
+                
+                # Main probability display
+                probability = deception_analysis['deception_probability']
+                confidence_level = deception_analysis['confidence_level']
+                
+                # Color coding based on probability
+                if probability < 0.3:
+                    color = "green"
+                    icon = "✅"
+                elif probability < 0.6:
+                    color = "orange"
+                    icon = "⚠️"
+                else:
+                    color = "red"
+                    icon = "🚨"
+                
+                st.markdown(f"""
+                <div style="background-color: {color}; padding: 15px; border-radius: 10px; margin: 10px 0;">
+                    <h3 style="color: white; margin: 0;">{icon} Deception Probability: {probability:.1%}</h3>
+                    <p style="color: white; margin: 5px 0;">Confidence Level: {confidence_level}</p>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                # Key indicators
+                if deception_analysis['key_indicators']:
+                    st.markdown("**🔍 Key Deception Indicators:**")
+                    for indicator in deception_analysis['key_indicators']:
+                        st.markdown(f"• {indicator.replace('_', ' ').title()}")
+                
+                # Risk assessment
+                st.markdown(f"**⚠️ Risk Assessment**: {deception_analysis['risk_assessment'].title()}")
+                
+                # Interpretation
+                st.markdown("**🧠 AI Interpretation:**")
+                st.info(deception_analysis['interpretation'])
+                
+                # Reset the button state
+                st.session_state.run_lie_detector = False
+                
             except Exception as e:
-                st.error(f"Analysis error: {str(e)}")
-            
-            # Add lie detector button and analysis
-            st.markdown("---")
-            lie_detector_col1, lie_detector_col2 = st.columns([1, 2])
-            
-            with lie_detector_col1:
-                if st.button("🔍 AI Lie Detector Analysis", key="lie_detector_image"):
-                    st.session_state.run_lie_detector = True
-            
-            with lie_detector_col2:
-                st.markdown("*Analyze micro-expressions and body language for deception indicators*")
-            
-            # Run lie detector analysis if button pressed
-            if st.session_state.get('run_lie_detector', False):
-                try:
-                    with st.spinner('Analyzing behavioral patterns for deception indicators...'):
-                        # Run deception analysis
-                        deception_analysis = lie_detector.analyze_deception(
-                            facial_expressions=all_expressions,
-                            body_patterns=body_patterns,
-                            expression_history=None
-                        )
-                        
-                        # Get AI-powered analysis
-                        ai_analysis = lie_detector.get_ai_deception_analysis(
-                            facial_expressions=all_expressions,
-                            body_patterns=body_patterns,
-                            deception_analysis=deception_analysis
-                        )
-                    
-                    # Display results
-                    st.markdown("### 🕵️ Deception Analysis Results")
-                    
-                    # Main probability display
-                    probability = deception_analysis['deception_probability']
-                    confidence_level = deception_analysis['confidence_level']
-                    
-                    # Color coding based on probability
-                    if probability < 0.3:
-                        color = "green"
-                        icon = "✅"
-                    elif probability < 0.6:
-                        color = "orange"
-                        icon = "⚠️"
-                    else:
-                        color = "red"
-                        icon = "🚨"
-                    
-                    st.markdown(f"""
-                    <div style="background-color: {color}; padding: 15px; border-radius: 10px; margin: 10px 0;">
-                        <h3 style="color: white; margin: 0;">{icon} Deception Probability: {probability:.1%}</h3>
-                        <p style="color: white; margin: 5px 0;">Confidence Level: {confidence_level}</p>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    
-                    # Key indicators
-                    if deception_analysis['key_indicators']:
-                        st.markdown("**🔍 Key Deception Indicators:**")
-                        for indicator in deception_analysis['key_indicators']:
-                            st.markdown(f"• {indicator.replace('_', ' ').title()}")
-                    
-                    # Detailed breakdown
-                    st.markdown("**📊 Analysis Breakdown:**")
-                    breakdown_col1, breakdown_col2 = st.columns(2)
-                    
-                    with breakdown_col1:
-                        micro_score = deception_analysis['analysis_breakdown']['micro_expressions']['score']
-                        st.metric("Micro-expressions", f"{micro_score:.1%}")
-                        
-                        timing_score = deception_analysis['analysis_breakdown']['timing_patterns']['score']
-                        st.metric("Timing Patterns", f"{timing_score:.1%}")
-                    
-                    with breakdown_col2:
-                        body_score = deception_analysis['analysis_breakdown']['body_language']['score']
-                        st.metric("Body Language", f"{body_score:.1%}")
-                        
-                        consistency_score = deception_analysis['analysis_breakdown']['consistency_analysis']['score']
-                        st.metric("Consistency", f"{consistency_score:.1%}")
-                    
-                    # Interpretation
-                    st.markdown("**🧠 Interpretation:**")
-                    st.info(deception_analysis['interpretation'])
-                    
-                    # AI Analysis
-                    st.markdown("**🤖 AI Psychological Analysis:**")
-                    st.warning(ai_analysis)
-                    
-                    # Reset the button state
-                    st.session_state.run_lie_detector = False
-                    
-                except Exception as e:
-                    st.error(f"Lie detector analysis error: {str(e)}")
-                    st.session_state.run_lie_detector = False
-        else:
-            st.warning("⚪ No clear expressions detected in this image")
+                st.error(f"Lie detector analysis error: {str(e)}")
+                st.session_state.run_lie_detector = False
     else:
-        st.warning("⚪ No face detected in the uploaded image")
+        st.warning("⚪ No clear expressions detected in this image")
 
 # Video Upload Feature
 video_col1, video_col2 = st.columns([2, 1])
