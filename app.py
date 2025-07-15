@@ -1393,7 +1393,9 @@ with col2:
         st.rerun()
 
 with col3:
-    pass  # Empty column for layout
+    if st.button("🧪 Test Debug", type="secondary"):
+        st.session_state.show_test_recorder = True
+        st.rerun()
 
 # Web Camera Section
 if st.session_state.get('show_web_camera', False):
@@ -1505,5 +1507,11 @@ if st.session_state.get('show_interview_recorder', False):
     
     init_screen_recorder_interview()
     show_screen_recorder_interview()
+
+# Test Screen Recorder Section
+if st.session_state.get('show_test_recorder', False):
+    st.markdown("---")
+    from test_screen_recorder import test_screen_recorder
+    test_screen_recorder()
 
 
