@@ -747,33 +747,43 @@ with upload_col2:
 st.markdown("---")
 st.markdown("### AI Tools")
 
-# Tools with plus sign like design
-tools_col1, tools_col2 = st.columns(2)
+# Simple plus sign tools design
+tools_col1, tools_col2, tools_col3 = st.columns(3)
 
 with tools_col1:
     st.markdown("""
-    <div class="upload-section">
-        <div class="upload-icon">🔍</div>
-        <div class="upload-title">AI Lie Detector</div>
-        <div class="upload-subtitle">Advanced deception analysis from expressions</div>
+    <div style="text-align: center; padding: 10px;">
+        <div style="font-size: 24px; margin-bottom: 5px;">🔍</div>
+        <div style="font-size: 14px; font-weight: 600;">AI Lie Detector</div>
     </div>
     """, unsafe_allow_html=True)
     
-    if st.button("➕ Access Lie Detector", key="lie_detector_tool", use_container_width=True):
+    if st.button("➕", key="lie_detector_tool", use_container_width=True):
         st.session_state.show_lie_detector_tool = True
         st.rerun()
 
 with tools_col2:
     st.markdown("""
-    <div class="upload-section">
-        <div class="upload-icon">📊</div>
-        <div class="upload-title">Expression Analytics</div>
-        <div class="upload-subtitle">Detailed emotion pattern analysis</div>
+    <div style="text-align: center; padding: 10px;">
+        <div style="font-size: 24px; margin-bottom: 5px;">📊</div>
+        <div style="font-size: 14px; font-weight: 600;">Expression Analytics</div>
     </div>
     """, unsafe_allow_html=True)
     
-    if st.button("➕ View Analytics", key="analytics_tool", use_container_width=True):
+    if st.button("➕", key="analytics_tool", use_container_width=True):
         st.switch_page("pages/analytics.py")
+
+with tools_col3:
+    st.markdown("""
+    <div style="text-align: center; padding: 10px;">
+        <div style="font-size: 24px; margin-bottom: 5px;">⚙️</div>
+        <div style="font-size: 14px; font-weight: 600;">Settings</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    if st.button("➕", key="settings_tool", use_container_width=True):
+        st.session_state.show_account_settings = True
+        st.rerun()
 
 # Show AI Lie Detector Tool if activated
 if st.session_state.get('show_lie_detector_tool', False):
