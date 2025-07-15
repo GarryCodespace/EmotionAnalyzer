@@ -62,7 +62,7 @@ Return a JSON object with:
     "emotional_state": "primary emotional state - be specific and avoid neutral",
     "deception_indicators": ["indicator1", "indicator2", ...],
     "confidence_level": "high/medium/low",
-    "detailed_analysis": "comprehensive analysis in 2-3 sentences describing what you actually observe"
+    "detailed_analysis": "comprehensive analysis in 4-6 sentences describing what you actually observe, including psychological insights, emotional context, and behavioral interpretation"
 }"""
 
         try:
@@ -81,7 +81,7 @@ Return a JSON object with:
                     }
                 ],
                 response_format={"type": "json_object"},
-                max_tokens=1000
+                max_tokens=1500
             )
             
             result = json.loads(response.choices[0].message.content)
@@ -119,7 +119,7 @@ Return a JSON object with:
     "body_language": ["pattern1", "pattern2", ...],
     "emotional_state": "primary emotional state - be specific and avoid neutral",
     "confidence_level": "high/medium/low",
-    "detailed_analysis": "comprehensive analysis in 2-3 sentences describing what you observe in relation to the context"
+    "detailed_analysis": "comprehensive analysis in 4-6 sentences describing what you observe in relation to the context, including psychological insights, emotional patterns, and behavioral interpretation"
 }}"""
 
         try:
@@ -138,7 +138,7 @@ Return a JSON object with:
                     }
                 ],
                 response_format={"type": "json_object"},
-                max_tokens=1000
+                max_tokens=1500
             )
             
             result = json.loads(response.choices[0].message.content)
@@ -171,7 +171,7 @@ Return a JSON object with:
     "confidence_level": "low/medium/high",
     "key_indicators": ["indicator1", "indicator2", ...],
     "risk_assessment": "low/medium/high",
-    "interpretation": "detailed explanation of findings"
+    "interpretation": "comprehensive 4-6 sentence explanation of behavioral patterns, psychological insights, and deception assessment with specific reasoning"
 }}"""
 
         try:
@@ -190,7 +190,7 @@ Return a JSON object with:
                     }
                 ],
                 response_format={"type": "json_object"},
-                max_tokens=500
+                max_tokens=800
             )
             
             result = json.loads(response.choices[0].message.content)
