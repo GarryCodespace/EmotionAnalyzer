@@ -318,19 +318,6 @@ with col2:
     
     🐦 **TWITTER**: [@EMOTICONAI](https://twitter.com/emoticon)
     
-    ---
-    
-    ### Office Location
-    
-    📍 **Address**:
-    
-    Emoticon AI Inc.
-    
-    123 Innovation Drive
-    
-    San Francisco, CA 94105
-    
-    United States
     """)
 
 st.markdown("---")

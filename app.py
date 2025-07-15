@@ -720,6 +720,7 @@ with col2:
 st.markdown("---")
 st.markdown("### Screen Recorder Mode")
 st.markdown("*Record external applications like Zoom, Teams, or any video call with live emotion analysis*")
+st.info("Note: Camera not available in containerized environment. Screen recorder requires local installation.")
 
 col1, col2 = st.columns(2)
 with col1:
