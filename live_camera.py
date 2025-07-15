@@ -314,20 +314,8 @@ def process_live_frame(frame_data):
         if len(st.session_state.live_analysis_results) > 5:
             st.session_state.live_analysis_results.pop(0)
         
-        # Display results in Streamlit below the camera component
-        st.markdown("### Latest Analysis:")
-        
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("Expressions", expressions_text)
-        with col2:
-            st.metric("Emotional State", emotional_state)
-        with col3:
-            st.metric("Confidence", confidence_level)
-        
-        # Show detailed analysis
-        with st.expander("View Detailed Analysis"):
-            st.write(detailed_analysis)
+        # Force a rerun to update the display
+        st.rerun()
         
         # Use JavaScript to update the component display as well
         js_code = f"""
