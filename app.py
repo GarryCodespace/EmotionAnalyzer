@@ -845,12 +845,12 @@ with tools_col3:
 with tools_col4:
     st.markdown("""
     <div style="text-align: center; padding: 10px;">
-        <div style="font-size: 14px; font-weight: 600;">Analytics</div>
+        <div style="font-size: 14px; font-weight: 600;">Screen Record</div>
     </div>
     """, unsafe_allow_html=True)
     
-    if st.button("➕", key="analytics_tool", use_container_width=True):
-        st.switch_page("pages/analytics.py")
+    if st.button("➕", key="screen_record_tool", use_container_width=True):
+        st.switch_page("pages/screen_recorder.py")
 
 # Show upload interfaces when tools are activated
 if st.session_state.get('show_upload_image', False):
@@ -1022,48 +1022,7 @@ if st.session_state.get('show_lie_detector_tool', False):
             st.rerun()
 
 
-    
-    # Deception Analysis (Premium Feature)
-    st.markdown("### Deception Analysis")
-    
-    # Check if user has access to lie detector
-    if not payment_ui.check_feature_access('lie_detector'):
-        st.warning("Lie detector analysis requires Professional plan or higher")
-    elif not PaymentPlans.check_lie_detection_limit():
-        st.error("Daily lie detection limit reached (1 per day)")
-        st.info("Upgrade to Enterprise for unlimited lie detections")
-        if st.button("Upgrade to Enterprise", key="upgrade_lie_unlimited"):
-            st.switch_page("pages/billing.py")
-    else:
-        # Run lie detector analysis
-        deception_analysis = lie_detector.analyze_deception(detected_expressions, body_patterns)
-        
-        # Increment lie detection usage
-        PaymentPlans.increment_lie_detection()
-        
-        deception_probability = deception_analysis.get('deception_probability', 0.0)
-        confidence_level = deception_analysis.get('confidence_level', 'Low')
-        key_indicators = deception_analysis.get('key_indicators', [])
-        
-        # Display deception probability with color coding
-        if deception_probability >= 0.7:
-            st.error(f"**Deception Risk**: HIGH ({deception_probability:.1%}) - Confidence: {confidence_level}")
-        elif deception_probability >= 0.4:
-            st.warning(f"**Deception Risk**: MEDIUM ({deception_probability:.1%}) - Confidence: {confidence_level}")
-        else:
-            st.success(f"**Deception Risk**: LOW ({deception_probability:.1%}) - Confidence: {confidence_level}")
-        
-        # Display key indicators
-        if key_indicators:
-            st.markdown("**Key Deception Indicators:**")
-            for indicator in key_indicators[:5]:
-                st.markdown(f"• {indicator}")
-        
-        # Get AI interpretation
-        ai_interpretation = deception_analysis.get('ai_interpretation', '')
-        if ai_interpretation:
-            st.markdown("**AI Deception Analysis:**")
-            st.markdown(ai_interpretation)
+
     
     # Stress Analysis (Premium Feature)
     st.markdown("### Stress & Anxiety Level")
@@ -1103,25 +1062,7 @@ if st.session_state.get('show_lie_detector_tool', False):
             for rec in stress_analysis['recommendations'][:3]:
                 st.markdown(f"• {rec}")
     
-    # Save analysis to database only if logged in
-    if st.session_state.get('logged_in', False):
-        try:
-            expressions_json = json.dumps(detected_expressions) if detected_expressions else "[]"
-            save_emotion_analysis(
-                st.session_state.session_id,
-                detected_expressions,
-                detailed_analysis,
-                "image",
-                deception_probability
-            )
-            st.success("Analysis saved to history")
-        except Exception as e:
-            st.error(f"Could not save analysis: {str(e)}")
-    else:
-        st.info("💡 Login to save analysis history and access advanced features")
-        if st.button("Login to Save History", key="login_for_image_save"):
-            st.session_state.show_login_modal = True
-            st.rerun()
+
 
 # Handle video upload from session state (if set by video tool)
 if st.session_state.get('uploaded_video') is not None:

@@ -1,0 +1,81 @@
+
+
+0
+
+    
+
+Emoticon
+    
+
+Live AI Emotion Interpretation from Micro-Expressions
+
+    
+
+Try it now - Upload an image to experience AI emotion analysis
+
+
+
+Popular Use Cases
+Describe your specific scenario for better analysis
+
+
+
+
+
+Describe Your Scenario
+Tell us about your situation to get more personalized analysis:
+
+Example: I'm analyzing a job interview video to understand the candidate's confidence level and honesty during technical questions...
+Try Emoticon Now - No Login Required!
+AI Vision Analysis
+
+Advanced facial expression detection
+
+Emotional Insights
+
+Psychological interpretation of expressions
+
+Instant Results
+
+Get analysis in seconds
+
+Upload Analysis - Perfect for Any Scenario
+Popular Use Cases:
+
+• For Fun - Analyze photos
+
+• Interview - Assess candidates
+
+• Date - Read emotions
+
+• Interrogation - Detect deception
+
+AI Tools
+Upload Image
+
+Upload Video
+
+AI Lie Detector
+
+Analytics
+
+streamlit.errors.StreamlitAPIException: Could not find page: pages/analytics.py. Must be the file path relative to the main script, from the directory: workspace. Only the main app file and files in the pages/ directory are supported.
+
+Traceback:
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/exec_code.py", line 128, in exec_func_with_error_handling
+    result = func()
+             ^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 667, in code_to_exec
+    _mpa_v1(self._main_script_path)
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 165, in _mpa_v1
+    page.run()
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/streamlit/navigation/page.py", line 300, in run
+    exec(code, module.__dict__)  # noqa: S102
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/app.py", line 853, in <module>
+    st.switch_page("pages/analytics.py")
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/streamlit/runtime/metrics_util.py", line 443, in wrapped_func
+    result = non_optional_func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/streamlit/commands/execution_control.py", line 222, in switch_page
+    raise StreamlitAPIException(
