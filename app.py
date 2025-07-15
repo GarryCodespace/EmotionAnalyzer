@@ -488,6 +488,182 @@ except Exception as e:
 if 'session_id' not in st.session_state:
     st.session_state.session_id = str(uuid.uuid4())
 
+def analyze_uploaded_image(uploaded_file):
+    """Analyze the uploaded image"""
+    # Check daily usage limit
+    if not payment_ui.check_daily_limit():
+        st.stop()
+    
+    # Display uploaded image
+    uploaded_file.seek(0)  # Reset file pointer
+    image = cv2.imdecode(np.frombuffer(uploaded_file.read(), np.uint8), cv2.IMREAD_COLOR)
+    st.image(image, caption="Uploaded Image", use_container_width=True)
+    
+    # Track usage
+    UsageTracker.track_analysis("image", st.session_state.get('user_id'))
+    
+    # Process image with AI vision analysis
+    with st.spinner('Analyzing image with AI vision...'):
+        ai_analysis = ai_vision.analyze_facial_expressions(image)
+    
+    # Extract analysis results
+    detected_expressions = ai_analysis.get("facial_expressions", [])
+    detected_body_language = ai_analysis.get("body_language", [])
+    emotional_state = ai_analysis.get("emotional_state", "neutral")
+    confidence_level = ai_analysis.get("confidence_level", "medium")
+    detailed_analysis = ai_analysis.get("detailed_analysis", "")
+    
+    # Display AI analysis summary
+    st.success(f"**AI Vision Analysis Complete** - Confidence: {confidence_level.title()}")
+    
+    # Display emotional state
+    if emotional_state and emotional_state != "neutral":
+        st.info(f"**Primary Emotional State**: {emotional_state.title()}")
+    
+    # Display detailed analysis
+    if detailed_analysis:
+        st.markdown(f"**AI Analysis**: {detailed_analysis}")
+    
+    # Display body language analysis
+    if detected_body_language:
+        st.success(f"**Body Language Patterns Detected**: {len(detected_body_language)}")
+        
+        body_col1, body_col2 = st.columns(2)
+        for idx, pattern in enumerate(detected_body_language[:8]):
+            pattern_text = f"{pattern.title()}"
+            
+            if idx % 2 == 0:
+                body_col1.markdown(f"• {pattern_text}")
+            else:
+                body_col2.markdown(f"• {pattern_text}")
+        
+        # Create body patterns for compatibility
+        body_patterns = [
+            {'pattern': pattern.replace(' ', '_'), 'confidence': 0.8}
+            for pattern in detected_body_language
+        ]
+    else:
+        st.info("**Body Language**: No significant body language patterns detected")
+        body_patterns = []
+    
+    # Display facial expressions from AI analysis
+    if detected_expressions:
+        st.success(f"**Facial Expressions Detected**: {len(detected_expressions)}")
+        
+        expr_col1, expr_col2 = st.columns(2)
+        confidence_scores = ai_vision.get_expression_confidence(detected_expressions)
+        
+        for idx, expr in enumerate(detected_expressions[:8]):
+            expression_text = f"{expr.title()}"
+            confidence = confidence_scores.get(expr, 0.0)
+            
+            if idx % 2 == 0:
+                expr_col1.markdown(f"• {expression_text} ({confidence:.0%})")
+            else:
+                expr_col2.markdown(f"• {expression_text} ({confidence:.0%})")
+    else:
+        st.info("**Facial Expressions**: No significant expressions detected")
+    
+    # Deception Analysis (Premium Feature)
+    st.markdown("### Deception Analysis")
+    
+    # Check if user has access to lie detector
+    if not payment_ui.check_feature_access('lie_detector'):
+        st.warning("Lie detector analysis requires Professional plan or higher")
+    elif not PaymentPlans.check_lie_detection_limit():
+        st.error("Daily lie detection limit reached (1 per day)")
+        st.info("Upgrade to Professional for unlimited lie detections")
+        if st.button("Upgrade to Professional", key="upgrade_lie_unlimited"):
+            st.switch_page("pages/billing.py")
+    else:
+        # Run lie detector analysis
+        deception_analysis = lie_detector.analyze_deception(detected_expressions, body_patterns)
+        
+        # Increment lie detection usage
+        PaymentPlans.increment_lie_detection()
+        
+        deception_probability = deception_analysis.get('deception_probability', 0.0)
+        confidence_level = deception_analysis.get('confidence_level', 'Low')
+        key_indicators = deception_analysis.get('key_indicators', [])
+        
+        # Display deception probability with color coding
+        if deception_probability >= 0.7:
+            st.error(f"**Deception Risk**: HIGH ({deception_probability:.1%}) - Confidence: {confidence_level}")
+        elif deception_probability >= 0.4:
+            st.warning(f"**Deception Risk**: MEDIUM ({deception_probability:.1%}) - Confidence: {confidence_level}")
+        else:
+            st.success(f"**Deception Risk**: LOW ({deception_probability:.1%}) - Confidence: {confidence_level}")
+        
+        # Display key indicators
+        if key_indicators:
+            st.markdown("**Key Deception Indicators:**")
+            for indicator in key_indicators[:5]:
+                st.markdown(f"• {indicator}")
+        
+        # Get AI interpretation
+        ai_interpretation = deception_analysis.get('ai_interpretation', '')
+        if ai_interpretation:
+            st.markdown("**AI Deception Analysis:**")
+            st.markdown(ai_interpretation)
+    
+    # Stress Analysis (Premium Feature)
+    st.markdown("### Stress & Anxiety Level")
+    
+    # Check if user has access to stress detector
+    if not payment_ui.check_feature_access('stress_detector'):
+        st.warning("Stress Analysis requires Professional plan or higher")
+    elif not PaymentPlans.check_stress_detection_limit():
+        st.error("Daily stress detection limit reached (1 per day)")
+        st.info("Upgrade to Professional for unlimited stress analysis")
+        if st.button("Upgrade to Professional", key="upgrade_stress_unlimited"):
+            st.switch_page("pages/billing.py")
+    else:
+        # Run stress analysis
+        stress_analysis = stress_analyzer.analyze_stress_level(image)
+        
+        # Increment stress detection usage
+        PaymentPlans.increment_stress_detection()
+        
+        # Display stress level
+        stress_percentage = stress_analysis['stress_percentage']
+        stress_level = stress_analysis['stress_level']
+        stress_color = stress_analysis['stress_color']
+        
+        st.markdown(f"**Stress Level**: <span style='color: {stress_color}; font-weight: bold;'>You look {stress_percentage}% stressed ({stress_level})</span>", 
+                   unsafe_allow_html=True)
+        
+        # Show stress indicators
+        if stress_analysis.get('indicators'):
+            st.markdown("**Stress Indicators:**")
+            for indicator in stress_analysis['indicators'][:4]:
+                st.markdown(f"• {indicator.replace('_', ' ').title()}")
+        
+        # Show recommendations
+        if stress_analysis.get('recommendations'):
+            st.markdown("**Recommendations:**")
+            for rec in stress_analysis['recommendations'][:3]:
+                st.markdown(f"• {rec}")
+    
+    # Save analysis to database only if logged in
+    if st.session_state.get('logged_in', False):
+        try:
+            expressions_json = json.dumps(detected_expressions) if detected_expressions else "[]"
+            save_emotion_analysis(
+                st.session_state.session_id,
+                detected_expressions,
+                detailed_analysis,
+                "image",
+                0.0
+            )
+            st.success("Analysis saved to history")
+        except Exception as e:
+            st.error(f"Could not save analysis: {str(e)}")
+    else:
+        st.info("💡 Login to save analysis history and access advanced features")
+        if st.button("Login to Save History", key="login_for_image_save"):
+            st.session_state.show_login_modal = True
+            st.rerun()
+
 # Add Analysis History to Sidebar
 with st.sidebar:
     st.markdown("### 📊 Analysis History")
@@ -847,81 +1023,7 @@ if st.session_state.get('show_lie_detector_tool', False):
             st.session_state.show_lie_detector_tool = False
             st.rerun()
 
-def analyze_uploaded_image(uploaded_file):
-    """Analyze the uploaded image"""
-    # Check daily usage limit
-    if not payment_ui.check_daily_limit():
-        st.stop()
-    
-    # Display uploaded image
-    uploaded_file.seek(0)  # Reset file pointer
-    image = cv2.imdecode(np.frombuffer(uploaded_file.read(), np.uint8), cv2.IMREAD_COLOR)
-    st.image(image, caption="Uploaded Image", use_container_width=True)
-    
-    # Track usage
-    UsageTracker.track_analysis("image", st.session_state.get('user_id'))
-    
-    # Process image with AI vision analysis
-    with st.spinner('Analyzing image with AI vision...'):
-        ai_analysis = ai_vision.analyze_facial_expressions(image)
-    
-    # Extract analysis results
-    detected_expressions = ai_analysis.get("facial_expressions", [])
-    detected_body_language = ai_analysis.get("body_language", [])
-    emotional_state = ai_analysis.get("emotional_state", "neutral")
-    confidence_level = ai_analysis.get("confidence_level", "medium")
-    detailed_analysis = ai_analysis.get("detailed_analysis", "")
-    
-    # Display AI analysis summary
-    st.success(f"**AI Vision Analysis Complete** - Confidence: {confidence_level.title()}")
-    
-    # Display emotional state
-    if emotional_state and emotional_state != "neutral":
-        st.info(f"**Primary Emotional State**: {emotional_state.title()}")
-    
-    # Display detailed analysis
-    if detailed_analysis:
-        st.markdown(f"**AI Analysis**: {detailed_analysis}")
-    
-    # Display body language analysis
-    if detected_body_language:
-        st.success(f"**Body Language Patterns Detected**: {len(detected_body_language)}")
-        
-        body_col1, body_col2 = st.columns(2)
-        for idx, pattern in enumerate(detected_body_language[:8]):
-            pattern_text = f"{pattern.title()}"
-            
-            if idx % 2 == 0:
-                body_col1.markdown(f"• {pattern_text}")
-            else:
-                body_col2.markdown(f"• {pattern_text}")
-        
-        # Create body patterns for compatibility
-        body_patterns = [
-            {'pattern': pattern.replace(' ', '_'), 'confidence': 0.8}
-            for pattern in detected_body_language
-        ]
-    else:
-        st.info("**Body Language**: No significant body language patterns detected")
-        body_patterns = []
-    
-    # Display facial expressions from AI analysis
-    if detected_expressions:
-        st.success(f"**Facial Expressions Detected**: {len(detected_expressions)}")
-        
-        expr_col1, expr_col2 = st.columns(2)
-        confidence_scores = ai_vision.get_expression_confidence(detected_expressions)
-        
-        for idx, expr in enumerate(detected_expressions[:8]):
-            expression_text = f"{expr.title()}"
-            confidence = confidence_scores.get(expr, 0.0)
-            
-            if idx % 2 == 0:
-                expr_col1.markdown(f"• {expression_text} ({confidence:.0%})")
-            else:
-                expr_col2.markdown(f"• {expression_text} ({confidence:.0%})")
-    else:
-        st.info("**Facial Expressions**: No significant expressions detected")
+
     
     # Deception Analysis (Premium Feature)
     st.markdown("### Deception Analysis")
