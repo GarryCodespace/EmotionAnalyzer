@@ -26,54 +26,43 @@ class PaymentPlans:
                 'daily_analyses': 5,
                 'save_history': False,
                 'lie_detector': False,
+                'stress_detector': False,
                 'advanced_features': False,
-                'api_access': False
+                'api_access': False,
+                'daily_lie_detections': 0,
+                'daily_stress_detections': 0
             },
             'stripe_price_id': None,
             'recommended': False
         },
-        'basic': {
-            'name': 'Basic',
-            'price': 9.99,
-            'price_display': '$9.99/month',
+        'pro': {
+            'name': 'Professional',
+            'price': 14.99,
+            'price_display': '$14.99/month',
             'features': [
                 'Unlimited emotion analysis',
                 'Save analysis history',
+                'AI lie detector analysis (1/day)',
+                'Stress level estimation (1/day)',
                 'Advanced AI insights',
-                'Priority support',
-                'Export analysis data'
-            ],
-            'limits': {
-                'daily_analyses': -1,  # unlimited
-                'save_history': True,
-                'lie_detector': False,
-                'advanced_features': True,
-                'api_access': False
-            },
-            'stripe_price_id': 'price_basic_monthly',
-            'recommended': True
-        },
-        'pro': {
-            'name': 'Professional',
-            'price': 19.99,
-            'price_display': '$19.99/month',
-            'features': [
-                'Everything in Basic',
-                'AI lie detector analysis',
                 'Body language analysis',
                 'Batch video processing',
                 'API access',
-                'Custom analysis models'
+                'Priority support',
+                'Export analysis data'
             ],
             'limits': {
                 'daily_analyses': -1,
                 'save_history': True,
                 'lie_detector': True,
+                'stress_detector': True,
                 'advanced_features': True,
-                'api_access': True
+                'api_access': True,
+                'daily_lie_detections': 1,
+                'daily_stress_detections': 1
             },
             'stripe_price_id': 'price_pro_monthly',
-            'recommended': False
+            'recommended': True
         },
         'enterprise': {
             'name': 'Enterprise',
@@ -81,6 +70,8 @@ class PaymentPlans:
             'price_display': '$49.99/month',
             'features': [
                 'Everything in Professional',
+                'Unlimited lie detections',
+                'Unlimited stress analysis',
                 'White-label solution',
                 'Custom integrations',
                 'Dedicated support',
@@ -91,8 +82,11 @@ class PaymentPlans:
                 'daily_analyses': -1,
                 'save_history': True,
                 'lie_detector': True,
+                'stress_detector': True,
                 'advanced_features': True,
-                'api_access': True
+                'api_access': True,
+                'daily_lie_detections': -1,
+                'daily_stress_detections': -1
             },
             'stripe_price_id': 'price_enterprise_monthly',
             'recommended': False
@@ -158,6 +152,52 @@ class PaymentPlans:
         st.session_state.daily_usage += 1
     
     @staticmethod
+    def check_lie_detection_limit(user_id: Optional[int] = None) -> bool:
+        """Check if user has reached daily lie detection limit"""
+        user_plan = PaymentPlans.get_user_plan(user_id)
+        limits = PaymentPlans.get_usage_limits(user_plan)
+        
+        daily_limit = limits.get('daily_lie_detections', 0)
+        if daily_limit == -1:  # unlimited
+            return True
+        if daily_limit == 0:  # no access
+            return False
+        
+        # Check current usage from session state
+        today_usage = st.session_state.get('daily_lie_detections', 0)
+        return today_usage < daily_limit
+    
+    @staticmethod
+    def check_stress_detection_limit(user_id: Optional[int] = None) -> bool:
+        """Check if user has reached daily stress detection limit"""
+        user_plan = PaymentPlans.get_user_plan(user_id)
+        limits = PaymentPlans.get_usage_limits(user_plan)
+        
+        daily_limit = limits.get('daily_stress_detections', 0)
+        if daily_limit == -1:  # unlimited
+            return True
+        if daily_limit == 0:  # no access
+            return False
+        
+        # Check current usage from session state
+        today_usage = st.session_state.get('daily_stress_detections', 0)
+        return today_usage < daily_limit
+    
+    @staticmethod
+    def increment_lie_detection():
+        """Increment daily lie detection counter"""
+        if 'daily_lie_detections' not in st.session_state:
+            st.session_state.daily_lie_detections = 0
+        st.session_state.daily_lie_detections += 1
+    
+    @staticmethod
+    def increment_stress_detection():
+        """Increment daily stress detection counter"""
+        if 'daily_stress_detections' not in st.session_state:
+            st.session_state.daily_stress_detections = 0
+        st.session_state.daily_stress_detections += 1
+    
+    @staticmethod
     def reset_daily_usage():
         """Reset daily usage counter (call at midnight)"""
         st.session_state.daily_usage = 0
@@ -165,7 +205,7 @@ class PaymentPlans:
     @staticmethod
     def get_upgrade_suggestion(current_plan: str) -> Optional[str]:
         """Get suggested upgrade plan"""
-        plan_hierarchy = ['free', 'basic', 'pro', 'enterprise']
+        plan_hierarchy = ['free', 'pro', 'enterprise']
         try:
             current_index = plan_hierarchy.index(current_plan)
             if current_index < len(plan_hierarchy) - 1:

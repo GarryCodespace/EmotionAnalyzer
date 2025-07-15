@@ -7,8 +7,9 @@ This application is a real-time facial expression analysis system that combines 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
-UI Design: Dark mode default, proper capitalization (first letter only), seamless button integration with black background matching navigation bar.
+UI Design: Light theme (dark mode removed), proper capitalization (first letter only), seamless button integration with blue notification boxes (#e3f2fd background).
 User Experience: Homepage-first approach - users can try the product before being prompted to login. Authentication is optional for basic features, required only for saving history and premium features.
+Payment Structure: Combined basic and professional plans into single Professional tier ($14.99/month) with daily usage limits for lie detection and stress analysis.
 
 ## System Architecture
 

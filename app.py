@@ -929,33 +929,79 @@ def analyze_uploaded_image(uploaded_file):
     # Check if user has access to lie detector
     if not payment_ui.check_feature_access('lie_detector'):
         st.warning("Lie detector analysis requires Professional plan or higher")
-        st.stop()
-    
-    deception_analysis = lie_detector.analyze_deception(detected_expressions, body_patterns)
-    
-    deception_probability = deception_analysis.get('deception_probability', 0.0)
-    confidence_level = deception_analysis.get('confidence_level', 'Low')
-    key_indicators = deception_analysis.get('key_indicators', [])
-    
-    # Display deception probability with color coding
-    if deception_probability >= 0.7:
-        st.error(f"**Deception Risk**: HIGH ({deception_probability:.1%}) - Confidence: {confidence_level}")
-    elif deception_probability >= 0.4:
-        st.warning(f"**Deception Risk**: MEDIUM ({deception_probability:.1%}) - Confidence: {confidence_level}")
+    elif not PaymentPlans.check_lie_detection_limit():
+        st.error("Daily lie detection limit reached (1 per day)")
+        st.info("Upgrade to Enterprise for unlimited lie detections")
+        if st.button("Upgrade to Enterprise", key="upgrade_lie_unlimited"):
+            st.switch_page("pages/billing.py")
     else:
-        st.success(f"**Deception Risk**: LOW ({deception_probability:.1%}) - Confidence: {confidence_level}")
+        # Run lie detector analysis
+        deception_analysis = lie_detector.analyze_deception(detected_expressions, body_patterns)
+        
+        # Increment lie detection usage
+        PaymentPlans.increment_lie_detection()
+        
+        deception_probability = deception_analysis.get('deception_probability', 0.0)
+        confidence_level = deception_analysis.get('confidence_level', 'Low')
+        key_indicators = deception_analysis.get('key_indicators', [])
+        
+        # Display deception probability with color coding
+        if deception_probability >= 0.7:
+            st.error(f"**Deception Risk**: HIGH ({deception_probability:.1%}) - Confidence: {confidence_level}")
+        elif deception_probability >= 0.4:
+            st.warning(f"**Deception Risk**: MEDIUM ({deception_probability:.1%}) - Confidence: {confidence_level}")
+        else:
+            st.success(f"**Deception Risk**: LOW ({deception_probability:.1%}) - Confidence: {confidence_level}")
+        
+        # Display key indicators
+        if key_indicators:
+            st.markdown("**Key Deception Indicators:**")
+            for indicator in key_indicators[:5]:
+                st.markdown(f"• {indicator}")
+        
+        # Get AI interpretation
+        ai_interpretation = deception_analysis.get('ai_interpretation', '')
+        if ai_interpretation:
+            st.markdown("**AI Deception Analysis:**")
+            st.markdown(ai_interpretation)
     
-    # Display key indicators
-    if key_indicators:
-        st.markdown("**Key Deception Indicators:**")
-        for indicator in key_indicators[:5]:
-            st.markdown(f"• {indicator}")
+    # Stress Analysis (Premium Feature)
+    st.markdown("### Stress & Anxiety Level")
     
-    # Get AI interpretation
-    ai_interpretation = deception_analysis.get('ai_interpretation', '')
-    if ai_interpretation:
-        st.markdown("**AI Deception Analysis:**")
-        st.markdown(ai_interpretation)
+    # Check if user has access to stress detector
+    if not payment_ui.check_feature_access('stress_detector'):
+        st.warning("Stress Analysis requires Professional plan or higher")
+    elif not PaymentPlans.check_stress_detection_limit():
+        st.error("Daily stress detection limit reached (1 per day)")
+        st.info("Upgrade to Enterprise for unlimited stress analysis")
+        if st.button("Upgrade to Enterprise", key="upgrade_stress_unlimited"):
+            st.switch_page("pages/billing.py")
+    else:
+        # Run stress analysis
+        stress_analysis = stress_analyzer.analyze_stress_level(image)
+        
+        # Increment stress detection usage
+        PaymentPlans.increment_stress_detection()
+        
+        # Display stress level
+        stress_percentage = stress_analysis['stress_percentage']
+        stress_level = stress_analysis['stress_level']
+        stress_color = stress_analysis['stress_color']
+        
+        st.markdown(f"**Stress Level**: <span style='color: {stress_color}; font-weight: bold;'>You look {stress_percentage}% stressed ({stress_level})</span>", 
+                   unsafe_allow_html=True)
+        
+        # Show stress indicators
+        if stress_analysis.get('indicators'):
+            st.markdown("**Stress Indicators:**")
+            for indicator in stress_analysis['indicators'][:4]:
+                st.markdown(f"• {indicator.replace('_', ' ').title()}")
+        
+        # Show recommendations
+        if stress_analysis.get('recommendations'):
+            st.markdown("**Recommendations:**")
+            for rec in stress_analysis['recommendations'][:3]:
+                st.markdown(f"• {rec}")
     
     # Save analysis to database only if logged in
     if st.session_state.get('logged_in', False):
