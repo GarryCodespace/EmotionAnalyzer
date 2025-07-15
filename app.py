@@ -1386,16 +1386,16 @@ with col2:
     st.markdown("3. Click 'Analyze Expression' for instant results")
     st.markdown("4. Use during video calls for live feedback")
     st.markdown("5. No downloads or installations required!")
+    
+    # Interview Mode button aligned with item 5
+    if st.button("🎯 Interview Mode", type="primary"):
+        st.session_state.show_working_recorder = True
+        st.rerun()
 
 col1, col2, col3 = st.columns(3)
 with col1:
     if st.button("📹 Start Web Camera", type="primary"):
         st.session_state.show_working_live_analyzer = True
-        st.rerun()
-
-with col2:
-    if st.button("🎯 Interview Mode", type="primary"):
-        st.session_state.show_working_recorder = True
         st.rerun()
 
 with col3:
