@@ -14,7 +14,8 @@ from body_language_analyzer import BodyLanguageAnalyzer
 from lie_detector import LieDetector
 from ai_vision_analyzer import AIVisionAnalyzer
 from stress_analyzer import StressAnalyzer
-from login_ui import require_authentication, show_user_menu, show_account_settings, init_auth_session, logout_user, show_login_modal
+from login_ui import require_authentication, show_user_menu, show_account_settings, init_auth_session, logout_user, show_login_modal, auto_login
+import login_ui
 from payment_ui import PaymentUI, check_daily_limit
 from payment_plans import PaymentPlans, UsageTracker
 
@@ -434,7 +435,7 @@ except Exception as e:
 
 # Initialize auth session and auto-login
 init_auth_session()
-auto_login_success = login_ui.auto_login()
+auto_login_success = auto_login()
 
 # Show welcome message for auto-login (only once per session)
 if auto_login_success and st.session_state.get('logged_in', False) and not st.session_state.get('welcome_shown', False):
