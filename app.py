@@ -1291,14 +1291,19 @@ with col2:
     st.markdown("4. Use during video calls for live feedback")
     st.markdown("5. No downloads or installations required!")
 
-col1, col2 = st.columns(2)
+col1, col2, col3 = st.columns(3)
 with col1:
     if st.button("📹 Start Web Camera", type="primary"):
         st.session_state.show_web_camera = True
         st.rerun()
 
 with col2:
-    if st.button("📋 Alternative: Local Setup", type="secondary"):
+    if st.button("🎯 Interview Mode", type="primary"):
+        st.session_state.show_interview_recorder = True
+        st.rerun()
+
+with col3:
+    if st.button("📋 Local Setup", type="secondary"):
         st.info("📥 **Local Installation (Advanced Users)**")
         st.markdown("For full screen recording and desktop integration:")
         st.markdown("• Download project files from this Replit")
@@ -1408,5 +1413,13 @@ if st.session_state.get('show_web_camera', False):
             st.markdown("• Adjust analysis interval based on your needs")
             st.markdown("• Perfect for self-awareness during meetings")
             st.markdown("• Track emotional patterns over time")
+
+# Interview Screen Recorder Section
+if st.session_state.get('show_interview_recorder', False):
+    st.markdown("---")
+    from screen_recorder_interview import show_screen_recorder_interview, init_screen_recorder_interview
+    
+    init_screen_recorder_interview()
+    show_screen_recorder_interview()
 
 
