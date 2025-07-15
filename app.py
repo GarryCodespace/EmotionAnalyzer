@@ -777,31 +777,57 @@ with tools_col1:
     </div>
     """, unsafe_allow_html=True)
     
-    # Hide file uploader interface completely
+    # Style the file uploader to look like a plus button
     st.markdown("""
     <style>
-    .stFileUploader {
-        display: none;
+    .stFileUploader label {
+        display: none !important;
     }
-    [data-testid="stFileUploader"] {
-        display: none;
+    .stFileUploader > div {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        height: 38px !important;
+        background: #f0f2f6 !important;
+        border: 1px solid #d1d5db !important;
+        border-radius: 0.375rem !important;
+        cursor: pointer !important;
+        transition: all 0.2s !important;
+    }
+    .stFileUploader > div:hover {
+        background: #e5e7eb !important;
+        border-color: #9ca3af !important;
+    }
+    .stFileUploader > div > div {
+        display: none !important;
+    }
+    .stFileUploader > div::before {
+        content: "➕" !important;
+        font-size: 16px !important;
+        color: #374151 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 100% !important;
+        height: 100% !important;
+    }
+    .stFileUploader > div > div:first-child {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 100% !important;
+        height: 100% !important;
+    }
+    .stFileUploader > div > div:first-child::before {
+        content: "➕" !important;
+        font-size: 16px !important;
+        color: #374151 !important;
     }
     </style>
     """, unsafe_allow_html=True)
     
-    # Create file uploader that triggers on plus button click
-    uploaded_file = st.file_uploader("Browse files", type=['jpg', 'jpeg', 'png'], key="hidden_image_uploader", label_visibility="collapsed")
-    
-    # Custom plus button that triggers file dialog
-    if st.button("➕", key="upload_image_tool", use_container_width=True):
-        st.markdown("""
-        <script>
-        const fileInput = document.querySelector('input[type="file"]');
-        if (fileInput) {
-            fileInput.click();
-        }
-        </script>
-        """, unsafe_allow_html=True)
+    # File uploader that looks like a plus button
+    uploaded_file = st.file_uploader("Browse files", type=['jpg', 'jpeg', 'png'], key="image_uploader_plus", label_visibility="collapsed")
     
     # Process uploaded file immediately
     if uploaded_file is not None:
