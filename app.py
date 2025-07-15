@@ -525,38 +525,37 @@ function createTopHeader() {
     header.id = 'top-header';
     header.style.cssText = `
         position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
+        top: 16px;
+        right: 16px;
         z-index: 999999;
-        background: #000000;
+        background: transparent;
         display: flex;
-        justify-content: flex-end;
+        flex-direction: column;
         align-items: center;
-        gap: 16px;
-        padding: 12px 24px;
-        border-bottom: 1px solid #333;
-        width: 100%;
+        gap: 8px;
+        padding: 0;
+        width: auto;
         box-sizing: border-box;
     `;
     
     // Create search button
     const searchBtn = document.createElement('div');
     searchBtn.style.cssText = `
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
+        background: #f0f0f0;
+        border: 1px solid #d0d0d0;
+        border-radius: 8px;
+        width: 44px;
+        height: 44px;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
         transition: all 0.3s ease;
-        color: white;
+        color: #333;
+        margin-bottom: 8px;
     `;
     searchBtn.innerHTML = `
-        <svg style="width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2;" viewBox="0 0 24 24">
+        <svg style="width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2;" viewBox="0 0 24 24">
             <circle cx="11" cy="11" r="8"></circle>
             <path d="M21 21l-4.35-4.35"></path>
         </svg>
@@ -566,36 +565,39 @@ function createTopHeader() {
     // Create login button
     const loginBtn = document.createElement('div');
     loginBtn.style.cssText = `
-        background: rgba(255, 255, 255, 0.15);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-radius: 25px;
-        padding: 8px 20px;
-        color: white;
+        background: #f0f0f0;
+        border: 1px solid #d0d0d0;
+        border-radius: 8px;
+        padding: 12px 20px;
+        color: #333;
         font-weight: 500;
         cursor: pointer;
         transition: all 0.3s ease;
         text-decoration: none;
+        font-size: 14px;
+        min-width: 60px;
+        text-align: center;
     `;
     loginBtn.textContent = 'Log in';
     loginBtn.onclick = function() { showLogin(); };
     
     // Add hover effects
     searchBtn.onmouseover = function() {
-        this.style.background = 'rgba(255, 255, 255, 0.2)';
-        this.style.transform = 'scale(1.05)';
+        this.style.background = '#e0e0e0';
+        this.style.borderColor = '#c0c0c0';
     };
     searchBtn.onmouseout = function() {
-        this.style.background = 'rgba(255, 255, 255, 0.1)';
-        this.style.transform = 'scale(1)';
+        this.style.background = '#f0f0f0';
+        this.style.borderColor = '#d0d0d0';
     };
     
     loginBtn.onmouseover = function() {
-        this.style.background = 'rgba(255, 255, 255, 0.25)';
-        this.style.transform = 'translateY(-1px)';
+        this.style.background = '#e0e0e0';
+        this.style.borderColor = '#c0c0c0';
     };
     loginBtn.onmouseout = function() {
-        this.style.background = 'rgba(255, 255, 255, 0.15)';
-        this.style.transform = 'translateY(0)';
+        this.style.background = '#f0f0f0';
+        this.style.borderColor = '#d0d0d0';
     };
     
     // Add buttons to header
