@@ -1384,12 +1384,12 @@ with col2:
 col1, col2, col3 = st.columns(3)
 with col1:
     if st.button("📹 Start Web Camera", type="primary"):
-        st.session_state.show_web_camera = True
+        st.session_state.show_simple_camera = True
         st.rerun()
 
 with col2:
     if st.button("🎯 Interview Mode", type="primary"):
-        st.session_state.show_interview_recorder = True
+        st.session_state.show_simple_recorder = True
         st.rerun()
 
 with col3:
@@ -1500,7 +1500,19 @@ if st.session_state.get('show_web_camera', False):
             st.markdown("• Perfect for self-awareness during meetings")
             st.markdown("• Track emotional patterns over time")
 
-# Interview Screen Recorder Section
+# Simple Live Camera Section
+if st.session_state.get('show_simple_camera', False):
+    st.markdown("---")
+    from simple_live_camera import simple_live_camera
+    simple_live_camera()
+
+# Simple Screen Recorder Section
+if st.session_state.get('show_simple_recorder', False):
+    st.markdown("---")
+    from simple_screen_recorder import simple_screen_recorder
+    simple_screen_recorder()
+
+# Interview Screen Recorder Section (Original)
 if st.session_state.get('show_interview_recorder', False):
     st.markdown("---")
     from screen_recorder_interview import show_screen_recorder_interview, init_screen_recorder_interview
