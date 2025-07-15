@@ -1384,7 +1384,7 @@ with col2:
 col1, col2, col3 = st.columns(3)
 with col1:
     if st.button("📹 Start Web Camera", type="primary"):
-        st.session_state.show_live_video_analyzer = True
+        st.session_state.show_working_live_analyzer = True
         st.rerun()
 
 with col2:
@@ -1500,11 +1500,11 @@ if st.session_state.get('show_web_camera', False):
             st.markdown("• Perfect for self-awareness during meetings")
             st.markdown("• Track emotional patterns over time")
 
-# Live Video Analyzer Section
-if st.session_state.get('show_live_video_analyzer', False):
+# Working Live Analyzer Section
+if st.session_state.get('show_working_live_analyzer', False):
     st.markdown("---")
-    from live_video_analyzer import live_video_analyzer
-    live_video_analyzer()
+    from working_live_analyzer import working_live_analyzer
+    working_live_analyzer()
 
 # Working Screen Recorder Section
 if st.session_state.get('show_working_recorder', False):
