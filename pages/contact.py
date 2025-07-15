@@ -279,8 +279,6 @@ with col2:
     
     📸 **INSTAGRAM**: [@EMOTICON.AI](https://www.instagram.com/emoticon.ai)
     
-    🐦 **TWITTER**: [@EMOTICONAI](https://twitter.com/emoticon)
-    
     """)
 
 st.markdown("---")
