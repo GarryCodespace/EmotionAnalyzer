@@ -12,6 +12,7 @@ def save_login_state(user_data):
         'email': user_data['email'],
         'session_token': user_data['session_token'],
         'login_time': datetime.now().isoformat(),
+        'session_expires': user_data.get('expires_at', user_data.get('session_expires')),
         'remember_me': True
     }
     
@@ -25,7 +26,7 @@ def save_login_state(user_data):
         const expires = new Date();
         expires.setTime(expires.getTime() + (30 * 24 * 60 * 60 * 1000));
         document.cookie = "emoticon_login=" + encodeURIComponent('{json.dumps(login_data)}') + 
-                         "; expires=" + expires.toUTCString() + "; path=/";
+                         "; expires=" + expires.toUTCString() + "; path=/; SameSite=Strict";
     </script>
     """
     st.components.v1.html(login_js, height=0)
@@ -89,11 +90,18 @@ def auto_login():
         if login_data:
             # Validate session token
             result = auth_system.validate_session(login_data['session_token'])
-            if result['success']:
+            if result.get('valid', False):
                 st.session_state.logged_in = True
-                st.session_state.user_email = login_data['email']
-                st.session_state.user_id = login_data['user_id']
+                st.session_state.user_email = result['email']
+                st.session_state.user_id = result['user_id']
                 st.session_state.session_token = login_data['session_token']
+                
+                # If session was refreshed, update stored login data
+                if result.get('refreshed'):
+                    updated_login_data = login_data.copy()
+                    updated_login_data['session_expires'] = result['session_expires']
+                    save_login_state(updated_login_data)
+                
                 return True
             else:
                 # Invalid session, clear stored data
