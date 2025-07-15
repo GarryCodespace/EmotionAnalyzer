@@ -302,6 +302,106 @@ div[data-testid="stInfo"] > div {
     text-transform: capitalize !important;
 }
 
+/* Additional selectors for current Streamlit version */
+[data-testid="stSidebar"] .stSelectbox label {
+    text-transform: capitalize !important;
+}
+
+[data-testid="stSidebar"] .stSelectbox option {
+    text-transform: capitalize !important;
+}
+
+/* Target all navigation elements */
+[data-testid="stSidebar"] nav {
+    text-transform: capitalize !important;
+}
+
+[data-testid="stSidebar"] nav * {
+    text-transform: capitalize !important;
+}
+
+/* Force capitalization on all sidebar links */
+[data-testid="stSidebar"] a {
+    text-transform: capitalize !important;
+    display: block;
+}
+
+[data-testid="stSidebar"] a::first-letter {
+    text-transform: uppercase !important;
+}
+
+/* Try to target the page navigation specifically */
+.stSidebar a {
+    text-transform: capitalize !important;
+}
+
+.stSidebar nav a {
+    text-transform: capitalize !important;
+}
+
+/* Modern approach - use CSS to override all text in sidebar */
+[data-testid="stSidebar"] p,
+[data-testid="stSidebar"] span,
+[data-testid="stSidebar"] a,
+[data-testid="stSidebar"] button {
+    text-transform: capitalize !important;
+}
+
+/* Nuclear option - target everything in sidebar */
+[data-testid="stSidebar"] * {
+    text-transform: capitalize !important;
+}
+</style>
+
+<script>
+// JavaScript to capitalize sidebar navigation after page load
+setTimeout(function() {
+    function capitalizeSidebarNavigation() {
+        // Target all navigation links in sidebar
+        const sidebar = document.querySelector('[data-testid="stSidebar"]');
+        if (sidebar) {
+            const navLinks = sidebar.querySelectorAll('a, button, span, p');
+            navLinks.forEach(link => {
+                if (link.textContent) {
+                    const text = link.textContent.trim();
+                    if (text && text.length > 0) {
+                        // Capitalize first letter and make rest lowercase
+                        const capitalizedText = text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+                        link.textContent = capitalizedText;
+                    }
+                }
+            });
+        }
+    }
+    
+    // Run immediately
+    capitalizeSidebarNavigation();
+    
+    // Run again after short delay to catch dynamic content
+    setTimeout(capitalizeSidebarNavigation, 500);
+    setTimeout(capitalizeSidebarNavigation, 1000);
+    setTimeout(capitalizeSidebarNavigation, 2000);
+    
+    // Set up observer for dynamic changes
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                setTimeout(capitalizeSidebarNavigation, 100);
+            }
+        });
+    });
+    
+    const sidebar = document.querySelector('[data-testid="stSidebar"]');
+    if (sidebar) {
+        observer.observe(sidebar, {
+            childList: true,
+            subtree: true
+        });
+    }
+}, 100);
+</script>
+
+<style>
 .stMarkdown {
     color: #000000 !important;
 }
