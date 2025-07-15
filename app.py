@@ -15,7 +15,7 @@ from lie_detector import LieDetector
 from ai_vision_analyzer import AIVisionAnalyzer
 from stress_analyzer import StressAnalyzer
 from login_ui import require_authentication, show_user_menu, show_account_settings, init_auth_session, logout_user, show_login_modal
-from payment_ui import PaymentUI
+from payment_ui import PaymentUI, check_daily_limit
 from payment_plans import PaymentPlans, UsageTracker
 
 # Setup MediaPipe

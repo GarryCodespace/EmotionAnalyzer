@@ -273,4 +273,19 @@ def show_payment_success():
 def show_payment_canceled():
     """Show payment canceled message"""
     st.warning("Payment was canceled. You can try again anytime.")
-    st.info("Your current plan remains unchanged.")
+
+def check_daily_limit(show_upgrade_prompt: bool = True) -> bool:
+    """Check daily usage limit and show upgrade prompt if needed"""
+    can_analyze = PaymentPlans.check_daily_limit()
+    
+    if not can_analyze and show_upgrade_prompt:
+        current_plan = PaymentPlans.get_user_plan()
+        limits = PaymentPlans.get_usage_limits(current_plan)
+        
+        st.error(f"Daily limit reached ({limits['daily_analyses']} analyses)")
+        st.info("Upgrade to Professional plan for unlimited daily analyses")
+        if st.button("Upgrade Now", key="upgrade_daily_limit"):
+            st.session_state.show_pricing = True
+            st.rerun()
+    
+    return can_analyze
