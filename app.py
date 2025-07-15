@@ -1393,13 +1393,7 @@ with col2:
         st.rerun()
 
 with col3:
-    if st.button("📋 Local Setup", type="secondary"):
-        st.info("📥 **Local Installation (Advanced Users)**")
-        st.markdown("For full screen recording and desktop integration:")
-        st.markdown("• Download project files from this Replit")
-        st.markdown("• Install Python 3.8+ and dependencies")
-        st.markdown("• Run: `streamlit run screen_recorder_standalone.py`")
-        st.markdown("• See LOCAL_SETUP.md for detailed instructions")
+    pass  # Empty column for layout
 
 # Web Camera Section
 if st.session_state.get('show_web_camera', False):
