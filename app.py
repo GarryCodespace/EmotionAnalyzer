@@ -413,7 +413,7 @@ if 'session_id' not in st.session_state:
 
 # Image Upload Analysis
 st.markdown("---")
-st.markdown("### 📸 Image Upload Analysis")
+st.markdown("### Image Upload Analysis")
 uploaded_file = st.file_uploader("Upload an image for expression analysis", type=['jpg', 'jpeg', 'png'])
 
 if uploaded_file is not None:
@@ -434,19 +434,19 @@ if uploaded_file is not None:
     detailed_analysis = ai_analysis.get("detailed_analysis", "")
     
     # Display AI analysis summary
-    st.success(f"🤖 **AI Vision Analysis Complete** - Confidence: {confidence_level.title()}")
+    st.success(f"**AI Vision Analysis Complete** - Confidence: {confidence_level.title()}")
     
     # Display emotional state
     if emotional_state and emotional_state != "neutral":
-        st.info(f"😊 **Primary Emotional State**: {emotional_state.title()}")
+        st.info(f"**Primary Emotional State**: {emotional_state.title()}")
     
     # Display detailed analysis
     if detailed_analysis:
-        st.markdown(f"**🔍 AI Analysis**: {detailed_analysis}")
+        st.markdown(f"**AI Analysis**: {detailed_analysis}")
     
     # Display body language analysis
     if detected_body_language:
-        st.success(f"🚶 **Body Language Patterns Detected**: {len(detected_body_language)}")
+        st.success(f"**Body Language Patterns Detected**: {len(detected_body_language)}")
         
         body_col1, body_col2 = st.columns(2)
         for idx, pattern in enumerate(detected_body_language[:8]):
@@ -463,12 +463,12 @@ if uploaded_file is not None:
             for pattern in detected_body_language
         ]
     else:
-        st.info("🚶 **Body Language**: No significant body language patterns detected")
+        st.info("**Body Language**: No significant body language patterns detected")
         body_patterns = []
     
     # Display facial expressions from AI analysis
     if detected_expressions:
-        st.success(f"😊 **Facial Expressions Detected**: {len(detected_expressions)}")
+        st.success(f"**Facial Expressions Detected**: {len(detected_expressions)}")
         
         expr_col1, expr_col2 = st.columns(2)
         confidence_scores = ai_vision.get_expression_confidence(detected_expressions)
@@ -498,7 +498,7 @@ if uploaded_file is not None:
         
         try:
             analysis = ai_vision.analyze_emotion_context(image, all_signals)
-            st.info(f"💬 **Comprehensive AI Analysis (Face + Body)**: {analysis}")
+            st.info(f"**Comprehensive AI Analysis (Face + Body)**: {analysis}")
             
             # Save to database
             save_emotion_analysis(
@@ -515,7 +515,7 @@ if uploaded_file is not None:
         lie_detector_col1, lie_detector_col2 = st.columns([1, 2])
         
         with lie_detector_col1:
-            if st.button("🔍 AI Lie Detector Analysis", key="lie_detector_image"):
+            if st.button("AI Lie Detector Analysis", key="lie_detector_image"):
                 st.session_state.run_lie_detector = True
         
         with lie_detector_col2:
@@ -576,16 +576,16 @@ if uploaded_file is not None:
                 st.error(f"Lie detector analysis error: {str(e)}")
                 st.session_state.run_lie_detector = False
     else:
-        st.warning("⚪ No clear expressions detected in this image")
+        st.warning("No clear expressions detected in this image")
 
 # Video Upload Feature
 video_col1, video_col2 = st.columns([2, 1])
 with video_col1:
-    st.markdown("#### 🎬 Video Analysis")
+    st.markdown("#### Video Analysis")
     st.markdown("*Upload a video for intelligent expression analysis - AI analyzes only significant expression changes*")
 
 with video_col2:
-    live_lie_detector = st.checkbox('🔍 Live Lie Detector', key='live_lie_detector')
+    live_lie_detector = st.checkbox('Live Lie Detector', key='live_lie_detector')
     if live_lie_detector:
         st.session_state.enable_live_lie_detector = True
     else:
@@ -610,7 +610,7 @@ if uploaded_video is not None:
             video_summary = video_analyzer.get_video_summary()
         
         if analyses:
-            st.success(f"🎯 **Found {len(analyses)} significant expression moments**")
+            st.success(f"**Found {len(analyses)} significant expression moments**")
             
             # Display video summary
             col1, col2 = st.columns(2)
@@ -628,10 +628,10 @@ if uploaded_video is not None:
                     minutes = int(timestamp // 60)
                     seconds = int(timestamp % 60)
                     time_str = f"{minutes}:{seconds:02d}" if minutes > 0 else f"{seconds}s"
-                    st.write(f"⏰ {time_str}: {', '.join(moment['expressions'])}")
+                    st.write(f"{time_str}: {', '.join(moment['expressions'])}")
             
             # Display detailed analyses
-            st.markdown("**🔍 Detailed Analysis of Significant Moments:**")
+            st.markdown("**Detailed Analysis of Significant Moments:**")
             for i, analysis in enumerate(analyses[:8]):  # Show top 8 analyses
                 timestamp = analysis['timestamp']
                 minutes = int(timestamp // 60)
@@ -652,7 +652,7 @@ if uploaded_video is not None:
                     )
         
         else:
-            st.info("⚪ No significant expression changes detected in this video")
+            st.info("No significant expression changes detected in this video")
             
     except Exception as e:
         st.error(f"Video analysis error: {str(e)}")
@@ -662,7 +662,7 @@ if uploaded_video is not None:
             os.unlink(tmp_video_path)
 
 # Demo Mode
-st.markdown("#### 🎭 Demo Mode - Expression Simulation")
+st.markdown("#### Demo Mode - Expression Simulation")
 st.markdown("*Test the AI analysis without needing a camera*")
 
 demo_expressions = [
@@ -680,11 +680,11 @@ selected_demo = st.selectbox("Choose a demo expression to analyze:", demo_expres
 
 col1, col2 = st.columns(2)
 with col1:
-    if st.button("🔍 Analyze Demo Expression"):
+    if st.button("Analyze Demo Expression"):
         try:
             demo_analysis = analyze_expression(selected_demo)
-            st.success(f"🎯 **Demo Expression**: {selected_demo}")
-            st.info(f"💬 **AI Analysis**: {demo_analysis}")
+            st.success(f"**Demo Expression**: {selected_demo}")
+            st.info(f"**AI Analysis**: {demo_analysis}")
             
             # Save to database
             expressions = selected_demo.split(", ")
@@ -698,12 +698,12 @@ with col1:
             st.error(f"Demo analysis error: {str(e)}")
 
 with col2:
-    if st.button("✨ Quick Test"):
+    if st.button("Quick Test"):
         try:
             quick_test = "subtle smile, eye contact, relaxed expression"
             quick_analysis = analyze_expression(quick_test)
-            st.success(f"🎯 **Quick Test**: {quick_test}")
-            st.info(f"💬 **AI Analysis**: {quick_analysis}")
+            st.success(f"**Quick Test**: {quick_test}")
+            st.info(f"**AI Analysis**: {quick_analysis}")
             
             # Save to database
             expressions = quick_test.split(", ")
@@ -718,7 +718,7 @@ with col2:
 
 # Screen Recorder Mode
 st.markdown("---")
-st.markdown("### 📱 Screen Recorder Mode")
+st.markdown("### Screen Recorder Mode")
 st.markdown("*Record external applications like Zoom, Teams, or any video call with live emotion analysis*")
 
 col1, col2 = st.columns(2)
@@ -830,7 +830,7 @@ with col2:
 
 # Instructions
 st.markdown("---")
-st.markdown("### 📋 Instructions")
+st.markdown("### Instructions")
 st.markdown("""
 1. **Image Upload**: Upload a photo to analyze facial expressions and body language
 2. **Video Analysis**: Upload a video for intelligent analysis of significant expression changes
@@ -840,7 +840,7 @@ st.markdown("""
 6. **Multi-Face Support**: Analyze multiple people simultaneously in images and videos
 """)
 
-st.markdown("### 🔧 Features")
+st.markdown("### Features")
 st.markdown("""
 - **AI Vision Analysis**: OpenAI GPT-4o Vision API for comprehensive emotion detection
 - **Multi-Modal Input**: Image upload and video analysis support
@@ -851,7 +851,7 @@ st.markdown("""
 - **Intelligent Filtering**: Only analyzes significant expression changes to reduce noise
 """)
 
-st.markdown("### ⚙️ Technical Details")
+st.markdown("### Technical Details")
 st.markdown("""
 - **OpenAI GPT-4o Vision**: Advanced AI vision analysis for comprehensive emotion detection
 - **MediaPipe**: Face mesh and body pose detection for landmark analysis
