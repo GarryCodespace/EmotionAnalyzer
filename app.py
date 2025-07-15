@@ -834,7 +834,38 @@ with tools_col5:
 if st.session_state.get('show_upload_image', False):
     st.markdown("---")
     st.markdown("### Upload Image")
-    uploaded_file = st.file_uploader("", type=['jpg', 'jpeg', 'png'], key="image_upload_tool", label_visibility="hidden")
+    
+    # Hide drag-and-drop text with custom CSS
+    st.markdown("""
+    <style>
+    .uploadedFile {
+        display: none;
+    }
+    .css-1kyxreq {
+        display: none;
+    }
+    .css-1eznxh6 {
+        display: none;
+    }
+    .css-1pqgz65 {
+        display: none;
+    }
+    .css-1djdyxw {
+        display: none;
+    }
+    [data-testid="stFileUploader"] > div > div > div > div > div:nth-child(2) {
+        display: none;
+    }
+    [data-testid="stFileUploader"] > div > div > div > div > div:nth-child(3) {
+        display: none;
+    }
+    [data-testid="stFileUploader"] > div > div > div > div > div:nth-child(4) {
+        display: none;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    uploaded_file = st.file_uploader("Browse files", type=['jpg', 'jpeg', 'png'], key="image_upload_tool")
     
     if uploaded_file is not None:
         analyze_uploaded_image(uploaded_file)
