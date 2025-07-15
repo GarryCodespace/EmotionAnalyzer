@@ -291,8 +291,11 @@ def process_screen_frame(frame_data):
     """Process captured screen frame for interview analysis"""
     
     try:
+        st.write(f"Debug: Processing frame {frame_data.get('frame_count', 'unknown')}")
+        
         # Check daily usage limit
         if not check_daily_limit(show_upgrade_prompt=False):
+            st.write("Debug: Daily limit reached")
             return
         
         # Decode base64 image
@@ -326,7 +329,12 @@ def process_screen_frame(frame_data):
         Be specific about what you observe and provide constructive insights.
         """
         
-        analysis = ai_vision.analyze_emotion_context(image_array, [context_prompt])
+        st.write("Debug: Starting AI analysis...")
+        
+        # Use simpler analysis method to avoid hanging
+        analysis = ai_vision.analyze_facial_expressions(image_array)
+        
+        st.write(f"Debug: Analysis complete. Keys: {list(analysis.keys())}")
         
         # Track usage
         UsageTracker.track_analysis("screen_interview", st.session_state.get('user_id'))
