@@ -1272,7 +1272,7 @@ if st.session_state.get('uploaded_video') is not None:
 st.markdown("---")
 st.markdown("### Screen Recorder Mode")
 st.markdown("*Record external applications like Zoom, Teams, or any video call with live emotion analysis*")
-st.info("Note: Camera not available in containerized environment. Screen recorder requires local installation.")
+st.info("💻 **Local Installation Required**: Screen recorder works best when run locally on your computer for full camera and screen access.")
 
 col1, col2 = st.columns(2)
 with col1:
@@ -1284,162 +1284,61 @@ with col1:
     st.markdown("• Runs independently from this app")
 
 with col2:
-    st.markdown("**How to use:**")
-    st.markdown("1. Click 'Launch Screen Recorder' below")
-    st.markdown("2. A new window will open")
-    st.markdown("3. Start your video call (Zoom, Teams, etc.)")
-    st.markdown("4. Click 'Start Recording' in the recorder")
-    st.markdown("5. Get live analysis popups during your call")
+    st.markdown("**Local Installation Steps:**")
+    st.markdown("1. Download the project files to your computer")
+    st.markdown("2. Install Python 3.8+ and required packages")
+    st.markdown("3. Run: `streamlit run screen_recorder_standalone.py`")
+    st.markdown("4. Start your video call and get live analysis")
+    st.markdown("5. See detailed setup instructions below")
 
 col1, col2 = st.columns(2)
 with col1:
-    if st.button("🎬 Launch Screen Recorder", type="primary"):
-        st.info("🚀 Screen recorder ready to launch!")
-        st.markdown("**To open the screen recorder:**")
-        st.markdown("1. Right-click the link below and select 'Open in new tab'")
-        st.markdown("2. Or copy the command below to run manually")
+    if st.button("📋 Show Local Setup Instructions", type="primary"):
+        st.info("📥 **Complete Local Installation Guide**")
         
-        # Direct link (will work when running locally)
-        port = 5000
-        st.markdown(f"**Direct link:** [Screen Recorder Mode](http://localhost:{port}/screen_recorder)")
+        st.markdown("**Step 1: Download Project**")
+        st.markdown("• Download all project files from this Replit")
+        st.markdown("• Extract to a folder on your computer")
         
-        # Manual command
+        st.markdown("**Step 2: Install Python & Dependencies**")
+        st.code("""
+# Install Python 3.8+ from python.org
+# Then install required packages:
+pip install streamlit opencv-python mediapipe openai psycopg2-binary sqlalchemy pillow mss
+        """, language="bash")
+        
+        st.markdown("**Step 3: Set Environment Variables**")
+        st.code("""
+# Create a .env file in the project folder:
+OPENAI_API_KEY=your_openai_api_key_here
+        """, language="bash")
+        
+        st.markdown("**Step 4: Run Screen Recorder**")
         st.code("streamlit run screen_recorder_standalone.py --server.port 5001", language="bash")
 
 with col2:
-    st.markdown("**Quick Demo Mode:**")
-    st.markdown("*Test the screen recorder functionality*")
+    st.markdown("**Alternative: Use Web Version**")
+    st.markdown("*For basic emotion analysis without local setup*")
     
-    if st.button("🎯 Test Screen Recorder", type="secondary"):
-        st.info("Testing screen recorder analysis...")
-        try:
-            # Initialize analyzer
-            analyzer = VideoEmotionAnalyzer(significance_threshold=0.2)
-            
-            # Try to capture a frame
-            camera = cv2.VideoCapture(0)
-            if camera.isOpened():
-                ret, frame = camera.read()
-                if ret:
-                    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                    
-                    # Display the frame
-                    st.image(frame_rgb, channels="RGB", caption="Live camera feed", use_column_width=True)
-                    
-                    # Analyze the frame
-                    result = analyzer.analyze_video_frame(frame_rgb, time.time())
-                    
-                    if result:
-                        st.success("✅ Screen recorder analysis working!")
-                        st.write(f"**Detected:** {', '.join(result.get('expressions', []))}")
-                        st.write(f"**Analysis:** {result.get('ai_analysis', 'No analysis')}")
-                        st.write(f"**Significance:** {result.get('significance_score', 0.0):.2f}")
-                    else:
-                        st.info("No significant expression changes detected in this frame.")
-                else:
-                    st.error("Could not capture frame from camera")
-                
-                camera.release()
-            else:
-                st.error("Camera not available in this environment. Please use image upload or video analysis instead.")
-                st.info("For local camera access, run this application locally with proper camera permissions.")
-        except Exception as e:
-            st.error(f"Screen recorder test failed: {str(e)}")
+    st.markdown("**Available online:**")
+    st.markdown("• Image upload analysis")
+    st.markdown("• Video upload analysis")
+    st.markdown("• AI lie detection")
+    st.markdown("• Stress level analysis")
+    
+    st.markdown("**Not available online:**")
+    st.markdown("• Live camera access")
+    st.markdown("• Screen recording")
+    st.markdown("• Real-time video calls")
+    
+    if st.button("📖 View Full Setup Guide", type="secondary"):
+        st.info("📋 **Complete Installation Instructions**")
+        st.markdown("A detailed setup guide has been created: `LOCAL_SETUP.md`")
+        st.markdown("**Quick Start:**")
+        st.markdown("1. Download project files")
+        st.markdown("2. Install Python 3.8+")
+        st.markdown("3. Run: `pip install streamlit opencv-python mediapipe openai`")
+        st.markdown("4. Set OPENAI_API_KEY environment variable")
+        st.markdown("5. Run: `streamlit run screen_recorder_standalone.py`")
 
 
-
-# Instructions
-st.markdown("---")
-st.markdown("### Instructions")
-st.markdown("""
-1. **Image Upload**: Upload a photo to analyze facial expressions and body language
-2. **Video Analysis**: Upload a video for intelligent analysis of significant expression changes
-3. **AI-Powered Analysis**: OpenAI GPT-4o provides comprehensive psychological insights
-4. **Lie Detection**: Advanced deception analysis using micro-expressions and body language
-5. **Session Data**: View your personal analysis history and overall statistics
-6. **Multi-Face Support**: Analyze multiple people simultaneously in images and videos
-""")
-
-# Screen Recorder Mode Section
-st.markdown("---")
-st.markdown("### Screen Recorder Mode")
-st.markdown("Record and analyze expressions during video calls")
-
-st.markdown("#### How to Use Screen Recorder Mode")
-st.markdown("**For External Video Calls:**")
-st.markdown("""
-• Open your video call app (Zoom, Teams, etc.)
-• Position this window where you can see it
-• Use the webcam mode below during your call
-• Get live analysis as you speak
-""")
-
-st.markdown("**Features:**")
-st.markdown("""
-• Real-time expression analysis
-• Smart detection of significant changes
-• Configurable sensitivity
-• Session history tracking
-• Export analysis results
-""")
-
-# Settings for Screen Recorder
-st.markdown("#### Settings")
-col1, col2 = st.columns(2)
-
-with col1:
-    st.markdown("**Analysis Sensitivity**")
-    sensitivity = st.slider("Sensitivity", 0.0, 1.0, 0.10, 0.01, key="screen_sensitivity", label_visibility="collapsed")
-
-with col2:
-    st.markdown("**Analysis Cooldown (seconds)**")
-    cooldown = st.slider("Cooldown", 3, 15, 3, 1, key="screen_cooldown", label_visibility="collapsed")
-
-# Live Analysis Section
-st.markdown("#### Live Analysis")
-if st.button("Start Screen Recording Analysis", key="start_screen_analysis"):
-    st.switch_page("pages/screen_recorder.py")
-
-# Analysis Results
-st.markdown("#### Analysis Results")
-st.info("No analysis results yet. Start live analysis to see results here.")
-
-# Tips Section
-st.markdown("#### Tips for Best Results")
-col1, col2 = st.columns(2)
-
-with col1:
-    st.markdown("**Lighting:**")
-    st.markdown("""
-    • Ensure good lighting on your face
-    • Avoid backlighting
-    • Keep camera at eye level
-    """)
-
-with col2:
-    st.markdown("**During Video Calls:**")
-    st.markdown("""
-    • Keep this window visible
-    • Position camera for clear face view
-    • Minimize background movement
-    """)
-
-st.markdown("### Features")
-st.markdown("""
-- **AI Vision Analysis**: OpenAI GPT-4o Vision API for comprehensive emotion detection
-- **Multi-Modal Input**: Image upload and video analysis support
-- **Body Language Detection**: Full body posture and gesture analysis
-- **Lie Detection**: Advanced deception probability analysis
-- **Database Storage**: Persistent storage of analysis history and statistics
-- **Multi-Face Support**: Analyze multiple people simultaneously
-- **Intelligent Filtering**: Only analyzes significant expression changes to reduce noise
-""")
-
-st.markdown("### Technical Details")
-st.markdown("""
-- **OpenAI GPT-4o Vision**: Advanced AI vision analysis for comprehensive emotion detection
-- **MediaPipe**: Face mesh and body pose detection for landmark analysis
-- **OpenCV**: Computer vision processing for image and video handling
-- **PostgreSQL**: Database storage for analysis history and statistics
-- **Streamlit**: Interactive web interface for seamless user experience
-""")
