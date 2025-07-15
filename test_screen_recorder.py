@@ -41,7 +41,7 @@ def test_screen_recorder():
     component_value = components.html(html_code, height=200)
     
     # Show component value
-    if component_value:
+    if component_value and isinstance(component_value, dict):
         st.write("Received data:", component_value)
         
         # Try to analyze something simple
