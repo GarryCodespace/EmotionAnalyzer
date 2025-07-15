@@ -314,38 +314,53 @@ def process_live_frame(frame_data):
         if len(st.session_state.live_analysis_results) > 5:
             st.session_state.live_analysis_results.pop(0)
         
-        # Display current analysis results
-        st.success(f"**Live Analysis #{result['frame_count']} Complete!**")
+        # Display results in Streamlit below the camera component
+        st.markdown("### Latest Analysis:")
         
-        col1, col2 = st.columns(2)
+        col1, col2, col3 = st.columns(3)
         with col1:
-            st.write(f"**Expressions**: {expressions_text}")
-            st.write(f"**Emotional State**: {emotional_state}")
+            st.metric("Expressions", expressions_text)
         with col2:
-            st.write(f"**Confidence**: {confidence_level}")
-            st.write(f"**Frame**: #{result['frame_count']}")
+            st.metric("Emotional State", emotional_state)
+        with col3:
+            st.metric("Confidence", confidence_level)
         
-        with st.expander("Detailed Analysis"):
+        # Show detailed analysis
+        with st.expander("View Detailed Analysis"):
             st.write(detailed_analysis)
         
-        # Use JavaScript to update the component display
+        # Use JavaScript to update the component display as well
         js_code = f"""
         <script>
             setTimeout(function() {{
                 try {{
-                    if (parent.document.getElementById('expressionResults')) {{
-                        parent.document.getElementById('expressionResults').innerHTML = 
-                            '<strong>Expressions:</strong> {expressions_text}';
-                        parent.document.getElementById('emotionResults').innerHTML = 
-                            '<strong>Emotional State:</strong> {emotional_state}';
-                        parent.document.getElementById('confidenceResults').innerHTML = 
-                            '<strong>Confidence:</strong> {confidence_level}';
-                        parent.document.getElementById('liveStatus').textContent = 
-                            '✅ Analysis #{result['frame_count']} complete - {expressions_text}';
-                        parent.document.getElementById('liveStatus').style.color = '#28a745';
+                    // Update main component elements
+                    const expressionEl = document.getElementById('expressionResults');
+                    const emotionEl = document.getElementById('emotionResults');
+                    const confidenceEl = document.getElementById('confidenceResults');
+                    const statusEl = document.getElementById('liveStatus');
+                    
+                    if (expressionEl) {{
+                        expressionEl.innerHTML = '<strong>Expressions:</strong> {expressions_text}';
+                    }}
+                    if (emotionEl) {{
+                        emotionEl.innerHTML = '<strong>Emotional State:</strong> {emotional_state}';
+                    }}
+                    if (confidenceEl) {{
+                        confidenceEl.innerHTML = '<strong>Confidence:</strong> {confidence_level}';
+                    }}
+                    if (statusEl) {{
+                        statusEl.textContent = '✅ Analysis #{result['frame_count']} complete - {expressions_text}';
+                        statusEl.style.color = '#28a745';
+                    }}
+                    
+                    // Show results section
+                    const resultsEl = document.getElementById('analysisResults');
+                    if (resultsEl) {{
+                        resultsEl.style.display = 'block';
                     }}
                 }} catch(e) {{
-                    console.log('Could not update parent elements:', e);
+                    console.log('Could not update elements:', e);
                 }}
             }}, 100);
         </script>
