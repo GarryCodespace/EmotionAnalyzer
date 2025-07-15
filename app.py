@@ -605,8 +605,8 @@ if uploaded_video is not None:
         
         # Process video with progress bar
         with st.spinner('Analyzing video for significant expression changes...'):
-            video_analyzer = VideoEmotionAnalyzer(significance_threshold=0.18)
-            analyses = video_analyzer.process_video(tmp_video_path, max_analyses=15)
+            video_analyzer = VideoEmotionAnalyzer(significance_threshold=0.25)
+            analyses = video_analyzer.process_video(tmp_video_path, max_analyses=10)
             video_summary = video_analyzer.get_video_summary()
         
         if analyses:
@@ -624,12 +624,20 @@ if uploaded_video is not None:
             with col2:
                 st.markdown("**Expression Timeline:**")
                 for moment in video_summary['timeline'][:5]:
-                    st.write(f"⏰ {moment['timestamp']:.1f}s: {', '.join(moment['expressions'])}")
+                    timestamp = moment['timestamp']
+                    minutes = int(timestamp // 60)
+                    seconds = int(timestamp % 60)
+                    time_str = f"{minutes}:{seconds:02d}" if minutes > 0 else f"{seconds}s"
+                    st.write(f"⏰ {time_str}: {', '.join(moment['expressions'])}")
             
             # Display detailed analyses
             st.markdown("**🔍 Detailed Analysis of Significant Moments:**")
             for i, analysis in enumerate(analyses[:8]):  # Show top 8 analyses
-                with st.expander(f"Moment {i+1} - {analysis['timestamp']:.1f}s (Significance: {analysis['significance_score']:.2f})"):
+                timestamp = analysis['timestamp']
+                minutes = int(timestamp // 60)
+                seconds = int(timestamp % 60)
+                time_str = f"{minutes}:{seconds:02d}" if minutes > 0 else f"{seconds}s"
+                with st.expander(f"Moment {i+1} - {time_str} (Significance: {analysis['significance_score']:.2f})"):
                     st.write(f"**Detected Expressions**: {', '.join(analysis['expressions'])}")
                     st.write(f"**AI Analysis**: {analysis['ai_analysis']}")
                     st.write(f"**Frame**: {analysis['frame_number']}")

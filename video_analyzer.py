@@ -29,6 +29,8 @@ class VideoEmotionAnalyzer:
         self.previous_expressions = set()
         self.frame_count = 0
         self.analysis_history = []
+        self.last_analysis_time = 0
+        self.min_time_between_analyses = 2.0  # Minimum 2 seconds between analyses
         
         # Define key facial landmarks for expression analysis
         self.key_landmarks = {
@@ -140,8 +142,12 @@ class VideoEmotionAnalyzer:
         expressions_with_confidence = self.detect_expressions_with_confidence(landmarks)
         return [expr["name"] for expr in expressions_with_confidence if expr["confidence"] > 0.5]
     
-    def is_significant_change(self, current_landmarks, current_expressions) -> bool:
+    def is_significant_change(self, current_landmarks, current_expressions, timestamp) -> bool:
         """Determine if there's a significant change in expression"""
+        # Check temporal constraint - prevent analyses too close together
+        if timestamp - self.last_analysis_time < self.min_time_between_analyses:
+            return False
+        
         if self.previous_landmarks is None:
             # Only return True if there are actual expressions detected
             return len(current_expressions) > 0
@@ -159,12 +165,16 @@ class VideoEmotionAnalyzer:
         # 1. Large geometric change in facial landmarks AND expressions exist
         # 2. New expressions appeared or disappeared AND they are meaningful
         # 3. Must have expressions to be considered significant
+        # 4. Must have substantial differences, not just minor variations
         
         geometric_change = landmark_distance > self.significance_threshold
-        expression_change = len(current_expr_set.symmetric_difference(previous_expr_set)) > 0
+        expression_change = len(current_expr_set.symmetric_difference(previous_expr_set)) > 1  # Need more than 1 change
         has_expressions = len(current_expressions) > 0
         
-        return (geometric_change or expression_change) and has_expressions
+        # Additional check: avoid similar expressions (e.g., just "smile" variations)
+        substantial_change = geometric_change and expression_change
+        
+        return substantial_change and has_expressions
     
     def analyze_video_frame(self, frame, timestamp: float) -> Optional[Dict]:
         """
@@ -187,7 +197,7 @@ class VideoEmotionAnalyzer:
         current_expressions = self.detect_expressions(landmarks)
         
         # Check if this is a significant change
-        if self.is_significant_change(landmarks, current_expressions):
+        if self.is_significant_change(landmarks, current_expressions, timestamp):
             # Generate AI analysis ONLY if expressions are detected AND significant
             if current_expressions and len(current_expressions) > 0:
                 ai_analysis = analyze_expression(", ".join(current_expressions))
@@ -204,7 +214,8 @@ class VideoEmotionAnalyzer:
                 
                 self.analysis_history.append(analysis_result)
                 
-                # Update previous state
+                # Update previous state and last analysis time
+                self.last_analysis_time = timestamp
                 self.previous_landmarks = landmarks
                 self.previous_expressions = set(current_expressions)
                 
@@ -293,3 +304,4 @@ class VideoEmotionAnalyzer:
         self.previous_expressions = set()
         self.frame_count = 0
         self.analysis_history = []
+        self.last_analysis_time = 0
