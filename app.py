@@ -354,43 +354,73 @@ div[data-testid="stInfo"] > div {
 </style>
 
 <script>
-// JavaScript to capitalize sidebar navigation after page load
-setTimeout(function() {
-    function capitalizeSidebarNavigation() {
-        // Target all navigation links in sidebar
-        const sidebar = document.querySelector('[data-testid="stSidebar"]');
-        if (sidebar) {
-            const navLinks = sidebar.querySelectorAll('a, button, span, p');
-            navLinks.forEach(link => {
-                if (link.textContent) {
-                    const text = link.textContent.trim();
-                    if (text && text.length > 0) {
-                        // Capitalize first letter and make rest lowercase
-                        const capitalizedText = text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
-                        link.textContent = capitalizedText;
-                    }
-                }
-            });
-        }
-    }
+// JavaScript to capitalize sidebar navigation
+function capitalizeSidebarNavigation() {
+    const sidebar = document.querySelector('[data-testid="stSidebar"]');
+    if (!sidebar) return;
     
-    // Run immediately
-    capitalizeSidebarNavigation();
-    
-    // Run again after short delay to catch dynamic content
-    setTimeout(capitalizeSidebarNavigation, 500);
-    setTimeout(capitalizeSidebarNavigation, 1000);
-    setTimeout(capitalizeSidebarNavigation, 2000);
-    
-    // Set up observer for dynamic changes
-    const observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-            if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-                setTimeout(capitalizeSidebarNavigation, 100);
+    // Target navigation links specifically
+    const navLinks = sidebar.querySelectorAll('a[href], button[data-testid]');
+    navLinks.forEach(link => {
+        if (link.textContent) {
+            const text = link.textContent.trim();
+            // Only capitalize if it's a page name (single word, lowercase)
+            if (text && text.length > 0 && text.length < 20 && text === text.toLowerCase()) {
+                const words = text.split(' ');
+                const capitalizedWords = words.map(word => 
+                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                );
+                link.textContent = capitalizedWords.join(' ');
             }
-        });
+        }
     });
     
+    // Also target any paragraph elements that might contain page names
+    const paragraphs = sidebar.querySelectorAll('p');
+    paragraphs.forEach(p => {
+        if (p.textContent) {
+            const text = p.textContent.trim();
+            if (text && text.length > 0 && text.length < 20 && text === text.toLowerCase()) {
+                const words = text.split(' ');
+                const capitalizedWords = words.map(word => 
+                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                );
+                p.textContent = capitalizedWords.join(' ');
+            }
+        }
+    });
+}
+
+// Run on page load
+document.addEventListener('DOMContentLoaded', function() {
+    capitalizeSidebarNavigation();
+});
+
+// Run immediately if DOM is already loaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', capitalizeSidebarNavigation);
+} else {
+    capitalizeSidebarNavigation();
+}
+
+// Run periodically to catch dynamic updates
+setInterval(capitalizeSidebarNavigation, 1000);
+
+// Set up mutation observer for when navigation changes
+const observer = new MutationObserver(function(mutations) {
+    let shouldUpdate = false;
+    mutations.forEach(function(mutation) {
+        if (mutation.type === 'childList' && mutation.target.closest('[data-testid="stSidebar"]')) {
+            shouldUpdate = true;
+        }
+    });
+    if (shouldUpdate) {
+        setTimeout(capitalizeSidebarNavigation, 100);
+    }
+});
+
+// Start observing when DOM is ready
+setTimeout(function() {
     const sidebar = document.querySelector('[data-testid="stSidebar"]');
     if (sidebar) {
         observer.observe(sidebar, {
@@ -398,7 +428,7 @@ setTimeout(function() {
             subtree: true
         });
     }
-}, 100);
+}, 500);
 </script>
 
 <style>
