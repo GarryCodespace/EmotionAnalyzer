@@ -272,7 +272,7 @@ def main():
     with col1:
         st.markdown("""
         **Recruiting Team**
-        - Email: careers@emoticon.ai
+        - Email: emoticon.contact@gmail.com
         - LinkedIn: /company/emoticon-ai
         - Twitter: @EmoticonAI
         """)
@@ -280,7 +280,7 @@ def main():
     with col2:
         st.markdown("""
         **Questions About Roles?**
-        - Contact our recruiting team at careers@emoticon.ai
+        - Contact our recruiting team at emoticon.contact@gmail.com
         - Follow us on LinkedIn: /company/emoticon-ai
         - Visit our website for more information
         """)
