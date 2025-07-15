@@ -434,7 +434,7 @@ except Exception as e:
 
 # Initialize auth session and auto-login
 init_auth_session()
-auto_login_success = auto_login()
+auto_login_success = login_ui.auto_login()
 
 # Show welcome message for auto-login (only once per session)
 if auto_login_success and st.session_state.get('logged_in', False) and not st.session_state.get('welcome_shown', False):
@@ -833,7 +833,7 @@ with tools_col5:
 if st.session_state.get('show_upload_image', False):
     st.markdown("---")
     st.markdown("### Upload Image")
-    uploaded_file = st.file_uploader("Choose image file", type=['jpg', 'jpeg', 'png'], key="image_upload_tool")
+    uploaded_file = st.file_uploader("", type=['jpg', 'jpeg', 'png'], key="image_upload_tool", label_visibility="hidden")
     
     if uploaded_file is not None:
         analyze_uploaded_image(uploaded_file)
