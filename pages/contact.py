@@ -2,9 +2,12 @@ import streamlit as st
 
 st.set_page_config(page_title="Contact - Emoticon", layout="wide")
 
-# Initialize theme state
+# Initialize theme state based on time of day
 if 'dark_mode' not in st.session_state:
-    st.session_state.dark_mode = True
+    from datetime import datetime
+    current_hour = datetime.now().hour
+    # Default to light mode during daytime (6 AM - 6 PM)
+    st.session_state.dark_mode = not (6 <= current_hour < 18)
 
 # Apply theme
 if st.session_state.dark_mode:

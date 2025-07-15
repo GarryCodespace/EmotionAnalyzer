@@ -7,6 +7,13 @@ def main():
         layout="wide"
     )
     
+    # Initialize theme state based on time of day
+    if 'dark_mode' not in st.session_state:
+        from datetime import datetime
+        current_hour = datetime.now().hour
+        # Default to light mode during daytime (6 AM - 6 PM)
+        st.session_state.dark_mode = not (6 <= current_hour < 18)
+    
     # Styling for navigation buttons
     st.markdown("""
     <style>
