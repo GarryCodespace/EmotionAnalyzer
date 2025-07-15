@@ -15,12 +15,28 @@ class PaymentUI:
     
     def __init__(self):
         """Initialize Stripe with API keys"""
-        # In production, these would be in st.secrets
-        self.stripe_public_key = os.environ.get('STRIPE_PUBLIC_KEY', 'pk_test_...')
-        self.stripe_secret_key = os.environ.get('STRIPE_SECRET_KEY', 'sk_test_...')
+        self.stripe_enabled = False
         
-        if self.stripe_secret_key:
-            stripe.api_key = self.stripe_secret_key
+        try:
+            # Try to get Stripe keys from environment or secrets
+            self.stripe_public_key = os.environ.get('STRIPE_PUBLIC_KEY')
+            self.stripe_secret_key = os.environ.get('STRIPE_SECRET_KEY')
+            
+            # Also try streamlit secrets if available
+            if not self.stripe_secret_key and hasattr(st, 'secrets'):
+                try:
+                    self.stripe_secret_key = st.secrets.get('STRIPE_SECRET_KEY')
+                    self.stripe_public_key = st.secrets.get('STRIPE_PUBLIC_KEY')
+                except:
+                    pass
+            
+            # Initialize Stripe if keys are available
+            if self.stripe_secret_key and self.stripe_secret_key != 'sk_test_...':
+                stripe.api_key = self.stripe_secret_key
+                self.stripe_enabled = True
+        except Exception as e:
+            # Silently handle initialization errors
+            self.stripe_enabled = False
     
     def show_pricing_page(self):
         """Display pricing plans page"""
@@ -87,6 +103,11 @@ class PaymentUI:
     
     def _initiate_stripe_checkout(self, plan_id: str):
         """Initiate Stripe checkout session"""
+        if not self.stripe_enabled:
+            st.warning("Payment processing is not configured. Please contact support to upgrade your plan.")
+            st.info("Email: emoticon.contact@gmail.com")
+            return
+            
         try:
             plan_info = PaymentPlans.get_plan_info(plan_id)
             
@@ -108,8 +129,8 @@ class PaymentUI:
                     'quantity': 1,
                 }],
                 mode='subscription',
-                success_url=f"{st.secrets.get('APP_URL', 'http://localhost:8501')}?success=true&plan={plan_id}",
-                cancel_url=f"{st.secrets.get('APP_URL', 'http://localhost:8501')}?canceled=true",
+                success_url=f"https://emotion-analyzer-z5425329.replit.app?success=true&plan={plan_id}",
+                cancel_url=f"https://emotion-analyzer-z5425329.replit.app?canceled=true",
                 metadata={
                     'plan_id': plan_id,
                     'user_id': str(st.session_state.get('user_id', 'guest'))
