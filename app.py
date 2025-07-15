@@ -164,9 +164,12 @@ cooldown_seconds = 5
 
 st.set_page_config(page_title="Emoticon – Emotion Detector", layout="wide")
 
-# Initialize theme state
+# Initialize theme state based on time of day
 if 'dark_mode' not in st.session_state:
-    st.session_state.dark_mode = True
+    from datetime import datetime
+    current_hour = datetime.now().hour
+    # Default to light mode during daytime (6 AM - 6 PM)
+    st.session_state.dark_mode = not (6 <= current_hour < 18)
 
 # Apply theme
 if st.session_state.dark_mode:
@@ -789,7 +792,8 @@ with col2:
                 
                 camera.release()
             else:
-                st.error("Camera not available")
+                st.error("Camera not available in this environment. Please use image upload or video analysis instead.")
+                st.info("For local camera access, run this application locally with proper camera permissions.")
         except Exception as e:
             st.error(f"Screen recorder test failed: {str(e)}")
 
