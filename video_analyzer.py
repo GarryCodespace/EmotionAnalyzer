@@ -30,7 +30,7 @@ class VideoEmotionAnalyzer:
         self.frame_count = 0
         self.analysis_history = []
         self.last_analysis_time = 0
-        self.min_time_between_analyses = 2.0  # Minimum 2 seconds between analyses
+        self.min_time_between_analyses = 1.0  # Minimum 1 second between analyses
         
         # Define key facial landmarks for expression analysis
         self.key_landmarks = {
@@ -209,20 +209,28 @@ class VideoEmotionAnalyzer:
         ai_analysis = ai_vision.analyze_facial_expressions(rgb_frame)
         
         # Extract expressions and analysis from AI
-        ai_expressions = ai_analysis.get('expressions', [])
-        analysis_text = ai_analysis.get('analysis', 'Neutral expression detected')
-        confidence_scores = ai_analysis.get('confidence_scores', {})
+        ai_expressions = ai_analysis.get('facial_expressions', [])
+        analysis_text = ai_analysis.get('detailed_analysis', 'Neutral expression detected')
+        emotional_state = ai_analysis.get('emotional_state', 'neutral')
+        confidence_level = ai_analysis.get('confidence_level', 'low')
         
         # Calculate landmark change for reference
         landmark_change = self.calculate_landmark_distance(self.previous_landmarks, landmarks)
         
-        # Create analysis result regardless of expressions detected
+        # Create analysis result with proper emotional state
+        final_expressions = ai_expressions if ai_expressions else [emotional_state]
+        
+        # Avoid defaulting to neutral - use emotional state if available
+        if not final_expressions or (len(final_expressions) == 1 and final_expressions[0] == 'neutral'):
+            final_expressions = [emotional_state if emotional_state != 'neutral' else 'calm']
+        
         analysis_result = {
             'timestamp': timestamp,
-            'expressions': ai_expressions if ai_expressions else ['neutral'],
+            'expressions': final_expressions,
             'ai_analysis': analysis_text,
             'frame_number': self.frame_count,
-            'confidence_scores': confidence_scores,
+            'emotional_state': emotional_state,
+            'confidence_level': confidence_level,
             'significance_score': landmark_change if self.previous_landmarks else 1.0
         }
         
@@ -258,8 +266,8 @@ class VideoEmotionAnalyzer:
         analyses = []
         frame_count = 0
         
-        # Process every 2-3 seconds to find significant moments
-        frame_skip = max(1, int(fps * 2))  # Process every 2 seconds
+        # Process every 1-2 seconds to find more expressions
+        frame_skip = max(1, int(fps * 1.5))  # Process every 1.5 seconds
         
         while cap.isOpened() and len(analyses) < max_analyses:
             ret, frame = cap.read()

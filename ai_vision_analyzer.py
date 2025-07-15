@@ -22,21 +22,25 @@ class AIVisionAnalyzer:
         """Analyze facial expressions using OpenAI Vision API"""
         base64_image = self.encode_image(image)
         
-        prompt = """Analyze this image for facial expressions and emotional states. Focus on:
+        prompt = """Analyze this image for facial expressions and emotional states with HIGH SENSITIVITY. Look for even the most subtle expressions.
+
+CRITICAL: Only use "neutral" if the person shows absolutely zero emotional expression. Be highly sensitive to detect ANY emotional cues.
 
 1. FACIAL EXPRESSIONS: Identify specific micro-expressions like:
-   - Smile variations (genuine, forced, subtle)
-   - Frown, scowl, or concern expressions
-   - Eye expressions (squinting, wide eyes, eye contact)
+   - Smile variations (genuine, forced, subtle, smirk)
+   - Frown, scowl, concern, or sadness expressions
+   - Eye expressions (squinting, wide eyes, eye contact, eye roll)
    - Eyebrow positions (raised, furrowed, asymmetrical)
-   - Mouth expressions (open, pursed, bite lip)
-   - Overall emotional state
+   - Mouth expressions (open, pursed, bite lip, compressed)
+   - Cheek tension, forehead wrinkles, jaw position
+   - Overall emotional state (happy, sad, angry, surprised, fearful, disgusted, contempt)
 
 2. BODY LANGUAGE: Analyze posture and gestures:
-   - Arm positions (crossed, open, defensive)
+   - Arm positions (crossed, open, defensive, gesturing)
    - Hand gestures and positioning
-   - Leg stance and positioning
-   - Overall body posture (confident, defensive, relaxed)
+   - Head position and tilt
+   - Shoulder positioning
+   - Overall body posture (confident, defensive, relaxed, tense)
 
 3. DECEPTION INDICATORS: Look for potential signs of deception:
    - Micro-expressions that don't match overall expression
@@ -45,14 +49,20 @@ class AIVisionAnalyzer:
    - Hand-to-face touching
    - Inconsistent expressions
 
+IMPORTANT: Be extremely observant and detect subtle emotions. Look for:
+- Slight mouth curves indicating happiness or sadness
+- Eyebrow micro-movements suggesting surprise or concern
+- Eye tension patterns indicating stress or focus
+- Head positioning suggesting confidence or submission
+
 Return a JSON object with:
 {
     "facial_expressions": ["expression1", "expression2", ...],
     "body_language": ["pattern1", "pattern2", ...],
-    "emotional_state": "primary emotional state",
+    "emotional_state": "primary emotional state - be specific and avoid neutral",
     "deception_indicators": ["indicator1", "indicator2", ...],
     "confidence_level": "high/medium/low",
-    "detailed_analysis": "comprehensive analysis in 2-3 sentences"
+    "detailed_analysis": "comprehensive analysis in 2-3 sentences describing what you actually observe"
 }"""
 
         try:
