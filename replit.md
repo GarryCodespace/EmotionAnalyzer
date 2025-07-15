@@ -10,6 +10,7 @@ Preferred communication style: Simple, everyday language.
 UI Design: Light theme (dark mode removed), proper capitalization (first letter only), seamless button integration with blue notification boxes (#e3f2fd background).
 User Experience: Homepage-first approach - users can try the product before being prompted to login. Authentication is optional for basic features, required only for saving history and premium features.
 Payment Structure: Free tier includes 1 lie detection + 1 stress analysis per day. Professional tier ($14.99/month) provides unlimited lie detection and stress analysis.
+Login Experience: After successful login, users are redirected back to the home page automatically.
 
 ## System Architecture
 
