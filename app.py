@@ -772,7 +772,7 @@ def analyze_uploaded_image(uploaded_file):
 video_col1, video_col2 = st.columns([2, 1])
 with video_col1:
     st.markdown("#### Video Analysis")
-    st.markdown("*Upload a video for intelligent expression analysis - AI analyzes only significant expression changes*")
+    st.markdown("*Upload a video for AI-powered expression analysis - detects all facial expressions*")
 
 with video_col2:
     if st.session_state.get('logged_in', False):
@@ -804,13 +804,13 @@ if uploaded_video is not None:
         st.video(uploaded_video)
         
         # Process video with progress bar
-        with st.spinner('Analyzing video for significant expression changes using AI...'):
-            video_analyzer = VideoEmotionAnalyzer(significance_threshold=0.3)
-            analyses = video_analyzer.process_video(tmp_video_path, max_analyses=8)
+        with st.spinner('Analyzing video expressions using AI...'):
+            video_analyzer = VideoEmotionAnalyzer(significance_threshold=0.1)
+            analyses = video_analyzer.process_video(tmp_video_path, max_analyses=10)
             video_summary = video_analyzer.get_video_summary()
         
         if analyses and len(analyses) > 0:
-            st.success(f"**Found {len(analyses)} significant expression moments**")
+            st.success(f"**Found {len(analyses)} expression moments**")
             
             # Display video summary
             col1, col2 = st.columns(2)
@@ -860,12 +860,11 @@ if uploaded_video is not None:
                     st.rerun()
         
         else:
-            st.info("**No significant expression changes detected in this video**")
+            st.info("**No facial expressions detected in this video**")
             st.markdown("This could mean:")
-            st.markdown("• The expressions were too subtle for AI detection")
-            st.markdown("• The person maintained a neutral expression throughout")
-            st.markdown("• The video quality may be too low for accurate analysis")
-            st.markdown("• Try uploading a video with more varied facial expressions")
+            st.markdown("• No clear face visible in the video")
+            st.markdown("• Video quality is too low for face detection")
+            st.markdown("• Try uploading a video with a clear, well-lit face")
             
     except Exception as e:
         st.error(f"Video analysis error: {str(e)}")

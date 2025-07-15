@@ -179,13 +179,14 @@ class VideoEmotionAnalyzer:
     def analyze_video_frame(self, frame, timestamp: float) -> Optional[Dict]:
         """
         Analyze a single video frame using AI vision analysis
+        Detects expressions in every frame regardless of significance
         
         Args:
             frame: OpenCV frame
             timestamp: Frame timestamp in seconds
             
         Returns:
-            Analysis result if significant change detected, None otherwise
+            Analysis result if face detected, None otherwise
         """
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         results = self.face_mesh.process(rgb_frame)
@@ -200,44 +201,40 @@ class VideoEmotionAnalyzer:
             self.frame_count += 1
             return None
         
-        # Check if landmarks have changed significantly
+        # Use AI vision analysis for accurate expression detection
+        from ai_vision_analyzer import AIVisionAnalyzer
+        ai_vision = AIVisionAnalyzer()
+        
+        # Analyze frame with AI vision
+        ai_analysis = ai_vision.analyze_facial_expressions(rgb_frame)
+        
+        # Extract expressions and analysis from AI
+        ai_expressions = ai_analysis.get('expressions', [])
+        analysis_text = ai_analysis.get('analysis', 'Neutral expression detected')
+        confidence_scores = ai_analysis.get('confidence_scores', {})
+        
+        # Calculate landmark change for reference
         landmark_change = self.calculate_landmark_distance(self.previous_landmarks, landmarks)
         
-        if landmark_change > self.significance_threshold:
-            # Use AI vision analysis for accurate expression detection
-            from ai_vision_analyzer import AIVisionAnalyzer
-            ai_vision = AIVisionAnalyzer()
-            
-            # Analyze frame with AI vision
-            ai_analysis = ai_vision.analyze_facial_expressions(rgb_frame)
-            
-            # Extract expressions and analysis from AI
-            ai_expressions = ai_analysis.get('expressions', [])
-            analysis_text = ai_analysis.get('analysis', 'No significant expression detected')
-            confidence_scores = ai_analysis.get('confidence_scores', {})
-            
-            # Only proceed if AI detects meaningful expressions
-            if ai_expressions and len(ai_expressions) > 0:
-                analysis_result = {
-                    'timestamp': timestamp,
-                    'expressions': ai_expressions,
-                    'ai_analysis': analysis_text,
-                    'frame_number': self.frame_count,
-                    'confidence_scores': confidence_scores,
-                    'significance_score': landmark_change
-                }
-                
-                self.analysis_history.append(analysis_result)
-                
-                # Update previous state and last analysis time
-                self.last_analysis_time = timestamp
-                self.previous_landmarks = landmarks
-                self.previous_expressions = set(ai_expressions)
-                
-                return analysis_result
+        # Create analysis result regardless of expressions detected
+        analysis_result = {
+            'timestamp': timestamp,
+            'expressions': ai_expressions if ai_expressions else ['neutral'],
+            'ai_analysis': analysis_text,
+            'frame_number': self.frame_count,
+            'confidence_scores': confidence_scores,
+            'significance_score': landmark_change if self.previous_landmarks else 1.0
+        }
+        
+        self.analysis_history.append(analysis_result)
+        
+        # Update previous state and last analysis time
+        self.last_analysis_time = timestamp
+        self.previous_landmarks = landmarks
+        self.previous_expressions = set(ai_expressions) if ai_expressions else set(['neutral'])
         
         self.frame_count += 1
-        return None
+        return analysis_result
     
     def process_video(self, video_path: str, max_analyses: int = 10) -> List[Dict]:
         """
