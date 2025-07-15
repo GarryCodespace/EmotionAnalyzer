@@ -422,7 +422,11 @@ st.markdown("""
 # Header with logo and login/theme toggle
 header_col1, header_col2, header_col3 = st.columns([2, 6, 2])
 with header_col1:
-    st.markdown("<br><br>", unsafe_allow_html=True)  # Push content down to align with subtitle
+    st.markdown("<br><br>", unsafe_allow_html=True)  # Push logo down to align with subtitle
+    try:
+        st.image("logo.png", width=120)
+    except:
+        st.markdown("🎭")
 with header_col2:
     st.markdown("<br>", unsafe_allow_html=True)  # Reduce spacing for closer text
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;<h1 style='font-size: 3rem; margin: 0; margin-bottom: -35px;'>Emoticon</h1>", unsafe_allow_html=True)
