@@ -502,7 +502,7 @@ setInterval(nuclearCapitalizationFix, 100);
 st.markdown("""
 <style>
 .main-content {
-    margin-top: 70px;
+    margin-top: 0px;
 }
 
 body {
@@ -639,39 +639,72 @@ function showLogin() {
 st.markdown("""
 <style>
 .hidden-buttons {
-    display: none;
+    display: none !important;
+    visibility: hidden !important;
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
+    height: 0px !important;
+    width: 0px !important;
+    opacity: 0 !important;
+    z-index: -9999 !important;
+}
+
+.hidden-buttons * {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0px !important;
+    width: 0px !important;
+    opacity: 0 !important;
+}
+
+/* Hide all buttons in the hidden container */
+.hidden-buttons button,
+.hidden-buttons [data-testid="stButton"],
+.hidden-buttons [data-testid="stPopover"] {
+    display: none !important;
+    visibility: hidden !important;
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
+    height: 0px !important;
+    width: 0px !important;
+    opacity: 0 !important;
+    z-index: -9999 !important;
 }
 </style>
 """, unsafe_allow_html=True)
 
-with st.container():
-    st.markdown('<div class="hidden-buttons">', unsafe_allow_html=True)
+# Create a completely hidden container for the buttons
+st.markdown("""
+<div class="hidden-buttons" style="position: absolute; top: -9999px; left: -9999px; height: 0; width: 0; opacity: 0; z-index: -9999;">
+""", unsafe_allow_html=True)
+
+# Hidden search button for JavaScript to trigger
+if st.button("🔍", key="search_btn", help="Search"):
+    st.session_state.show_search = True
+    st.rerun()
+
+# Hidden login functionality
+if st.session_state.get('logged_in', False):
+    user_email = st.session_state.get('user_email', 'User')
+    user_name = user_email.split('@')[0].title()
     
-    # Hidden search button for JavaScript to trigger
-    if st.button("🔍", key="search_btn", help="Search"):
-        st.session_state.show_search = True
-        st.rerun()
-    
-    # Hidden login functionality
-    if st.session_state.get('logged_in', False):
-        user_email = st.session_state.get('user_email', 'User')
-        user_name = user_email.split('@')[0].title()
-        
-        # User dropdown menu
-        with st.popover(f"👤 {user_name}"):
-            st.markdown(f"**{user_email}**")
-            st.markdown("---")
-            if st.button("Account Settings", key="account_settings_btn", use_container_width=True):
-                st.session_state.show_account_settings = True
-                st.rerun()
-            if st.button("Logout", key="logout_btn", use_container_width=True):
-                logout_user()
-    else:
-        if st.button("Log in", key="login_btn"):
-            st.session_state.show_login_modal = True
+    # User dropdown menu
+    with st.popover(f"👤 {user_name}"):
+        st.markdown(f"**{user_email}**")
+        st.markdown("---")
+        if st.button("Account Settings", key="account_settings_btn", use_container_width=True):
+            st.session_state.show_account_settings = True
             st.rerun()
-    
-    st.markdown('</div>', unsafe_allow_html=True)
+        if st.button("Logout", key="logout_btn", use_container_width=True):
+            logout_user()
+else:
+    if st.button("Log in", key="login_btn"):
+        st.session_state.show_login_modal = True
+        st.rerun()
+
+st.markdown('</div>', unsafe_allow_html=True)
 
 # Main content container
 st.markdown('<div class="main-content">', unsafe_allow_html=True)
