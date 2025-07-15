@@ -97,20 +97,30 @@ Return a JSON object with:
                 "detailed_analysis": f"Analysis error: {str(e)}"
             }
     
-    def analyze_emotion_context(self, image, expressions: List[str]) -> str:
-        """Get contextual emotional analysis"""
+    def analyze_emotion_context(self, image, context: List[str]) -> Dict:
+        """Get contextual emotional analysis with user-provided scenario"""
         base64_image = self.encode_image(image)
         
-        prompt = f"""Based on the detected expressions: {', '.join(expressions)}, provide a comprehensive emotional analysis of this person.
+        scenario_context = context[0] if context else ""
+        
+        prompt = f"""Analyze this image for facial expressions and emotions with the following context: {scenario_context}
 
-Focus on:
-- Underlying emotional state and mood
-- Social context and interpersonal dynamics
-- Confidence levels and self-assurance
-- Potential stress or anxiety indicators
-- Overall psychological assessment
+Provide detailed analysis focusing on:
+- Specific facial expressions and micro-expressions
+- Body language patterns visible
+- Emotional state relevant to the given context
+- Confidence levels and authenticity
+- Stress or anxiety indicators
+- Overall psychological assessment for this scenario
 
-Keep response to 150 words maximum. Be insightful and professional."""
+Return a JSON object with:
+{{
+    "facial_expressions": ["expression1", "expression2", ...],
+    "body_language": ["pattern1", "pattern2", ...],
+    "emotional_state": "primary emotional state - be specific and avoid neutral",
+    "confidence_level": "high/medium/low",
+    "detailed_analysis": "comprehensive analysis in 2-3 sentences describing what you observe in relation to the context"
+}}"""
 
         try:
             response = self.client.chat.completions.create(
@@ -127,13 +137,21 @@ Keep response to 150 words maximum. Be insightful and professional."""
                         ]
                     }
                 ],
-                max_tokens=300
+                response_format={"type": "json_object"},
+                max_tokens=1000
             )
             
-            return response.choices[0].message.content
+            result = json.loads(response.choices[0].message.content)
+            return result
             
         except Exception as e:
-            return f"Analysis error: {str(e)}"
+            return {
+                "facial_expressions": [],
+                "body_language": [],
+                "emotional_state": "unknown",
+                "confidence_level": "low",
+                "detailed_analysis": f"Context analysis error: {str(e)}"
+            }
     
     def analyze_deception_probability(self, image, detected_indicators: List[str]) -> Dict:
         """Analyze deception probability using AI vision"""
