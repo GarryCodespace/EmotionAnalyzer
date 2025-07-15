@@ -1389,7 +1389,7 @@ with col1:
 
 with col2:
     if st.button("🎯 Interview Mode", type="primary"):
-        st.session_state.show_simple_recorder = True
+        st.session_state.show_working_recorder = True
         st.rerun()
 
 with col3:
@@ -1499,6 +1499,12 @@ if st.session_state.get('show_web_camera', False):
             st.markdown("• Adjust analysis interval based on your needs")
             st.markdown("• Perfect for self-awareness during meetings")
             st.markdown("• Track emotional patterns over time")
+
+# Working Screen Recorder Section
+if st.session_state.get('show_working_recorder', False):
+    st.markdown("---")
+    from working_screen_recorder import working_screen_recorder
+    working_screen_recorder()
 
 # Simple Live Camera Section
 if st.session_state.get('show_simple_camera', False):
