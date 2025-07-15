@@ -2,6 +2,104 @@ import streamlit as st
 from auth import auth_system
 from datetime import datetime
 import time
+import uuid
+import json
+
+def save_login_state(user_data):
+    """Save login state to browser storage"""
+    login_data = {
+        'user_id': user_data['user_id'],
+        'email': user_data['email'],
+        'session_token': user_data['session_token'],
+        'login_time': datetime.now().isoformat(),
+        'remember_me': True
+    }
+    
+    # Use streamlit's session state to persist across page reloads
+    st.session_state.persistent_login = login_data
+    
+    # Save to browser cookies using HTML meta tag approach
+    login_js = f"""
+    <script>
+        // Set cookie for 30 days
+        const expires = new Date();
+        expires.setTime(expires.getTime() + (30 * 24 * 60 * 60 * 1000));
+        document.cookie = "emoticon_login=" + encodeURIComponent('{json.dumps(login_data)}') + 
+                         "; expires=" + expires.toUTCString() + "; path=/";
+    </script>
+    """
+    st.components.v1.html(login_js, height=0)
+
+def load_login_state():
+    """Load login state from browser storage"""
+    # First check streamlit session state
+    if 'persistent_login' in st.session_state:
+        login_data = st.session_state.persistent_login
+        
+        # Validate session token is still valid
+        if login_data.get('session_token'):
+            result = auth_system.validate_session(login_data['session_token'])
+            if result['success']:
+                return login_data
+    
+    # Try to load from browser cookies
+    cookie_js = """
+    <script>
+        // Function to get cookie value
+        function getCookie(name) {
+            const value = "; " + document.cookie;
+            const parts = value.split("; " + name + "=");
+            if (parts.length === 2) return parts.pop().split(";").shift();
+            return null;
+        }
+        
+        const cookieValue = getCookie('emoticon_login');
+        if (cookieValue) {
+            try {
+                const data = JSON.parse(decodeURIComponent(cookieValue));
+                // Store in session state for subsequent loads
+                window.parent.postMessage({type: 'login_data', data: data}, '*');
+            } catch (e) {
+                console.error('Error parsing login cookie:', e);
+            }
+        }
+    </script>
+    """
+    st.components.v1.html(cookie_js, height=0)
+    
+    return None
+
+def clear_login_state():
+    """Clear login state from browser storage"""
+    if 'persistent_login' in st.session_state:
+        del st.session_state.persistent_login
+    
+    clear_js = """
+    <script>
+        // Clear cookie by setting it to expire immediately
+        document.cookie = "emoticon_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    </script>
+    """
+    st.components.v1.html(clear_js, height=0)
+
+def auto_login():
+    """Automatically log in user if valid session exists"""
+    if not st.session_state.get('logged_in', False):
+        login_data = load_login_state()
+        if login_data:
+            # Validate session token
+            result = auth_system.validate_session(login_data['session_token'])
+            if result['success']:
+                st.session_state.logged_in = True
+                st.session_state.user_email = login_data['email']
+                st.session_state.user_id = login_data['user_id']
+                st.session_state.session_token = login_data['session_token']
+                return True
+            else:
+                # Invalid session, clear stored data
+                clear_login_state()
+    
+    return st.session_state.get('logged_in', False)
 
 def show_login_form():
     """Display login form"""
@@ -10,6 +108,7 @@ def show_login_form():
     with st.form("login_form"):
         email = st.text_input("Email", placeholder="Enter your email")
         password = st.text_input("Password", type="password", placeholder="Enter your password")
+        remember_me = st.checkbox("Remember me", value=True)
         
         col1, col2 = st.columns(2)
         with col1:
@@ -27,6 +126,10 @@ def show_login_form():
                 result = auth_system.login_user(email, password)
                 
                 if result['success']:
+                    # Save login state to browser storage if remember me is checked
+                    if remember_me:
+                        save_login_state(result)
+                    
                     st.session_state.logged_in = True
                     st.session_state.user_email = result['email']
                     st.session_state.user_id = result['user_id']
@@ -100,8 +203,11 @@ def logout_user():
     if st.session_state.get('session_token'):
         auth_system.logout_user(st.session_state.session_token)
     
+    # Clear persistent login state
+    clear_login_state()
+    
     # Clear session state
-    keys_to_clear = ['logged_in', 'user_email', 'user_id', 'session_token', 'show_account_settings', 'show_login_modal']
+    keys_to_clear = ['logged_in', 'user_email', 'user_id', 'session_token', 'show_account_settings', 'show_login_modal', 'persistent_login']
     for key in keys_to_clear:
         if key in st.session_state:
             del st.session_state[key]
@@ -191,6 +297,10 @@ def show_account_settings():
 
 def check_authentication():
     """Check if user is authenticated and session is valid"""
+    # Try auto-login from persistent storage first
+    if not st.session_state.get('logged_in', False):
+        auto_login()
+    
     if st.session_state.get('logged_in', False) and st.session_state.get('session_token'):
         # Validate session
         result = auth_system.validate_session(st.session_state.session_token)
