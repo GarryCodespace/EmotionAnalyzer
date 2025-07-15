@@ -252,9 +252,8 @@ def show_screen_recorder_interview():
     component_value = components.html(screen_recorder_html, height=1200)
     
     # Process screen frame data
-    if component_value and isinstance(component_value, dict):
-        if 'screen_frame' in component_value:
-            process_screen_frame(component_value)
+    if component_value and isinstance(component_value, dict) and 'screen_frame' in component_value:
+        process_screen_frame(component_value)
     
     # Display recent analysis results
     if 'screen_analysis_results' in st.session_state and st.session_state.screen_analysis_results:
@@ -291,11 +290,8 @@ def process_screen_frame(frame_data):
     """Process captured screen frame for interview analysis"""
     
     try:
-        st.write(f"Debug: Processing frame {frame_data.get('frame_count', 'unknown')}")
-        
         # Check daily usage limit
         if not check_daily_limit(show_upgrade_prompt=False):
-            st.write("Debug: Daily limit reached")
             return
         
         # Decode base64 image
@@ -315,7 +311,7 @@ def process_screen_frame(frame_data):
         # Analyze with AI Vision
         ai_vision = AIVisionAnalyzer()
         
-        # Enhanced analysis for interview context
+        # Use comprehensive analysis for interview context
         context_prompt = """
         This is a screen recording during a job interview. Provide a comprehensive paragraph analysis (4-6 sentences) 
         of the person's emotional state and interview performance. Focus on:
@@ -329,12 +325,8 @@ def process_screen_frame(frame_data):
         Be specific about what you observe and provide constructive insights.
         """
         
-        st.write("Debug: Starting AI analysis...")
-        
-        # Use simpler analysis method to avoid hanging
-        analysis = ai_vision.analyze_facial_expressions(image_array)
-        
-        st.write(f"Debug: Analysis complete. Keys: {list(analysis.keys())}")
+        # Use contextual analysis for better insights
+        analysis = ai_vision.analyze_emotion_context(image_array, [context_prompt])
         
         # Track usage
         UsageTracker.track_analysis("screen_interview", st.session_state.get('user_id'))
