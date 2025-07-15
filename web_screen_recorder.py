@@ -154,7 +154,7 @@ def screen_recorder_page():
                                     )
                         
                         # Display frame
-                        stframe.image(frame_rgb, channels="RGB", use_column_width=True)
+                        stframe.image(frame_rgb, channels="RGB", use_container_width=True)
                         
                         # Add small delay
                         time.sleep(0.1)
