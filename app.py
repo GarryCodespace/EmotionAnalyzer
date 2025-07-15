@@ -503,6 +503,12 @@ def analyze_uploaded_image(uploaded_file):
     # Display AI analysis summary
     st.success(f"**AI Vision Analysis Complete** - Confidence: {confidence_level.title()}")
     
+    # Handle no-face detection scenario
+    if emotional_state == "no face detected":
+        st.warning("**No Face Detected**")
+        st.markdown(f"**Guidance**: {detailed_analysis}")
+        return  # Exit early for no-face scenarios
+    
     # Display emotional state
     if emotional_state and emotional_state != "neutral":
         st.info(f"**Primary Emotional State**: {emotional_state.title()}")

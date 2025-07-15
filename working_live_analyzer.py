@@ -250,7 +250,35 @@ def process_frame_simple(frame_data):
                 
             else:
                 expressions = []
-                analysis = "No face detected in the current frame. Please ensure you are visible in the camera view for accurate emotion analysis."
+                
+                # Generate AI analysis for no-face scenario
+                response = client.chat.completions.create(
+                    model="gpt-4o", # the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": "You are an expert emotion analyst. When no face is detected, provide helpful guidance and suggestions."
+                        },
+                        {
+                            "role": "user",
+                            "content": f"""
+                            No face detected in frame {frame_data.get('frame_count', 1)}. 
+                            
+                            Provide a helpful 4-6 sentence analysis including:
+                            1. Explanation of why face detection is important for emotion analysis
+                            2. Tips for optimal camera positioning and lighting
+                            3. Suggestions for improving visibility
+                            4. Encouragement to try again with better positioning
+                            
+                            Write in a supportive and instructional tone.
+                            """
+                        }
+                    ],
+                    max_tokens=250,
+                    temperature=0.7
+                )
+                
+                analysis = response.choices[0].message.content
                 confidence = "low"
             
             return {

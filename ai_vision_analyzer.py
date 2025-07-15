@@ -22,6 +22,28 @@ class AIVisionAnalyzer:
         """Analyze facial expressions using OpenAI Vision API"""
         base64_image = self.encode_image(image)
         
+        # First check if there's a face using MediaPipe
+        import mediapipe as mp
+        import cv2
+        
+        mp_face_detection = mp.solutions.face_detection
+        with mp_face_detection.FaceDetection(min_detection_confidence=0.6) as face_detection:
+            rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            results = face_detection.process(rgb_image)
+            
+            if not results.detections:
+                # No face detected - return special analysis
+                return {
+                    "analysis": json.dumps({
+                        "facial_expressions": [],
+                        "body_language": [],
+                        "emotional_state": "no face detected",
+                        "deception_indicators": [],
+                        "confidence_level": "low",
+                        "detailed_analysis": "No face detected in the image. For accurate emotion analysis, please ensure: 1) You are clearly visible in the frame, 2) The image has good lighting, 3) Your face is not obscured by objects, hands, or shadows, 4) The camera is positioned at eye level for optimal detection. Try taking a new photo with better positioning and lighting conditions."
+                    })
+                }
+        
         prompt = """Analyze this image for facial expressions and emotional states with HIGH SENSITIVITY. Look for even the most subtle expressions.
 
 CRITICAL: Only use "neutral" if the person shows absolutely zero emotional expression. Be highly sensitive to detect ANY emotional cues.
@@ -100,6 +122,26 @@ Return a JSON object with:
     def analyze_emotion_context(self, image, context: List[str]) -> Dict:
         """Get contextual emotional analysis with user-provided scenario"""
         base64_image = self.encode_image(image)
+        
+        # First check if there's a face using MediaPipe
+        import mediapipe as mp
+        import cv2
+        
+        mp_face_detection = mp.solutions.face_detection
+        with mp_face_detection.FaceDetection(min_detection_confidence=0.6) as face_detection:
+            rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            results = face_detection.process(rgb_image)
+            
+            if not results.detections:
+                # No face detected - return contextual no-face analysis
+                scenario_context = context[0] if context else ""
+                return {
+                    "facial_expressions": [],
+                    "body_language": [],
+                    "emotional_state": "no face detected",
+                    "confidence_level": "low",
+                    "detailed_analysis": f"No face detected in the image for context: {scenario_context}. For accurate emotion analysis in this scenario, please ensure: 1) You are clearly visible in the frame, 2) The image has good lighting, 3) Your face is not obscured by objects, hands, or shadows, 4) The camera is positioned at eye level for optimal detection. Try taking a new photo with better positioning and lighting conditions."
+                }
         
         scenario_context = context[0] if context else ""
         
