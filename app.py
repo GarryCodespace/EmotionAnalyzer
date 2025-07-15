@@ -1410,6 +1410,70 @@ st.markdown("""
 6. **Multi-Face Support**: Analyze multiple people simultaneously in images and videos
 """)
 
+# Screen Recorder Mode Section
+st.markdown("---")
+st.markdown("### Screen Recorder Mode")
+st.markdown("Record and analyze expressions during video calls")
+
+st.markdown("#### How to Use Screen Recorder Mode")
+st.markdown("**For External Video Calls:**")
+st.markdown("""
+• Open your video call app (Zoom, Teams, etc.)
+• Position this window where you can see it
+• Use the webcam mode below during your call
+• Get live analysis as you speak
+""")
+
+st.markdown("**Features:**")
+st.markdown("""
+• Real-time expression analysis
+• Smart detection of significant changes
+• Configurable sensitivity
+• Session history tracking
+• Export analysis results
+""")
+
+# Settings for Screen Recorder
+st.markdown("#### Settings")
+col1, col2 = st.columns(2)
+
+with col1:
+    st.markdown("**Analysis Sensitivity**")
+    sensitivity = st.slider("", 0.0, 1.0, 0.10, 0.01, key="screen_sensitivity")
+
+with col2:
+    st.markdown("**Analysis Cooldown (seconds)**")
+    cooldown = st.slider("", 3, 15, 3, 1, key="screen_cooldown")
+
+# Live Analysis Section
+st.markdown("#### Live Analysis")
+if st.button("Start Screen Recording Analysis", key="start_screen_analysis"):
+    st.switch_page("pages/screen_recorder.py")
+
+# Analysis Results
+st.markdown("#### Analysis Results")
+st.info("No analysis results yet. Start live analysis to see results here.")
+
+# Tips Section
+st.markdown("#### Tips for Best Results")
+col1, col2 = st.columns(2)
+
+with col1:
+    st.markdown("**Lighting:**")
+    st.markdown("""
+    • Ensure good lighting on your face
+    • Avoid backlighting
+    • Keep camera at eye level
+    """)
+
+with col2:
+    st.markdown("**During Video Calls:**")
+    st.markdown("""
+    • Keep this window visible
+    • Position camera for clear face view
+    • Minimize background movement
+    """)
+
 st.markdown("### Features")
 st.markdown("""
 - **AI Vision Analysis**: OpenAI GPT-4o Vision API for comprehensive emotion detection
