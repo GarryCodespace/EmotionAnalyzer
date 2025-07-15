@@ -107,13 +107,12 @@ st.markdown("""
         <span class="nav-item">Home</span>
         <span class="nav-item active">About</span>
         <span class="nav-item">Contact</span>
-        <span class="nav-item">Screen Recorder</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
 # Navigation functionality using columns - styled buttons
-nav_col1, nav_col2, nav_col3, nav_col4, nav_col5 = st.columns([1, 1, 1, 1, 2])
+nav_col1, nav_col2, nav_col3, nav_col4 = st.columns([1, 1, 1, 1])
 
 with nav_col1:
     if st.button("Home", key="nav_home", use_container_width=True):
@@ -130,10 +129,6 @@ with nav_col3:
 with nav_col4:
     if st.button("Career", key="nav_career", use_container_width=True):
         st.switch_page("pages/career.py")
-
-with nav_col5:
-    if st.button("Screen Recorder", key="nav_screen", use_container_width=True):
-        st.switch_page("pages/screen_recorder.py")
 
 # Style the navigation buttons to match the design
 st.markdown("""

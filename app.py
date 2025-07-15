@@ -175,33 +175,7 @@ st.set_page_config(page_title="Emoticon – Emotion Detector", layout="wide")
 
 
 # Initialize projects data
-if 'projects' not in st.session_state:
-    st.session_state.projects = [
-        {
-            'id': str(uuid.uuid4()),
-            'name': 'Emoticon AI Roadmap',
-            'type': 'startup',
-            'description': 'Strategic roadmap for AI emotion detection platform',
-            'created': datetime.now().strftime('%Y-%m-%d'),
-            'status': 'active'
-        },
-        {
-            'id': str(uuid.uuid4()),
-            'name': 'AI Screen Automation',
-            'type': 'startup', 
-            'description': 'Automated screen recording and analysis system',
-            'created': datetime.now().strftime('%Y-%m-%d'),
-            'status': 'active'
-        },
-        {
-            'id': str(uuid.uuid4()),
-            'name': 'AI Website Builders',
-            'type': 'startup',
-            'description': 'Automated website generation for startups',
-            'created': datetime.now().strftime('%Y-%m-%d'),
-            'status': 'active'
-        }
-    ]
+
 
 # Apply light theme
 st.markdown("""
@@ -342,7 +316,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Navigation functionality using columns - styled buttons
-nav_col1, nav_col2, nav_col3, nav_col4, nav_col5, nav_col6 = st.columns([1, 1, 1, 1, 1, 1])
+nav_col1, nav_col2, nav_col3, nav_col4, nav_col5 = st.columns([1, 1, 1, 1, 1])
 
 with nav_col1:
     if st.button("Home", key="nav_home", use_container_width=True):
@@ -363,10 +337,6 @@ with nav_col4:
 with nav_col5:
     if st.button("Career", key="nav_career", use_container_width=True):
         st.switch_page("pages/career.py")
-
-with nav_col6:
-    if st.button("Screen Recorder", key="nav_screen", use_container_width=True):
-        st.switch_page("pages/screen_recorder.py")
 
 # Style the navigation buttons to match the design
 st.markdown("""
@@ -784,23 +754,6 @@ if not st.session_state.get('logged_in', False):
         st.markdown("**Instant Results**")
         st.markdown("Get analysis in seconds")
 
-# Combined Upload Analysis with Use Cases
-st.markdown("---")
-st.markdown("### Upload Analysis - Perfect for Any Scenario")
-
-# Show use case suggestions in a stylish format
-st.markdown("**Popular Use Cases:**")
-use_case_col1, use_case_col2, use_case_col3, use_case_col4 = st.columns(4)
-
-with use_case_col1:
-    st.markdown("• **For Fun** - Analyze photos")
-with use_case_col2:
-    st.markdown("• **Interview** - Assess candidates")
-with use_case_col3:
-    st.markdown("• **Date** - Read emotions")
-with use_case_col4:
-    st.markdown("• **Interrogation** - Detect deception")
-
 st.markdown("---")
 
 # AI Tools Section
@@ -867,15 +820,7 @@ with tools_col5:
         st.session_state.show_deception_level_tool = True
         st.rerun()
 
-with tools_col6:
-    st.markdown("""
-    <div style="text-align: center; padding: 10px;">
-        <div style="font-size: 14px; font-weight: 600;">Screen Record</div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    if st.button("➕", key="screen_record_tool", use_container_width=True):
-        st.switch_page("pages/screen_recorder.py")
+
 
 # Show upload interfaces when tools are activated
 if st.session_state.get('show_upload_image', False):
@@ -1439,11 +1384,11 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.markdown("**Analysis Sensitivity**")
-    sensitivity = st.slider("", 0.0, 1.0, 0.10, 0.01, key="screen_sensitivity")
+    sensitivity = st.slider("Sensitivity", 0.0, 1.0, 0.10, 0.01, key="screen_sensitivity", label_visibility="collapsed")
 
 with col2:
     st.markdown("**Analysis Cooldown (seconds)**")
-    cooldown = st.slider("", 3, 15, 3, 1, key="screen_cooldown")
+    cooldown = st.slider("Cooldown", 3, 15, 3, 1, key="screen_cooldown", label_visibility="collapsed")
 
 # Live Analysis Section
 st.markdown("#### Live Analysis")
