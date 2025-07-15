@@ -845,6 +845,20 @@ with tools_col3:
 with tools_col4:
     st.markdown("""
     <div style="text-align: center; padding: 10px;">
+        <div style="font-size: 14px; font-weight: 600;">Stress Analyzer</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    if st.button("➕", key="stress_analyzer_tool", use_container_width=True):
+        st.session_state.show_stress_analyzer_tool = True
+        st.rerun()
+
+# Second row of tools
+tools_col5, tools_col6, tools_col7, tools_col8 = st.columns(4)
+
+with tools_col5:
+    st.markdown("""
+    <div style="text-align: center; padding: 10px;">
         <div style="font-size: 14px; font-weight: 600;">Screen Record</div>
     </div>
     """, unsafe_allow_html=True)
@@ -1007,61 +1021,127 @@ if st.session_state.get('show_lie_detector_tool', False):
     st.markdown("---")
     st.markdown("### AI Lie Detector Tool")
     
-    # Check if user has access to lie detector
-    if not payment_ui.check_feature_access('lie_detector'):
-        st.warning("AI Lie Detector requires Professional plan or higher")
-        if st.button("Upgrade to Professional", key="upgrade_for_lie_detector"):
+    # Check daily usage limit
+    if not PaymentPlans.check_lie_detection_limit():
+        st.error("Daily lie detection limit reached (1 per day)")
+        st.info("Upgrade to Professional for unlimited lie detections")
+        if st.button("Upgrade to Professional", key="upgrade_lie_unlimited"):
             st.switch_page("pages/pricing.py")
     else:
-        st.success("AI Lie Detector Active - Upload an image or video above to analyze deception patterns")
-        st.info("This tool analyzes micro-expressions, body language, and behavioral patterns to assess truthfulness probability")
+        st.success("AI Lie Detector Active - Upload an image to analyze deception patterns")
+        st.info("This tool analyzes micro-expressions and behavioral patterns to assess truthfulness probability (1 use per day)")
+        
+        # Upload image for lie detection
+        lie_uploaded_file = st.file_uploader("Choose image file for lie detection", type=['jpg', 'jpeg', 'png'], key="lie_detector_upload")
+        
+        if lie_uploaded_file is not None:
+            image = cv2.imdecode(np.frombuffer(lie_uploaded_file.read(), np.uint8), cv2.IMREAD_COLOR)
+            
+            # Process with AI vision
+            with st.spinner('Analyzing for deception indicators...'):
+                context = st.session_state.get('analysis_context', 'Analyze this person for deception indicators and truthfulness.')
+                ai_analysis = ai_vision.analyze_emotion_context(image, [context])
+                
+                # Run lie detector analysis
+                facial_expressions = ai_analysis.get('facial_expressions', [])
+                body_patterns = []  # Simple implementation
+                
+                deception_analysis = lie_detector.analyze_deception(facial_expressions, body_patterns)
+                
+                # Increment lie detection usage
+                PaymentPlans.increment_lie_detection()
+                
+                deception_probability = deception_analysis.get('deception_probability', 0.0)
+                confidence_level = deception_analysis.get('confidence_level', 'Low')
+                key_indicators = deception_analysis.get('key_indicators', [])
+                
+                # Display results
+                st.image(image, channels="BGR", caption="Analyzed Image")
+                
+                # Display deception probability with color coding
+                if deception_probability >= 0.7:
+                    st.error(f"**Deception Risk**: HIGH ({deception_probability:.1%}) - Confidence: {confidence_level}")
+                elif deception_probability >= 0.4:
+                    st.warning(f"**Deception Risk**: MEDIUM ({deception_probability:.1%}) - Confidence: {confidence_level}")
+                else:
+                    st.success(f"**Deception Risk**: LOW ({deception_probability:.1%}) - Confidence: {confidence_level}")
+                
+                # Display key indicators
+                if key_indicators:
+                    st.markdown("**Key Deception Indicators:**")
+                    for indicator in key_indicators[:5]:
+                        st.markdown(f"• {indicator}")
+                
+                # Get AI interpretation
+                ai_interpretation = deception_analysis.get('ai_interpretation', '')
+                if ai_interpretation:
+                    st.markdown("**AI Deception Analysis:**")
+                    st.markdown(ai_interpretation)
         
         # Reset tool state
         if st.button("Close Tool", key="close_lie_detector"):
             st.session_state.show_lie_detector_tool = False
             st.rerun()
 
-
-
+# Show Stress Analyzer Tool if activated
+if st.session_state.get('show_stress_analyzer_tool', False):
+    st.markdown("---")
+    st.markdown("### Stress & Anxiety Analyzer Tool")
     
-    # Stress Analysis (Premium Feature)
-    st.markdown("### Stress & Anxiety Level")
-    
-    # Check if user has access to stress detector
-    if not payment_ui.check_feature_access('stress_detector'):
-        st.warning("Stress Analysis requires Professional plan or higher")
-    elif not PaymentPlans.check_stress_detection_limit():
-        st.error("Daily stress detection limit reached (1 per day)")
-        st.info("Upgrade to Enterprise for unlimited stress analysis")
-        if st.button("Upgrade to Enterprise", key="upgrade_stress_unlimited"):
-            st.switch_page("pages/billing.py")
+    # Check daily usage limit
+    if not PaymentPlans.check_stress_detection_limit():
+        st.error("Daily stress analysis limit reached (1 per day)")
+        st.info("Upgrade to Professional for unlimited stress analysis")
+        if st.button("Upgrade to Professional", key="upgrade_stress_unlimited"):
+            st.switch_page("pages/pricing.py")
     else:
-        # Run stress analysis
-        stress_analysis = stress_analyzer.analyze_stress_level(image)
+        st.success("Stress Analyzer Active - Upload an image to analyze stress and anxiety levels")
+        st.info("This tool analyzes facial expressions and body language to assess stress levels (1 use per day)")
         
-        # Increment stress detection usage
-        PaymentPlans.increment_stress_detection()
+        # Upload image for stress analysis
+        stress_uploaded_file = st.file_uploader("Choose image file for stress analysis", type=['jpg', 'jpeg', 'png'], key="stress_analyzer_upload")
         
-        # Display stress level
-        stress_percentage = stress_analysis['stress_percentage']
-        stress_level = stress_analysis['stress_level']
-        stress_color = stress_analysis['stress_color']
+        if stress_uploaded_file is not None:
+            image = cv2.imdecode(np.frombuffer(stress_uploaded_file.read(), np.uint8), cv2.IMREAD_COLOR)
+            
+            # Process with stress analyzer
+            with st.spinner('Analyzing stress and anxiety levels...'):
+                stress_analysis = stress_analyzer.analyze_stress_level(image)
+                
+                # Increment stress detection usage
+                PaymentPlans.increment_stress_detection()
+                
+                # Display results
+                st.image(image, channels="BGR", caption="Analyzed Image")
+                
+                # Display stress level
+                stress_percentage = stress_analysis['stress_percentage']
+                stress_level = stress_analysis['stress_level']
+                stress_color = stress_analysis['stress_color']
+                
+                st.markdown(f"**Stress Level**: <span style='color: {stress_color}; font-weight: bold;'>You look {stress_percentage}% stressed ({stress_level})</span>", 
+                           unsafe_allow_html=True)
+                
+                # Show stress indicators
+                if stress_analysis.get('indicators'):
+                    st.markdown("**Stress Indicators:**")
+                    for indicator in stress_analysis['indicators'][:4]:
+                        st.markdown(f"• {indicator.replace('_', ' ').title()}")
+                
+                # Show recommendations
+                if stress_analysis.get('recommendations'):
+                    st.markdown("**Recommendations:**")
+                    for rec in stress_analysis['recommendations'][:3]:
+                        st.markdown(f"• {rec}")
         
-        st.markdown(f"**Stress Level**: <span style='color: {stress_color}; font-weight: bold;'>You look {stress_percentage}% stressed ({stress_level})</span>", 
-                   unsafe_allow_html=True)
-        
-        # Show stress indicators
-        if stress_analysis.get('indicators'):
-            st.markdown("**Stress Indicators:**")
-            for indicator in stress_analysis['indicators'][:4]:
-                st.markdown(f"• {indicator.replace('_', ' ').title()}")
-        
-        # Show recommendations
-        if stress_analysis.get('recommendations'):
-            st.markdown("**Recommendations:**")
-            for rec in stress_analysis['recommendations'][:3]:
-                st.markdown(f"• {rec}")
-    
+        # Reset tool state
+        if st.button("Close Tool", key="close_stress_analyzer"):
+            st.session_state.show_stress_analyzer_tool = False
+            st.rerun()
+
+
+
+
 
 
 # Handle video upload from session state (if set by video tool)
