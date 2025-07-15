@@ -498,7 +498,129 @@ setInterval(nuclearCapitalizationFix, 100);
 
 
 
-# Header with logo and login/theme toggle
+# Add top header with search and login buttons
+st.markdown("""
+<style>
+.top-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 12px 24px;
+    z-index: 1000;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.search-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: white;
+}
+
+.search-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+.login-btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 25px;
+    padding: 8px 20px;
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.login-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-1px);
+}
+
+.main-content {
+    margin-top: 70px;
+}
+
+.search-icon {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+}
+</style>
+
+<div class="top-header">
+    <div class="search-btn" onclick="toggleSearch()">
+        <svg class="search-icon" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="M21 21l-4.35-4.35"></path>
+        </svg>
+    </div>
+    <div class="login-btn" onclick="showLogin()">Log in</div>
+</div>
+
+<script>
+function toggleSearch() {
+    console.log('Search clicked');
+}
+
+function showLogin() {
+    const loginButton = document.querySelector('[data-testid="stButton"][title="login_btn"]');
+    if (loginButton) {
+        loginButton.click();
+    }
+}
+</script>
+""", unsafe_allow_html=True)
+
+# Top header buttons functionality
+top_col1, top_col2, top_col3 = st.columns([8, 1, 1])
+
+with top_col2:
+    if st.button("🔍", key="search_btn", help="Search"):
+        st.session_state.show_search = True
+        st.rerun()
+
+with top_col3:
+    if st.session_state.get('logged_in', False):
+        user_email = st.session_state.get('user_email', 'User')
+        user_name = user_email.split('@')[0].title()
+        
+        # User dropdown menu
+        with st.popover(f"👤 {user_name}"):
+            st.markdown(f"**{user_email}**")
+            st.markdown("---")
+            if st.button("Account Settings", key="account_settings_btn", use_container_width=True):
+                st.session_state.show_account_settings = True
+                st.rerun()
+            if st.button("Logout", key="logout_btn", use_container_width=True):
+                logout_user()
+    else:
+        if st.button("Log in", key="login_btn"):
+            st.session_state.show_login_modal = True
+            st.rerun()
+
+# Main content container
+st.markdown('<div class="main-content">', unsafe_allow_html=True)
+
+# Header with logo and title
 header_col1, header_col2, header_col3 = st.columns([2, 6, 2])
 with header_col1:
     st.markdown("<br><br>", unsafe_allow_html=True)  # Push logo down to align with subtitle
@@ -517,25 +639,6 @@ with header_col2:
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;<p style='margin-top: -10px; font-size: 0.9rem; color: #666;'>Try it now - Upload an image to experience AI emotion analysis</p>", unsafe_allow_html=True)
 with header_col3:
     st.markdown("<br>", unsafe_allow_html=True)  # Add some spacing
-    
-    # Login/User menu in top right
-    if st.session_state.get('logged_in', False):
-        user_email = st.session_state.get('user_email', 'User')
-        user_name = user_email.split('@')[0].title()
-        
-        # User dropdown menu
-        with st.popover(f"👤 {user_name}"):
-            st.markdown(f"**{user_email}**")
-            st.markdown("---")
-            if st.button("Account Settings", key="account_settings_btn", use_container_width=True):
-                st.session_state.show_account_settings = True
-                st.rerun()
-            if st.button("Logout", key="logout_btn", use_container_width=True):
-                logout_user()
-    else:
-        if st.button("Log in", key="login_btn"):
-            st.session_state.show_login_modal = True
-            st.rerun()
     
 
 
@@ -1651,5 +1754,46 @@ if st.session_state.get('show_test_recorder', False):
     st.markdown("---")
     from test_screen_recorder import test_screen_recorder
     test_screen_recorder()
+
+# Search Modal
+if st.session_state.get('show_search', False):
+    st.markdown("---")
+    st.markdown("### Search")
+    
+    search_query = st.text_input("Search for features, analysis tools, or help topics:", placeholder="e.g., lie detector, stress analysis, how to use")
+    
+    if search_query:
+        st.markdown("**Search Results:**")
+        
+        # Simple search functionality
+        search_results = []
+        
+        if "lie" in search_query.lower() or "deception" in search_query.lower():
+            search_results.append(("AI Lie Detector", "Analyze facial expressions and body language for deception indicators"))
+        
+        if "stress" in search_query.lower() or "anxiety" in search_query.lower():
+            search_results.append(("Stress Analyzer", "Detect stress and anxiety levels from facial expressions"))
+        
+        if "video" in search_query.lower() or "upload" in search_query.lower():
+            search_results.append(("Video Analysis", "Upload videos to analyze emotional changes over time"))
+        
+        if "live" in search_query.lower() or "camera" in search_query.lower():
+            search_results.append(("Live Camera", "Real-time emotion analysis using your webcam"))
+        
+        if "screen" in search_query.lower() or "record" in search_query.lower():
+            search_results.append(("Screen Recorder", "Record screen activity with emotion analysis overlay"))
+        
+        if search_results:
+            for title, description in search_results:
+                st.markdown(f"**{title}**: {description}")
+        else:
+            st.info("No results found. Try searching for: lie detector, stress analysis, video upload, live camera, or screen recorder")
+    
+    if st.button("Close Search", key="close_search"):
+        st.session_state.show_search = False
+        st.rerun()
+
+# Close main content div
+st.markdown('</div>', unsafe_allow_html=True)
 
 
