@@ -13,7 +13,7 @@ from video_analyzer import VideoEmotionAnalyzer
 from body_language_analyzer import BodyLanguageAnalyzer
 from lie_detector import LieDetector
 from ai_vision_analyzer import AIVisionAnalyzer
-from login_ui import require_authentication, show_user_menu, show_account_settings, init_auth_session
+from login_ui import require_authentication, show_user_menu, show_account_settings, init_auth_session, logout_user, show_login_modal
 
 # Setup MediaPipe
 mp_face_mesh = mp.solutions.face_mesh
@@ -464,7 +464,7 @@ st.markdown("""
 
 
 
-# Header with logo and theme toggle
+# Header with logo and login/theme toggle
 header_col1, header_col2, header_col3 = st.columns([2, 6, 2])
 with header_col1:
     st.markdown("<br><br>", unsafe_allow_html=True)  # Push logo down to align with subtitle
@@ -478,7 +478,27 @@ with header_col2:
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;<p style='margin-top: -35px;'>Live AI Emotion Interpretation from Micro-Expressions</p>", unsafe_allow_html=True)
 with header_col3:
     st.markdown("<br>", unsafe_allow_html=True)  # Add some spacing
-
+    
+    # Login/User menu in top right
+    if st.session_state.get('logged_in', False):
+        user_email = st.session_state.get('user_email', 'User')
+        user_name = user_email.split('@')[0].title()
+        
+        # User dropdown menu
+        with st.popover(f"👤 {user_name}"):
+            st.markdown(f"**{user_email}**")
+            st.markdown("---")
+            if st.button("Account Settings", key="account_settings_btn", use_container_width=True):
+                st.session_state.show_account_settings = True
+                st.rerun()
+            if st.button("Logout", key="logout_btn", use_container_width=True):
+                logout_user()
+    else:
+        if st.button("Log in", key="login_btn"):
+            st.session_state.show_login_modal = True
+            st.rerun()
+    
+    # Theme toggle button
     theme_button_text = "🌙 Dark" if not st.session_state.dark_mode else "☀️ Light"
     if st.button(theme_button_text, key="theme_toggle"):
         st.session_state.dark_mode = not st.session_state.dark_mode
@@ -490,17 +510,18 @@ try:
 except Exception as e:
     st.error(f"❌ Database connection issue: {str(e)}")
 
-# Check authentication - require login to access the app
-if not require_authentication():
-    st.stop()
+# Initialize auth session
+init_auth_session()
 
 # Show account settings if requested
 if st.session_state.get('show_account_settings', False):
     show_account_settings()
     st.stop()
 
-# Show user menu in sidebar
-show_user_menu()
+# Show login modal if requested
+if st.session_state.get('show_login_modal', False):
+    show_login_modal()
+    st.stop()
 
 # API Key Status Check
 try:
@@ -519,10 +540,12 @@ if 'session_id' not in st.session_state:
 with st.sidebar:
     st.markdown("### 📊 Analysis History")
     
-    # Get user's analysis history from database
-    try:
-        history = get_user_history(st.session_state.session_id, limit=10)
-        if history:
+    # Only show history for logged in users
+    if st.session_state.get('logged_in', False):
+        # Get user's analysis history from database
+        try:
+            history = get_user_history(st.session_state.session_id, limit=10)
+            if history:
             for idx, analysis in enumerate(history):
                 timestamp = analysis.timestamp.strftime('%H:%M %m/%d')
                 analysis_type = analysis.analysis_type.title()
@@ -570,10 +593,18 @@ with st.sidebar:
 # Image Upload Analysis
 st.markdown("---")
 st.markdown("### Image Upload Analysis")
-uploaded_file = st.file_uploader("Upload an image for expression analysis", type=['jpg', 'jpeg', 'png'])
 
-if uploaded_file is not None:
-    analyze_uploaded_image(uploaded_file)
+# Check if user is logged in
+if not st.session_state.get('logged_in', False):
+    st.info("Please log in to access emotion analysis features")
+    if st.button("Login to Analyze Images", key="login_for_image_analysis"):
+        st.session_state.show_login_modal = True
+        st.rerun()
+else:
+    uploaded_file = st.file_uploader("Upload an image for expression analysis", type=['jpg', 'jpeg', 'png'])
+    
+    if uploaded_file is not None:
+        analyze_uploaded_image(uploaded_file)
 
 def analyze_uploaded_image(uploaded_file):
     """Analyze the uploaded image"""
@@ -781,13 +812,23 @@ with video_col1:
     st.markdown("*Upload a video for intelligent expression analysis - AI analyzes only significant expression changes*")
 
 with video_col2:
-    live_lie_detector = st.checkbox('Live Lie Detector', key='live_lie_detector')
-    if live_lie_detector:
-        st.session_state.enable_live_lie_detector = True
+    if st.session_state.get('logged_in', False):
+        live_lie_detector = st.checkbox('Live Lie Detector', key='live_lie_detector')
+        if live_lie_detector:
+            st.session_state.enable_live_lie_detector = True
+        else:
+            st.session_state.enable_live_lie_detector = False
     else:
-        st.session_state.enable_live_lie_detector = False
+        st.info("Login required for advanced features")
 
-uploaded_video = st.file_uploader("Upload a video for expression analysis", type=['mp4', 'avi', 'mov', 'mkv'])
+# Check if user is logged in for video analysis
+if not st.session_state.get('logged_in', False):
+    st.info("Please log in to access video analysis features")
+    if st.button("Login to Analyze Videos", key="login_for_video_analysis"):
+        st.session_state.show_login_modal = True
+        st.rerun()
+else:
+    uploaded_video = st.file_uploader("Upload a video for expression analysis", type=['mp4', 'avi', 'mov', 'mkv'])
 
 if uploaded_video is not None:
     # Save uploaded video to temporary file
