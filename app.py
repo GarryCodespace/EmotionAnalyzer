@@ -13,6 +13,7 @@ from video_analyzer import VideoEmotionAnalyzer
 from body_language_analyzer import BodyLanguageAnalyzer
 from lie_detector import LieDetector
 from ai_vision_analyzer import AIVisionAnalyzer
+from stress_analyzer import StressAnalyzer
 from login_ui import require_authentication, show_user_menu, show_account_settings, init_auth_session, logout_user, show_login_modal
 from payment_ui import PaymentUI
 from payment_plans import PaymentPlans, UsageTracker
@@ -25,6 +26,7 @@ face_mesh = mp_face_mesh.FaceMesh(static_image_mode=False, max_num_faces=5, refi
 body_analyzer = BodyLanguageAnalyzer()
 lie_detector = LieDetector()
 ai_vision = AIVisionAnalyzer()
+stress_analyzer = StressAnalyzer()
 payment_ui = PaymentUI()
 
 # Define 100+ gestures (some with reduced sensitivity thresholds)
