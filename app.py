@@ -905,8 +905,14 @@ with tools_col1:
     """, unsafe_allow_html=True)
     
     if st.button("➕", key="upload_image_tool", use_container_width=True):
-        st.session_state.show_upload_image = True
-        st.rerun()
+        # Check if user is logged in
+        if not st.session_state.get('logged_in', False):
+            st.session_state.show_login_modal = True
+            st.session_state.login_redirect = "upload_image"
+            st.rerun()
+        else:
+            st.session_state.show_upload_image = True
+            st.rerun()
 
 with tools_col2:
     st.markdown("""
@@ -916,8 +922,14 @@ with tools_col2:
     """, unsafe_allow_html=True)
     
     if st.button("➕", key="upload_video_tool", use_container_width=True):
-        st.session_state.show_upload_video = True
-        st.rerun()
+        # Check if user is logged in
+        if not st.session_state.get('logged_in', False):
+            st.session_state.show_login_modal = True
+            st.session_state.login_redirect = "upload_video"
+            st.rerun()
+        else:
+            st.session_state.show_upload_video = True
+            st.rerun()
 
 with tools_col3:
     st.markdown("""
@@ -1512,8 +1524,14 @@ with col2:
 col1, col2, col3 = st.columns(3)
 with col1:
     if st.button("📹 Start Web Camera", type="primary"):
-        st.session_state.show_working_live_analyzer = True
-        st.rerun()
+        # Check if user is logged in
+        if not st.session_state.get('logged_in', False):
+            st.session_state.show_login_modal = True
+            st.session_state.login_redirect = "live_camera"
+            st.rerun()
+        else:
+            st.session_state.show_working_live_analyzer = True
+            st.rerun()
 
 with col3:
     if st.button("🧪 Test Debug", type="secondary"):
