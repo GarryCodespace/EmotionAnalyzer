@@ -222,6 +222,36 @@ if st.session_state.dark_mode:
         background-color: #2d2d2d;
         color: #ffffff;
     }
+    
+    /* Capitalize sidebar navigation items */
+    .css-1d391kg p {
+        text-transform: capitalize;
+    }
+    
+    /* Alternative selector for sidebar navigation */
+    [data-testid="stSidebar"] .css-1d391kg p {
+        text-transform: capitalize;
+    }
+    
+    /* More specific selector for navigation items */
+    .css-1d391kg p:first-child {
+        text-transform: capitalize;
+    }
+    
+    /* Target nav links in sidebar */
+    .css-1d391kg a {
+        text-transform: capitalize;
+    }
+    
+    /* Target navigation labels */
+    .css-1d391kg span {
+        text-transform: capitalize;
+    }
+    
+    /* General sidebar navigation capitalization */
+    [data-testid="stSidebar"] ul li a {
+        text-transform: capitalize;
+    }
     </style>
     """, unsafe_allow_html=True)
 else:
@@ -249,6 +279,36 @@ else:
         background-color: #f8f8f8;
         color: #000000;
         border: 1px solid #ddd;
+    }
+    
+    /* Capitalize sidebar navigation items */
+    .css-1d391kg p {
+        text-transform: capitalize;
+    }
+    
+    /* Alternative selector for sidebar navigation */
+    [data-testid="stSidebar"] .css-1d391kg p {
+        text-transform: capitalize;
+    }
+    
+    /* More specific selector for navigation items */
+    .css-1d391kg p:first-child {
+        text-transform: capitalize;
+    }
+    
+    /* Target nav links in sidebar */
+    .css-1d391kg a {
+        text-transform: capitalize;
+    }
+    
+    /* Target navigation labels */
+    .css-1d391kg span {
+        text-transform: capitalize;
+    }
+    
+    /* General sidebar navigation capitalization */
+    [data-testid="stSidebar"] ul li a {
+        text-transform: capitalize;
     }
     div[data-testid="stAlert"] > div {
         background-color: #fff3cd;

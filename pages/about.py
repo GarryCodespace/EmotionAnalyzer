@@ -1,6 +1,6 @@
 import streamlit as st
 
-st.set_page_config(page_title="About Emoticon", layout="wide")
+st.set_page_config(page_title="About - Emoticon", layout="wide")
 
 # Initialize theme state based on time of day
 if 'dark_mode' not in st.session_state:
