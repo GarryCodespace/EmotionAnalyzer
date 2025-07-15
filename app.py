@@ -1316,8 +1316,16 @@ if st.session_state.get('show_web_camera', False):
     if not check_daily_limit():
         st.error("Daily usage limit reached. Please upgrade to continue.")
     else:
-        # Camera capture using Streamlit's built-in camera input
-        st.info("📹 **Instructions**: Click the camera button below to take a photo for instant AI analysis!")
+        # Live camera streaming
+        from live_camera import show_live_camera, init_live_camera
+        
+        init_live_camera()
+        show_live_camera()
+        
+        # Alternative: Single photo capture
+        st.markdown("---")
+        st.markdown("#### Alternative: Single Photo Analysis")
+        st.markdown("*Take a single photo for instant analysis*")
         
         camera_photo = st.camera_input("Take a photo for expression analysis")
         
@@ -1345,7 +1353,7 @@ if st.session_state.get('show_web_camera', False):
                     UsageTracker.track_analysis("camera", st.session_state.get('user_id'))
                     
                     # Display results
-                    st.success("**Live Analysis Complete!**")
+                    st.success("**Photo Analysis Complete!**")
                     
                     col1, col2 = st.columns(2)
                     
@@ -1383,7 +1391,8 @@ if st.session_state.get('show_web_camera', False):
                     st.error(f"Error processing camera photo: {str(e)}")
         
         # Tips for better camera results
-        st.markdown("#### Tips for Better Camera Results")
+        st.markdown("---")
+        st.markdown("#### Tips for Better Results")
         col1, col2 = st.columns(2)
         
         with col1:
@@ -1395,9 +1404,9 @@ if st.session_state.get('show_web_camera', False):
         
         with col2:
             st.markdown("**During Video Calls:**")
-            st.markdown("• Take photos during key moments")
-            st.markdown("• Analyze different emotional states")
-            st.markdown("• Use for self-awareness during meetings")
+            st.markdown("• Use live analysis for continuous monitoring")
+            st.markdown("• Adjust analysis interval based on your needs")
+            st.markdown("• Perfect for self-awareness during meetings")
             st.markdown("• Track emotional patterns over time")
 
 
