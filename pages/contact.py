@@ -318,10 +318,6 @@ with col2:
     
     🐦 **TWITTER**: [@EMOTICONAI](https://twitter.com/emoticon)
     
-    💼 **LINKEDIN**: [EMOTICON](https://linkedin.com/company/emoticon)
-    
-    🐙 **GITHUB**: [GITHUB.COM/EMOTICON](https://github.com/emoticon)
-    
     ---
     
     ### Office Location
@@ -375,7 +371,6 @@ with st.expander("How do I report a bug or suggest a feature?"):
     You can report bugs or suggest features by:
     1. Using the contact form above with "Bug Report" or "Feature Request" as the subject
     2. Emailing us directly at emoticon.contact@gmail.com
-    3. Opening an issue on our GitHub repository
     """)
 
 # Navigation
