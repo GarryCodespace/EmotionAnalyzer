@@ -20,17 +20,19 @@ class PaymentPlans:
                 'Image upload analysis',
                 'Video upload analysis',
                 'Demo mode access',
-                'Limited to 5 analyses per day'
+                'Limited to 5 analyses per day',
+                'AI lie detector (1/day)',
+                'Stress analysis (1/day)'
             ],
             'limits': {
                 'daily_analyses': 5,
                 'save_history': False,
-                'lie_detector': False,
-                'stress_detector': False,
+                'lie_detector': True,
+                'stress_detector': True,
                 'advanced_features': False,
                 'api_access': False,
-                'daily_lie_detections': 0,
-                'daily_stress_detections': 0
+                'daily_lie_detections': 1,
+                'daily_stress_detections': 1
             },
             'stripe_price_id': None,
             'recommended': False
@@ -42,8 +44,8 @@ class PaymentPlans:
             'features': [
                 'Unlimited emotion analysis',
                 'Save analysis history',
-                'AI lie detector analysis (1/day)',
-                'Stress level estimation (1/day)',
+                'Unlimited AI lie detector',
+                'Unlimited stress analysis',
                 'Advanced AI insights',
                 'Body language analysis',
                 'Batch video processing',
@@ -58,8 +60,8 @@ class PaymentPlans:
                 'stress_detector': True,
                 'advanced_features': True,
                 'api_access': True,
-                'daily_lie_detections': 1,
-                'daily_stress_detections': 1
+                'daily_lie_detections': -1,
+                'daily_stress_detections': -1
             },
             'stripe_price_id': 'price_pro_monthly',
             'recommended': True
