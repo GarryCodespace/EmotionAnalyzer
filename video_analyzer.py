@@ -143,7 +143,8 @@ class VideoEmotionAnalyzer:
     def is_significant_change(self, current_landmarks, current_expressions) -> bool:
         """Determine if there's a significant change in expression"""
         if self.previous_landmarks is None:
-            return True
+            # Only return True if there are actual expressions detected
+            return len(current_expressions) > 0
         
         # Calculate geometric distance between landmark sets
         landmark_distance = self.calculate_landmark_distance(
@@ -155,14 +156,15 @@ class VideoEmotionAnalyzer:
         previous_expr_set = self.previous_expressions
         
         # Significant change if:
-        # 1. Large geometric change in facial landmarks
-        # 2. New expressions appeared or disappeared
-        # 3. Major expression category change
+        # 1. Large geometric change in facial landmarks AND expressions exist
+        # 2. New expressions appeared or disappeared AND they are meaningful
+        # 3. Must have expressions to be considered significant
         
         geometric_change = landmark_distance > self.significance_threshold
         expression_change = len(current_expr_set.symmetric_difference(previous_expr_set)) > 0
+        has_expressions = len(current_expressions) > 0
         
-        return geometric_change or expression_change
+        return (geometric_change or expression_change) and has_expressions
     
     def analyze_video_frame(self, frame, timestamp: float) -> Optional[Dict]:
         """
@@ -186,8 +188,8 @@ class VideoEmotionAnalyzer:
         
         # Check if this is a significant change
         if self.is_significant_change(landmarks, current_expressions):
-            # Generate AI analysis
-            if current_expressions:
+            # Generate AI analysis ONLY if expressions are detected AND significant
+            if current_expressions and len(current_expressions) > 0:
                 ai_analysis = analyze_expression(", ".join(current_expressions))
                 
                 analysis_result = {

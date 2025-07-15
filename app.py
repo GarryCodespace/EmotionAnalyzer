@@ -605,7 +605,7 @@ if uploaded_video is not None:
         
         # Process video with progress bar
         with st.spinner('Analyzing video for significant expression changes...'):
-            video_analyzer = VideoEmotionAnalyzer(significance_threshold=0.12)
+            video_analyzer = VideoEmotionAnalyzer(significance_threshold=0.18)
             analyses = video_analyzer.process_video(tmp_video_path, max_analyses=15)
             video_summary = video_analyzer.get_video_summary()
         
