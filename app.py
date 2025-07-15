@@ -504,7 +504,12 @@ def analyze_uploaded_image(uploaded_file):
     
     # Process image with AI vision analysis
     with st.spinner('Analyzing image with AI vision...'):
-        ai_analysis = ai_vision.analyze_facial_expressions(image)
+        # Get context if provided
+        context = st.session_state.get('analysis_context', '')
+        if context:
+            ai_analysis = ai_vision.analyze_emotion_context(image, [context])
+        else:
+            ai_analysis = ai_vision.analyze_facial_expressions(image)
     
     # Extract analysis results
     detected_expressions = ai_analysis.get("facial_expressions", [])
@@ -663,6 +668,54 @@ def analyze_uploaded_image(uploaded_file):
         if st.button("Login to Save History", key="login_for_image_save"):
             st.session_state.show_login_modal = True
             st.rerun()
+
+# Popular Use Cases Section
+st.markdown("---")
+st.markdown("### 💡 Popular Use Cases")
+st.markdown("*Describe your specific scenario for better analysis*")
+
+# Create columns for use case examples
+case_col1, case_col2, case_col3, case_col4 = st.columns(4)
+
+with case_col1:
+    if st.button("😄 For Fun\nAnalyze photos with friends", key="fun_case", use_container_width=True):
+        st.session_state.analysis_context = "I'm having fun analyzing photos with friends to see what our facial expressions reveal about our personalities and emotions during social moments."
+        st.rerun()
+
+with case_col2:
+    if st.button("💼 Interview\nAssess candidates", key="interview_case", use_container_width=True):
+        st.session_state.analysis_context = "I'm analyzing an interview video to assess the candidate's confidence level, honesty, and stress indicators during the hiring process."
+        st.rerun()
+
+with case_col3:
+    if st.button("💕 Date\nRead emotions", key="date_case", use_container_width=True):
+        st.session_state.analysis_context = "I'm analyzing photos from a date to understand the person's genuine interest level and emotional state during our interaction."
+        st.rerun()
+
+with case_col4:
+    if st.button("🔍 Interrogation\nDetect deception", key="interrogation_case", use_container_width=True):
+        st.session_state.analysis_context = "I'm analyzing this person to detect deception indicators and assess truthfulness based on facial micro-expressions and body language."
+        st.rerun()
+
+# Context input for better analysis
+st.markdown("### 📝 Describe Your Scenario")
+context_input = st.text_area(
+    "Tell us about your situation to get more personalized analysis:",
+    value=st.session_state.get('analysis_context', ''),
+    placeholder="Example: I'm analyzing a job interview video to understand the candidate's confidence level and honesty during technical questions...",
+    height=80,
+    key="analysis_context_input"
+)
+
+if context_input:
+    st.session_state.analysis_context = context_input
+    st.success("Context saved! Your analysis will be tailored to this scenario.")
+
+# Clear context button
+if st.session_state.get('analysis_context'):
+    if st.button("Clear Context", key="clear_context"):
+        st.session_state.analysis_context = ""
+        st.rerun()
 
 # Add Analysis History to Sidebar
 with st.sidebar:
