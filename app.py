@@ -686,71 +686,41 @@ with use_case_col4:
 
 st.markdown("---")
 
-# File upload section with styled interface
-st.markdown("""
-<style>
-.upload-section {
-    background: #f8f9fa;
-    border: 2px dashed #dee2e6;
-    border-radius: 12px;
-    padding: 20px;
-    margin: 10px 0;
-    text-align: center;
-    transition: all 0.3s ease;
-}
-.upload-section:hover {
-    border-color: #007bff;
-    background: #e3f2fd;
-}
-.upload-icon {
-    font-size: 48px;
-    margin-bottom: 10px;
-    color: #6c757d;
-}
-.upload-title {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 5px;
-    color: #343a40;
-}
-.upload-subtitle {
-    font-size: 14px;
-    color: #6c757d;
-    margin-bottom: 15px;
-}
-</style>
-""", unsafe_allow_html=True)
-
-upload_col1, upload_col2 = st.columns(2)
-
-with upload_col1:
-    st.markdown("""
-    <div class="upload-section">
-        <div class="upload-icon">📁</div>
-        <div class="upload-title">Image Analysis</div>
-        <div class="upload-subtitle">Upload photos for instant emotion detection</div>
-    </div>
-    """, unsafe_allow_html=True)
-    uploaded_file = st.file_uploader("Choose image file", type=['jpg', 'jpeg', 'png'], key="image_upload", label_visibility="collapsed")
-    
-with upload_col2:
-    st.markdown("""
-    <div class="upload-section">
-        <div class="upload-icon">📹</div>
-        <div class="upload-title">Video Analysis</div>
-        <div class="upload-subtitle">Upload videos for timeline emotion tracking</div>
-    </div>
-    """, unsafe_allow_html=True)
-    uploaded_video = st.file_uploader("Choose video file", type=['mp4', 'avi', 'mov', 'mkv'], key="video_upload", label_visibility="collapsed")
+# Upload instructions
+st.info("Click the ➕ buttons below to upload files or access AI tools")
 
 # AI Tools Section
 st.markdown("---")
 st.markdown("### AI Tools")
 
 # Simple plus sign tools design
-tools_col1, tools_col2, tools_col3 = st.columns(3)
+tools_col1, tools_col2, tools_col3, tools_col4 = st.columns(4)
 
 with tools_col1:
+    st.markdown("""
+    <div style="text-align: center; padding: 10px;">
+        <div style="font-size: 24px; margin-bottom: 5px;">📁</div>
+        <div style="font-size: 14px; font-weight: 600;">Upload Image</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    if st.button("➕", key="upload_image_tool", use_container_width=True):
+        st.session_state.show_upload_image = True
+        st.rerun()
+
+with tools_col2:
+    st.markdown("""
+    <div style="text-align: center; padding: 10px;">
+        <div style="font-size: 24px; margin-bottom: 5px;">📹</div>
+        <div style="font-size: 14px; font-weight: 600;">Upload Video</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    if st.button("➕", key="upload_video_tool", use_container_width=True):
+        st.session_state.show_upload_video = True
+        st.rerun()
+
+with tools_col3:
     st.markdown("""
     <div style="text-align: center; padding: 10px;">
         <div style="font-size: 24px; margin-bottom: 5px;">🔍</div>
@@ -762,27 +732,125 @@ with tools_col1:
         st.session_state.show_lie_detector_tool = True
         st.rerun()
 
-with tools_col2:
+with tools_col4:
     st.markdown("""
     <div style="text-align: center; padding: 10px;">
         <div style="font-size: 24px; margin-bottom: 5px;">📊</div>
-        <div style="font-size: 14px; font-weight: 600;">Expression Analytics</div>
+        <div style="font-size: 14px; font-weight: 600;">Analytics</div>
     </div>
     """, unsafe_allow_html=True)
     
     if st.button("➕", key="analytics_tool", use_container_width=True):
         st.switch_page("pages/analytics.py")
 
-with tools_col3:
-    st.markdown("""
-    <div style="text-align: center; padding: 10px;">
-        <div style="font-size: 24px; margin-bottom: 5px;">⚙️</div>
-        <div style="font-size: 14px; font-weight: 600;">Settings</div>
-    </div>
-    """, unsafe_allow_html=True)
+# Show upload interfaces when tools are activated
+if st.session_state.get('show_upload_image', False):
+    st.markdown("---")
+    st.markdown("### Upload Image")
+    uploaded_file = st.file_uploader("Choose image file", type=['jpg', 'jpeg', 'png'], key="image_upload_tool")
     
-    if st.button("➕", key="settings_tool", use_container_width=True):
-        st.session_state.show_account_settings = True
+    if uploaded_file is not None:
+        analyze_uploaded_image(uploaded_file)
+    
+    if st.button("Close", key="close_upload_image"):
+        st.session_state.show_upload_image = False
+        st.rerun()
+
+if st.session_state.get('show_upload_video', False):
+    st.markdown("---")
+    st.markdown("### Upload Video")
+    uploaded_video = st.file_uploader("Choose video file", type=['mp4', 'avi', 'mov', 'mkv'], key="video_upload_tool")
+    
+    if uploaded_video is not None:
+        # Process the video directly
+        # Check daily usage limit
+        if not payment_ui.check_daily_limit():
+            st.stop()
+        
+        # Save uploaded video to temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp_file:
+            tmp_file.write(uploaded_video.read())
+            tmp_video_path = tmp_file.name
+        
+        # Track usage
+        UsageTracker.track_analysis("video", st.session_state.get('user_id'))
+        
+        try:
+            # Display video
+            st.video(uploaded_video)
+            
+            # Process video with progress bar
+            with st.spinner('Analyzing video expressions using AI...'):
+                video_analyzer = VideoEmotionAnalyzer(significance_threshold=0.1)
+                analyses = video_analyzer.process_video(tmp_video_path, max_analyses=10)
+                video_summary = video_analyzer.get_video_summary()
+            
+            if analyses and len(analyses) > 0:
+                st.success(f"**Found {len(analyses)} expression moments**")
+                
+                # Display video summary
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.metric("Total Analyses", video_summary['total_analyses'])
+                    if video_summary['dominant_emotions']:
+                        st.markdown("**Dominant Emotions:**")
+                        for emotion, count in video_summary['dominant_emotions']:
+                            st.write(f"• {emotion}: {count} times")
+                
+                with col2:
+                    st.markdown("**Expression Timeline:**")
+                    for moment in video_summary['timeline'][:5]:
+                        timestamp = moment['timestamp']
+                        minutes = int(timestamp // 60)
+                        seconds = int(timestamp % 60)
+                        time_str = f"{minutes}:{seconds:02d}" if minutes > 0 else f"{seconds}s"
+                        st.write(f"{time_str}: {', '.join(moment['expressions'])}")
+                
+                # Display detailed analyses
+                st.markdown("**Detailed Analysis of Significant Moments:**")
+                for i, analysis in enumerate(analyses[:8]):
+                    timestamp = analysis['timestamp']
+                    minutes = int(timestamp // 60)
+                    seconds = int(timestamp % 60)
+                    time_str = f"{minutes}:{seconds:02d}" if minutes > 0 else f"{seconds}s"
+                    with st.expander(f"Moment {i+1} - {time_str} (Significance: {analysis['significance_score']:.2f})"):
+                        st.write(f"**Detected Expressions**: {', '.join(analysis['expressions'])}")
+                        st.write(f"**AI Analysis**: {analysis['ai_analysis']}")
+                        st.write(f"**Frame**: {analysis['frame_number']}")
+                        
+                        # Save significant analyses to database only if logged in
+                        if st.session_state.get('logged_in', False):
+                            save_emotion_analysis(
+                                session_id=st.session_state.session_id,
+                                expressions=analysis['expressions'],
+                                ai_analysis=analysis['ai_analysis'],
+                                analysis_type="video",
+                                confidence=analysis['significance_score']
+                            )
+                
+                # Show login prompt if not logged in
+                if not st.session_state.get('logged_in', False):
+                    st.info("💡 Login to save analysis history and access advanced features")
+                    if st.button("Login to Save History", key="login_for_video_save_tool"):
+                        st.session_state.show_login_modal = True
+                        st.rerun()
+            
+            else:
+                st.info("**No facial expressions detected in this video**")
+                st.markdown("This could mean:")
+                st.markdown("• No clear face visible in the video")
+                st.markdown("• Video quality is too low for face detection")
+                st.markdown("• Try uploading a video with a clear, well-lit face")
+                
+        except Exception as e:
+            st.error(f"Video analysis error: {str(e)}")
+        finally:
+            # Clean up temporary file
+            if os.path.exists(tmp_video_path):
+                os.unlink(tmp_video_path)
+    
+    if st.button("Close", key="close_upload_video"):
+        st.session_state.show_upload_video = False
         st.rerun()
 
 # Show AI Lie Detector Tool if activated
@@ -934,11 +1002,10 @@ def analyze_uploaded_image(uploaded_file):
             st.session_state.show_login_modal = True
             st.rerun()
 
-# Process uploaded files
-if uploaded_file is not None:
-    analyze_uploaded_image(uploaded_file)
-
-if uploaded_video is not None:
+# Handle video upload from session state (if set by video tool)
+if st.session_state.get('uploaded_video') is not None:
+    uploaded_video = st.session_state.uploaded_video
+    st.session_state.uploaded_video = None  # Clear it to prevent re-processing
     # Check daily usage limit
     if not payment_ui.check_daily_limit():
         st.stop()
