@@ -144,8 +144,22 @@ def show_login_form():
                     st.session_state.session_token = result['session_token']
                     st.session_state.show_login_modal = False
                     st.success("Login successful!")
+                    
+                    # Handle redirect after login
+                    redirect_to = st.session_state.get('login_redirect', None)
+                    if redirect_to:
+                        if redirect_to == "upload_image":
+                            st.session_state.show_upload_image = True
+                        elif redirect_to == "upload_video":
+                            st.session_state.show_upload_video = True
+                        elif redirect_to == "live_camera":
+                            st.session_state.show_working_live_analyzer = True
+                        # Clear redirect state
+                        if 'login_redirect' in st.session_state:
+                            del st.session_state.login_redirect
+                    
                     time.sleep(1)
-                    st.switch_page("app.py")
+                    st.rerun()
                 else:
                     st.error(result['error'])
 
@@ -184,7 +198,33 @@ def show_register_form():
                 result = auth_system.register_user(email, password)
                 
                 if result['success']:
-                    st.success("Account created successfully! Please login.")
+                    st.success("Account created successfully! You are now logged in.")
+                    
+                    # Auto-login after registration
+                    login_result = auth_system.login_user(email, password)
+                    if login_result['success']:
+                        st.session_state.logged_in = True
+                        st.session_state.user_email = login_result['email']
+                        st.session_state.user_id = login_result['user_id']
+                        st.session_state.session_token = login_result['session_token']
+                        st.session_state.show_login_modal = False
+                        
+                        # Save login state
+                        save_login_state(login_result)
+                        
+                        # Handle redirect after registration
+                        redirect_to = st.session_state.get('login_redirect', None)
+                        if redirect_to:
+                            if redirect_to == "upload_image":
+                                st.session_state.show_upload_image = True
+                            elif redirect_to == "upload_video":
+                                st.session_state.show_upload_video = True
+                            elif redirect_to == "live_camera":
+                                st.session_state.show_working_live_analyzer = True
+                            # Clear redirect state
+                            if 'login_redirect' in st.session_state:
+                                del st.session_state.login_redirect
+                    
                     st.session_state.show_register = False
                     time.sleep(1)
                     st.rerun()
@@ -226,9 +266,31 @@ def logout_user():
     st.rerun()
 
 def show_login_modal():
-    """Display login modal"""
+    """Display login modal with social login options"""
     st.markdown("## Login to Emoticon")
     st.markdown("*Access advanced emotion analysis features*")
+    
+    # Add social login options
+    st.markdown("### Quick Login Options")
+    
+    # Create columns for social login buttons
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        if st.button("🔍 Continue with Google", key="google_login", use_container_width=True, type="primary"):
+            st.info("🚧 Google login integration coming soon! Please use email login below.")
+    
+    with col2:
+        if st.button("🍎 Continue with Apple", key="apple_login", use_container_width=True, type="primary"):
+            st.info("🚧 Apple login integration coming soon! Please use email login below.")
+    
+    with col3:
+        if st.button("📱 Continue with Phone", key="phone_login", use_container_width=True, type="primary"):
+            st.info("🚧 Phone login integration coming soon! Please use email login below.")
+    
+    # Add divider
+    st.markdown("---")
+    st.markdown("### Or use Email")
     
     # Initialize registration state
     if 'show_register' not in st.session_state:

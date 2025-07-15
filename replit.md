@@ -13,6 +13,8 @@ Payment Structure: Free tier includes 1 lie detection + 1 stress analysis per da
 Login Experience: After successful login, users are redirected back to the home page automatically. Sessions persist for 30 days with automatic refresh, eliminating the need for daily logins. Browser cookies maintain login state across sessions.
 Use Case Scenarios: Added popular use cases (For Fun, Interview, Date, Interrogation) with clickable buttons that auto-fill context for personalized AI analysis.
 Interface: Removed session data and statistics display from sidebar for cleaner interface.
+Authentication Requirements: Upload file and live camera features now require login. Users are redirected to login modal when attempting to access these features without authentication.
+Social Login: Added Gmail, Apple, and phone number login options in the login modal (currently showing "coming soon" placeholders).
 
 ## System Architecture
 
