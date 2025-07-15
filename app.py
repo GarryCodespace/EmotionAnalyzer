@@ -685,10 +685,7 @@ with use_case_col4:
 
 st.markdown("---")
 
-
-
 # AI Tools Section
-st.markdown("---")
 st.markdown("### AI Tools")
 
 # Simple plus sign tools design
