@@ -122,7 +122,7 @@ if st.session_state.is_recording:
             frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             
             # Display frame
-            camera_placeholder.image(frame_rgb, channels="RGB", use_column_width=True)
+            camera_placeholder.image(frame_rgb, channels="RGB", use_container_width=True)
             
             # Analyze frame
             current_time = time.time()
