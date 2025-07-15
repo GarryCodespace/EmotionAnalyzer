@@ -394,10 +394,24 @@ st.markdown("""
 header_col1, header_col2, header_col3 = st.columns([2, 6, 2])
 with header_col1:
     st.markdown("<br><br>", unsafe_allow_html=True)  # Push logo down to align with subtitle
-    try:
-        st.image("logo.png", width=120)
-    except:
-        st.markdown("🎭")
+    
+    # Clickable logo using HTML/JavaScript
+    logo_html = """
+    <div onclick="window.parent.postMessage({type: 'streamlit:rerun', data: {action: 'go_home'}}, '*')" 
+         style="cursor: pointer; display: inline-block;">
+        <img src="logo.png" width="120" style="cursor: pointer;" 
+             onerror="this.outerHTML='<div style=&quot;font-size: 4rem; cursor: pointer;&quot;>🎭</div>';">
+    </div>
+    """
+    st.markdown(logo_html, unsafe_allow_html=True)
+    
+    # Handle logo click
+    if st.button("🏠", key="home_btn", help="Go to home page"):
+        # Clear all session states to go back to home
+        for key in list(st.session_state.keys()):
+            if key.startswith('show_'):
+                del st.session_state[key]
+        st.rerun()
 with header_col2:
     st.markdown("<br>", unsafe_allow_html=True)  # Reduce spacing for closer text
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;<h1 style='font-size: 3rem; margin: 0; margin-bottom: -35px;'>Emoticon</h1>", unsafe_allow_html=True)
