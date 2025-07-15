@@ -237,17 +237,19 @@ with col1:
     st.markdown("""
     ## Why Emoticon?
     
-    Human expressions are often missed — fleeting moments of truth hidden in plain sight. Inspired by criminal interrogation techniques, **Emoticon** recognizes over 40 facial gestures, combining computer vision and AI to interpret what your face says before your mouth speaks.
+    Advanced AI emotion detection platform that analyzes facial expressions, body language, and deception patterns using OpenAI's GPT-4o vision API. Provides comprehensive psychological insights through image upload, video analysis, and real-time processing.
     
     ## Features
     
-    • **Real-time face gesture tracking** using webcam
+    • **AI Vision Analysis** - OpenAI GPT-4o for comprehensive emotion detection
     
-    • **40+ micro-expressions** (eyebrows, lips, head movement, etc.)
+    • **Multi-Modal Input** - Image upload and video analysis support
     
-    • **GPT-powered emotional insight engine**
+    • **Body Language Detection** - Full body posture and gesture analysis
     
-    • **Built with Streamlit + MediaPipe + OpenAI + React**
+    • **Lie Detection System** - Advanced deception probability assessment
+    
+    • **Multi-Face Support** - Analyze multiple people simultaneously
     """)
 
 with col2:
