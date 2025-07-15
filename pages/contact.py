@@ -264,8 +264,37 @@ with col1:
         
         if submitted:
             if name and email and message:
-                st.success("Thank you for your message! We'll get back to you within 24 hours.")
-                # Here you would normally send the email or save to database
+                # Add timestamp
+                from datetime import datetime
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                
+                # Format email content
+                email_content = f"""
+New Contact Form Submission - Emoticon
+
+Name: {name}
+Email: {email}
+Subject: {subject}
+Message:
+{message}
+
+Submitted at: {timestamp}
+"""
+                
+                # Create mailto link
+                import urllib.parse
+                mailto_subject = f"Emoticon Contact Form - {subject}"
+                mailto_body = email_content
+                
+                mailto_link = f"mailto:support@emoticon.ai?subject={urllib.parse.quote(mailto_subject)}&body={urllib.parse.quote(mailto_body)}"
+                
+                st.success("Thank you for your message! Click the link below to send via your email client:")
+                st.markdown(f"[📧 Send Email]({mailto_link})", unsafe_allow_html=True)
+                
+                # Also show the formatted message
+                st.info("Message Preview:")
+                st.text(email_content)
+                
             else:
                 st.error("Please fill in all required fields marked with *")
 
