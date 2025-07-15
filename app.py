@@ -14,6 +14,8 @@ from body_language_analyzer import BodyLanguageAnalyzer
 from lie_detector import LieDetector
 from ai_vision_analyzer import AIVisionAnalyzer
 from login_ui import require_authentication, show_user_menu, show_account_settings, init_auth_session, logout_user, show_login_modal
+from payment_ui import PaymentUI
+from payment_plans import PaymentPlans, UsageTracker
 
 # Setup MediaPipe
 mp_face_mesh = mp.solutions.face_mesh
@@ -23,6 +25,7 @@ face_mesh = mp_face_mesh.FaceMesh(static_image_mode=False, max_num_faces=5, refi
 body_analyzer = BodyLanguageAnalyzer()
 lie_detector = LieDetector()
 ai_vision = AIVisionAnalyzer()
+payment_ui = PaymentUI()
 
 # Define 100+ gestures (some with reduced sensitivity thresholds)
 GESTURES = [
@@ -391,7 +394,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Navigation functionality using columns - styled buttons
-nav_col1, nav_col2, nav_col3, nav_col4, nav_col5 = st.columns([1, 1, 1, 1, 1])
+nav_col1, nav_col2, nav_col3, nav_col4, nav_col5, nav_col6 = st.columns([1, 1, 1, 1, 1, 1])
 
 with nav_col1:
     if st.button("Home", key="nav_home", use_container_width=True):
@@ -402,14 +405,18 @@ with nav_col2:
         st.switch_page("pages/about.py")
 
 with nav_col3:
+    if st.button("Pricing", key="nav_pricing", use_container_width=True):
+        st.switch_page("pages/pricing.py")
+
+with nav_col4:
     if st.button("Contact", key="nav_contact", use_container_width=True):
         st.switch_page("pages/contact.py")
 
-with nav_col4:
+with nav_col5:
     if st.button("Career", key="nav_career", use_container_width=True):
         st.switch_page("pages/career.py")
 
-with nav_col5:
+with nav_col6:
     if st.button("Screen Recorder", key="nav_screen", use_container_width=True):
         st.switch_page("pages/screen_recorder.py")
 
@@ -540,11 +547,36 @@ if 'session_id' not in st.session_state:
 with st.sidebar:
     st.markdown("### 📊 Analysis History")
     
+    # Show usage statistics
+    current_plan = PaymentPlans.get_user_plan()
+    plan_info = PaymentPlans.get_plan_info(current_plan)
+    usage_stats = UsageTracker.get_usage_stats()
+    
+    st.markdown(f"**Plan:** {plan_info['name']}")
+    
+    # Show daily usage limit
+    limits = PaymentPlans.get_usage_limits(current_plan)
+    daily_limit = limits['daily_analyses']
+    if daily_limit == -1:
+        st.markdown(f"**Usage:** {usage_stats['today']}/Unlimited today")
+    else:
+        st.markdown(f"**Usage:** {usage_stats['today']}/{daily_limit} today")
+        if usage_stats['today'] >= daily_limit:
+            st.error("Daily limit reached!")
+    
+    # Show billing link for logged in users
+    if st.session_state.get('logged_in', False):
+        if st.button("💳 Billing", key="billing_sidebar", use_container_width=True):
+            st.switch_page("pages/billing.py")
+    
     # Only show history for logged in users
     if st.session_state.get('logged_in', False):
+        st.markdown("---")
+        st.markdown("### 📊 Recent Analysis")
+        
         # Get user's analysis history from database
         try:
-            history = get_user_history(st.session_state.session_id, limit=10)
+            history = get_user_history(st.session_state.session_id, limit=5)
             if history:
                 for idx, analysis in enumerate(history):
                     timestamp = analysis.timestamp.strftime('%H:%M %m/%d')
@@ -574,7 +606,7 @@ with st.sidebar:
                         if analysis.confidence_score is not None:
                             st.write(f"**Confidence:** {analysis.confidence_score:.1%}")
             else:
-                st.info("No analysis history yet. Upload an image to get started!")
+                st.info("No analysis history yet")
         except Exception as e:
             st.error(f"Could not load history: {str(e)}")
         
@@ -590,7 +622,7 @@ with st.sidebar:
             st.session_state.session_id = session_id
             st.rerun()
     else:
-        st.info("Login to view analysis history")
+        st.info("Login to view analysis history and save unlimited analyses")
         if st.button("Login", key="login_sidebar", use_container_width=True):
             st.session_state.show_login_modal = True
             st.rerun()
@@ -606,10 +638,17 @@ if uploaded_file is not None:
 
 def analyze_uploaded_image(uploaded_file):
     """Analyze the uploaded image"""
+    # Check daily usage limit
+    if not payment_ui.check_daily_limit():
+        st.stop()
+    
     # Display uploaded image
     uploaded_file.seek(0)  # Reset file pointer
     image = cv2.imdecode(np.frombuffer(uploaded_file.read(), np.uint8), cv2.IMREAD_COLOR)
     st.image(image, caption="Uploaded Image", use_container_width=True)
+    
+    # Track usage
+    UsageTracker.track_analysis("image", st.session_state.get('user_id'))
     
     # Process image with AI vision analysis
     with st.spinner('Analyzing image with AI vision...'):
@@ -673,8 +712,14 @@ def analyze_uploaded_image(uploaded_file):
     else:
         st.info("**Facial Expressions**: No significant expressions detected")
     
-    # Deception Analysis
+    # Deception Analysis (Premium Feature)
     st.markdown("### Deception Analysis")
+    
+    # Check if user has access to lie detector
+    if not payment_ui.check_feature_access('lie_detector'):
+        st.warning("Lie detector analysis requires Professional plan or higher")
+        st.stop()
+    
     deception_analysis = lie_detector.analyze_deception(detected_expressions, body_patterns)
     
     deception_probability = deception_analysis.get('deception_probability', 0.0)
@@ -742,10 +787,17 @@ with video_col2:
 uploaded_video = st.file_uploader("Upload a video for expression analysis", type=['mp4', 'avi', 'mov', 'mkv'])
 
 if uploaded_video is not None:
+    # Check daily usage limit
+    if not payment_ui.check_daily_limit():
+        st.stop()
+    
     # Save uploaded video to temporary file
     with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp_file:
         tmp_file.write(uploaded_video.read())
         tmp_video_path = tmp_file.name
+    
+    # Track usage
+    UsageTracker.track_analysis("video", st.session_state.get('user_id'))
     
     try:
         # Display video
@@ -837,40 +889,60 @@ selected_demo = st.selectbox("Choose a demo expression to analyze:", demo_expres
 col1, col2 = st.columns(2)
 with col1:
     if st.button("Analyze Demo Expression"):
-        try:
-            demo_analysis = analyze_expression(selected_demo)
-            st.success(f"**Demo Expression**: {selected_demo}")
-            st.info(f"**AI Analysis**: {demo_analysis}")
-            
-            # Save to database
-            expressions = selected_demo.split(", ")
-            save_emotion_analysis(
-                session_id=st.session_state.session_id,
-                expressions=expressions,
-                ai_analysis=demo_analysis,
-                analysis_type="demo"
-            )
-        except Exception as e:
-            st.error(f"Demo analysis error: {str(e)}")
+        # Check daily usage limit
+        if not payment_ui.check_daily_limit():
+            st.error("Daily limit reached. Upgrade to continue.")
+        else:
+            try:
+                # Track usage
+                UsageTracker.track_analysis("demo", st.session_state.get('user_id'))
+                
+                demo_analysis = analyze_expression(selected_demo)
+                st.success(f"**Demo Expression**: {selected_demo}")
+                st.info(f"**AI Analysis**: {demo_analysis}")
+                
+                # Save to database only if logged in
+                if st.session_state.get('logged_in', False):
+                    expressions = selected_demo.split(", ")
+                    save_emotion_analysis(
+                        session_id=st.session_state.session_id,
+                        expressions=expressions,
+                        ai_analysis=demo_analysis,
+                        analysis_type="demo"
+                    )
+                else:
+                    st.info("💡 Login to save analysis history")
+            except Exception as e:
+                st.error(f"Demo analysis error: {str(e)}")
 
 with col2:
     if st.button("Quick Test"):
-        try:
-            quick_test = "subtle smile, eye contact, relaxed expression"
-            quick_analysis = analyze_expression(quick_test)
-            st.success(f"**Quick Test**: {quick_test}")
-            st.info(f"**AI Analysis**: {quick_analysis}")
-            
-            # Save to database
-            expressions = quick_test.split(", ")
-            save_emotion_analysis(
-                session_id=st.session_state.session_id,
-                expressions=expressions,
-                ai_analysis=quick_analysis,
-                analysis_type="demo"
-            )
-        except Exception as e:
-            st.error(f"Quick test error: {str(e)}")
+        # Check daily usage limit
+        if not payment_ui.check_daily_limit():
+            st.error("Daily limit reached. Upgrade to continue.")
+        else:
+            try:
+                # Track usage
+                UsageTracker.track_analysis("demo", st.session_state.get('user_id'))
+                
+                quick_test = "subtle smile, eye contact, relaxed expression"
+                quick_analysis = analyze_expression(quick_test)
+                st.success(f"**Quick Test**: {quick_test}")
+                st.info(f"**AI Analysis**: {quick_analysis}")
+                
+                # Save to database only if logged in
+                if st.session_state.get('logged_in', False):
+                    expressions = quick_test.split(", ")
+                    save_emotion_analysis(
+                        session_id=st.session_state.session_id,
+                        expressions=expressions,
+                        ai_analysis=quick_analysis,
+                        analysis_type="demo"
+                    )
+                else:
+                    st.info("💡 Login to save analysis history")
+            except Exception as e:
+                st.error(f"Quick test error: {str(e)}")
 
 # Screen Recorder Mode
 st.markdown("---")

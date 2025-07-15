@@ -1371,7 +1371,9 @@ dependencies = [
     { name = "pillow" },
     { name = "psycopg2-binary" },
     { name = "sqlalchemy" },
+    { name = "st-paywall" },
     { name = "streamlit" },
+    { name = "stripe" },
 ]
 
 [package.metadata]
@@ -1385,7 +1387,9 @@ requires-dist = [
     { name = "pillow", specifier = ">=11.3.0" },
     { name = "psycopg2-binary", specifier = ">=2.9.10" },
     { name = "sqlalchemy", specifier = ">=2.0.41" },
+    { name = "st-paywall", specifier = ">=1.0.2" },
     { name = "streamlit", specifier = ">=1.46.1" },
+    { name = "stripe", specifier = ">=12.3.0" },
 ]
 
 [[package]]
@@ -1664,6 +1668,19 @@ wheels = [
 ]
 
 [[package]]
+name = "st-paywall"
+version = "1.0.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "streamlit" },
+    { name = "stripe" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f7/fd/3f47a075d909a10f455b3c9f0c18d26181ee342ae61327cf08da2d5aea87/st_paywall-1.0.2.tar.gz", hash = "sha256:8f8da0dc643afd19147291924d48a9588e44a111c1105e56db3bfecb58a8f58f", size = 5338 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/13/57/62c32731867b5068be1b430543cea605a0ad3379f55d2956da9d7920771e/st_paywall-1.0.2-py3-none-any.whl", hash = "sha256:79230f25ba4804aa3a53f8aba77edca20f36a005a740486a0b8718fb60a50b98", size = 6204 },
+]
+
+[[package]]
 name = "streamlit"
 version = "1.46.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1690,6 +1707,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/bd/7e/c7499c447b7021657fa5c851091072c1c7a26f1dda0369c21c0243fc35e7/streamlit-1.46.1.tar.gz", hash = "sha256:2cc4ad01cfeded9ad953a21829eb879b90aa77af4068c68397411c2d5c8862cf", size = 9651018 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/84/3b/35400175788cdd6a43c90dce1e7f567eb6843a3ba0612508c0f19ee31f5f/streamlit-1.46.1-py3-none-any.whl", hash = "sha256:dffa373230965f87ccc156abaff848d7d731920cf14106f3b99b1ea18076f728", size = 10051346 },
+]
+
+[[package]]
+name = "stripe"
+version = "12.3.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "requests" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/5b/d1/294e4b3081cf6deff32c230511f07546fc2bf256ebdf7a90dc2d70a6154b/stripe-12.3.0.tar.gz", hash = "sha256:ad8afdab8acdbd75fc098b0fefdfee698f68334a3f6e787633e8d290da89932b", size = 1407878 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5c/d5/aa5147e38a75d999a16ef20ba8a55e80935372780650026b83cbdc816afe/stripe-12.3.0-py2.py3-none-any.whl", hash = "sha256:f53daf37253cef0323613aa298b66d2d2081d37d0f2e4d9f8639824bf67185b9", size = 1647774 },
 ]
 
 [[package]]
