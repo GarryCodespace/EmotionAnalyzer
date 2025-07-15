@@ -578,10 +578,15 @@ st.markdown("""
 
 <script>
 function toggleSearch() {
-    console.log('Search clicked');
+    // Find and click the hidden search button
+    const searchButton = document.querySelector('[data-testid="stButton"][title="search_btn"]');
+    if (searchButton) {
+        searchButton.click();
+    }
 }
 
 function showLogin() {
+    // Find and click the hidden login button
     const loginButton = document.querySelector('[data-testid="stButton"][title="login_btn"]');
     if (loginButton) {
         loginButton.click();
@@ -590,15 +595,24 @@ function showLogin() {
 </script>
 """, unsafe_allow_html=True)
 
-# Top header buttons functionality
-top_col1, top_col2, top_col3 = st.columns([8, 1, 1])
+# Hidden buttons for JavaScript interaction (invisible)
+st.markdown("""
+<style>
+.hidden-buttons {
+    display: none;
+}
+</style>
+""", unsafe_allow_html=True)
 
-with top_col2:
+with st.container():
+    st.markdown('<div class="hidden-buttons">', unsafe_allow_html=True)
+    
+    # Hidden search button for JavaScript to trigger
     if st.button("🔍", key="search_btn", help="Search"):
         st.session_state.show_search = True
         st.rerun()
-
-with top_col3:
+    
+    # Hidden login functionality
     if st.session_state.get('logged_in', False):
         user_email = st.session_state.get('user_email', 'User')
         user_name = user_email.split('@')[0].title()
@@ -616,6 +630,8 @@ with top_col3:
         if st.button("Log in", key="login_btn"):
             st.session_state.show_login_modal = True
             st.rerun()
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # Main content container
 st.markdown('<div class="main-content">', unsafe_allow_html=True)

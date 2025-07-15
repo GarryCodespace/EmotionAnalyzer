@@ -111,24 +111,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Navigation functionality using columns - styled buttons
-nav_col1, nav_col2, nav_col3, nav_col4 = st.columns([1, 1, 1, 1])
-
-with nav_col1:
-    if st.button("Home", key="nav_home", use_container_width=True):
-        st.switch_page("app.py")
-
-with nav_col2:
-    if st.button("About", key="nav_about", use_container_width=True):
-        st.switch_page("pages/about.py")
-
-with nav_col3:
-    if st.button("Contact", key="nav_contact", use_container_width=True):
-        st.switch_page("pages/contact.py")
-
-with nav_col4:
-    if st.button("Career", key="nav_career", use_container_width=True):
-        st.switch_page("pages/career.py")
+# Navigation removed - users can use sidebar navigation
 
 # Style the navigation buttons to match the design
 st.markdown("""
