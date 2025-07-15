@@ -270,9 +270,20 @@ def process_live_frame(frame_data):
         # Convert to numpy array
         image_array = np.array(image)
         
-        # Analyze with AI Vision
+        # Analyze with AI Vision (manual method for live video)
         ai_vision = AIVisionAnalyzer()
         analysis = ai_vision.analyze_facial_expressions(image_array)
+        
+        # Enhance with detailed analysis using OpenAI text API
+        expressions = analysis.get('facial_expressions', [])
+        expressions_text = ', '.join(expressions) if expressions else 'neutral expression'
+        
+        # Generate detailed paragraph analysis using OpenAI text model
+        from openai_analyzer import analyze_expression
+        detailed_analysis = analyze_expression(f"Live camera analysis: {expressions_text}")
+        
+        # Add detailed analysis to the result
+        analysis['detailed_analysis'] = detailed_analysis
         
         # Track usage
         UsageTracker.track_analysis("live_camera", st.session_state.get('user_id'))

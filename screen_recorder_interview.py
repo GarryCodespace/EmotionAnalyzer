@@ -325,8 +325,19 @@ def process_screen_frame(frame_data):
         Be specific about what you observe and provide constructive insights.
         """
         
-        # Use contextual analysis for better insights
-        analysis = ai_vision.analyze_emotion_context(image_array, [context_prompt])
+        # Use manual facial expression analysis for live video
+        analysis = ai_vision.analyze_facial_expressions(image_array)
+        
+        # Enhance with detailed analysis using OpenAI text API
+        expressions = analysis.get('facial_expressions', [])
+        expressions_text = ', '.join(expressions) if expressions else 'neutral expression'
+        
+        # Generate detailed paragraph analysis using OpenAI text model
+        from openai_analyzer import analyze_expression
+        detailed_analysis = analyze_expression(f"Interview context: {expressions_text}")
+        
+        # Add detailed analysis to the result
+        analysis['detailed_analysis'] = detailed_analysis
         
         # Track usage
         UsageTracker.track_analysis("screen_interview", st.session_state.get('user_id'))

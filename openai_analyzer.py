@@ -35,7 +35,25 @@ def analyze_expression(event_text):
         
         has_body_language = any(pattern in event_text for pattern in body_language_patterns)
         
-        if has_body_language:
+        # Check if this is interview context
+        is_interview = "Interview context:" in event_text
+        
+        if is_interview:
+            prompt = f"""The user displayed the following facial expressions during a job interview: {event_text}.
+            
+            Please provide a comprehensive paragraph analysis (4-6 sentences) that includes:
+            1. EMOTIONAL INTELLIGENCE ANALYSIS: Assess confidence level, stress indicators, engagement signals, and authenticity
+            2. INTERVIEW PERFORMANCE: Evaluate professionalism, attentiveness, body language, and overall presence
+            3. BEHAVIORAL INSIGHTS: Identify micro-expressions, posture changes, and non-verbal communication patterns
+            4. ACTIONABLE FEEDBACK: Provide specific recommendations for improvement
+            
+            Write in a detailed, professional tone similar to an AI coach analyzing interview performance. 
+            Be specific about what you observe and provide constructive insights. Focus on interview-specific emotional intelligence."""
+            
+            system_content = """You are an expert AI interview coach specializing in emotional intelligence and non-verbal communication during job interviews. 
+            You analyze facial expressions, body language, and micro-expressions to provide actionable feedback for interview success.
+            Provide detailed, constructive analysis that helps candidates improve their interview performance."""
+        elif has_body_language:
             prompt = f"""The user displayed the following facial expressions, gestures, and body language: {event_text}.
             
             Please provide a comprehensive emotional analysis that includes:
@@ -54,12 +72,13 @@ def analyze_expression(event_text):
         else:
             prompt = f"""The user displayed the following facial expressions and gestures: {event_text}.
             
-            Please provide a concise emotional analysis that includes:
+            Please provide a comprehensive emotional analysis paragraph (4-6 sentences) that includes:
             1. The likely emotional state or mood
             2. Possible underlying feelings or thoughts
             3. Social or psychological context if applicable
+            4. Detailed behavioral insights and emotional patterns
             
-            Keep your response between 150-250 words and focus on comprehensive psychological insights rather than technical descriptions. Provide detailed emotional interpretation and behavioral analysis."""
+            Focus on comprehensive psychological insights rather than technical descriptions. Provide detailed emotional interpretation and behavioral analysis in paragraph format."""
             
             system_content = """You are an expert psychologist specializing in facial expression analysis and emotional intelligence. 
             You have deep knowledge of micro-expressions, emotional psychology, and non-verbal communication. 
