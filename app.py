@@ -671,7 +671,7 @@ def analyze_uploaded_image(uploaded_file):
 
 # Popular Use Cases Section
 st.markdown("---")
-st.markdown("### 💡 Popular Use Cases")
+st.markdown("### Popular Use Cases")
 st.markdown("*Describe your specific scenario for better analysis*")
 
 # Create columns for use case examples
@@ -698,7 +698,7 @@ with case_col4:
         st.rerun()
 
 # Context input for better analysis
-st.markdown("### 📝 Describe Your Scenario")
+st.markdown("### Describe Your Scenario")
 context_input = st.text_area(
     "Tell us about your situation to get more personalized analysis:",
     value=st.session_state.get('analysis_context', ''),
