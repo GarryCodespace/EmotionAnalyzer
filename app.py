@@ -1270,75 +1270,134 @@ if st.session_state.get('uploaded_video') is not None:
 
 # Screen Recorder Mode
 st.markdown("---")
-st.markdown("### Screen Recorder Mode")
-st.markdown("*Record external applications like Zoom, Teams, or any video call with live emotion analysis*")
-st.info("💻 **Local Installation Required**: Screen recorder works best when run locally on your computer for full camera and screen access.")
+st.markdown("### Live Camera Analysis")
+st.markdown("*Real-time emotion analysis using your web camera during video calls*")
+st.info("📹 **Web Camera Available**: Live camera analysis works directly in your browser - no installation required!")
 
 col1, col2 = st.columns(2)
 with col1:
     st.markdown("**Features:**")
-    st.markdown("• Records your entire screen")
-    st.markdown("• Detects faces during video calls")
-    st.markdown("• Shows popup analysis for major changes")
-    st.markdown("• Configurable sensitivity settings")
-    st.markdown("• Runs independently from this app")
+    st.markdown("• Works directly in your browser")
+    st.markdown("• Real-time camera access")
+    st.markdown("• Instant expression analysis")
+    st.markdown("• No software installation needed")
+    st.markdown("• Perfect for video calls and meetings")
 
 with col2:
-    st.markdown("**Local Installation Steps:**")
-    st.markdown("1. Download the project files to your computer")
-    st.markdown("2. Install Python 3.8+ and required packages")
-    st.markdown("3. Run: `streamlit run screen_recorder_standalone.py`")
-    st.markdown("4. Start your video call and get live analysis")
-    st.markdown("5. See detailed setup instructions below")
+    st.markdown("**How to Use:**")
+    st.markdown("1. Click 'Start Web Camera' below")
+    st.markdown("2. Allow camera access in your browser")
+    st.markdown("3. Click 'Analyze Expression' for instant results")
+    st.markdown("4. Use during video calls for live feedback")
+    st.markdown("5. No downloads or installations required!")
 
 col1, col2 = st.columns(2)
 with col1:
-    if st.button("📋 Show Local Setup Instructions", type="primary"):
-        st.info("📥 **Complete Local Installation Guide**")
-        
-        st.markdown("**Step 1: Download Project**")
-        st.markdown("• Download all project files from this Replit")
-        st.markdown("• Extract to a folder on your computer")
-        
-        st.markdown("**Step 2: Install Python & Dependencies**")
-        st.code("""
-# Install Python 3.8+ from python.org
-# Then install required packages:
-pip install streamlit opencv-python mediapipe openai psycopg2-binary sqlalchemy pillow mss
-        """, language="bash")
-        
-        st.markdown("**Step 3: Set Environment Variables**")
-        st.code("""
-# Create a .env file in the project folder:
-OPENAI_API_KEY=your_openai_api_key_here
-        """, language="bash")
-        
-        st.markdown("**Step 4: Run Screen Recorder**")
-        st.code("streamlit run screen_recorder_standalone.py --server.port 5001", language="bash")
+    if st.button("📹 Start Web Camera", type="primary"):
+        st.session_state.show_web_camera = True
+        st.rerun()
 
 with col2:
-    st.markdown("**Alternative: Use Web Version**")
-    st.markdown("*For basic emotion analysis without local setup*")
+    if st.button("📋 Alternative: Local Setup", type="secondary"):
+        st.info("📥 **Local Installation (Advanced Users)**")
+        st.markdown("For full screen recording and desktop integration:")
+        st.markdown("• Download project files from this Replit")
+        st.markdown("• Install Python 3.8+ and dependencies")
+        st.markdown("• Run: `streamlit run screen_recorder_standalone.py`")
+        st.markdown("• See LOCAL_SETUP.md for detailed instructions")
+
+# Web Camera Section
+if st.session_state.get('show_web_camera', False):
+    st.markdown("---")
+    st.markdown("### Live Camera Analysis")
+    st.markdown("*Real-time emotion analysis using your web camera*")
     
-    st.markdown("**Available online:**")
-    st.markdown("• Image upload analysis")
-    st.markdown("• Video upload analysis")
-    st.markdown("• AI lie detection")
-    st.markdown("• Stress level analysis")
-    
-    st.markdown("**Not available online:**")
-    st.markdown("• Live camera access")
-    st.markdown("• Screen recording")
-    st.markdown("• Real-time video calls")
-    
-    if st.button("📖 View Full Setup Guide", type="secondary"):
-        st.info("📋 **Complete Installation Instructions**")
-        st.markdown("A detailed setup guide has been created: `LOCAL_SETUP.md`")
-        st.markdown("**Quick Start:**")
-        st.markdown("1. Download project files")
-        st.markdown("2. Install Python 3.8+")
-        st.markdown("3. Run: `pip install streamlit opencv-python mediapipe openai`")
-        st.markdown("4. Set OPENAI_API_KEY environment variable")
-        st.markdown("5. Run: `streamlit run screen_recorder_standalone.py`")
+    # Check daily usage limit
+    if not check_daily_limit():
+        st.error("Daily usage limit reached. Please upgrade to continue.")
+    else:
+        # Camera capture using Streamlit's built-in camera input
+        st.info("📹 **Instructions**: Click the camera button below to take a photo for instant AI analysis!")
+        
+        camera_photo = st.camera_input("Take a photo for expression analysis")
+        
+        if camera_photo is not None:
+            # Check daily usage limit again
+            if not check_daily_limit():
+                st.error("Daily usage limit reached. Please upgrade to continue.")
+            else:
+                # Process the camera photo
+                try:
+                    # Convert uploaded file to image
+                    from PIL import Image
+                    import numpy as np
+                    
+                    image = Image.open(camera_photo)
+                    image_array = np.array(image)
+                    
+                    # Analyze with AI Vision
+                    ai_vision = AIVisionAnalyzer()
+                    
+                    with st.spinner('Analyzing your expression...'):
+                        analysis = ai_vision.analyze_facial_expressions(image_array)
+                    
+                    # Track usage
+                    UsageTracker.track_analysis("camera", st.session_state.get('user_id'))
+                    
+                    # Display results
+                    st.success("**Live Analysis Complete!**")
+                    
+                    col1, col2 = st.columns(2)
+                    
+                    with col1:
+                        st.image(image, caption="Analyzed Photo", use_column_width=True)
+                    
+                    with col2:
+                        expressions = analysis.get('facial_expressions', [])
+                        if expressions:
+                            st.write(f"**Detected Expressions**: {', '.join(expressions)}")
+                        
+                        emotional_state = analysis.get('emotional_state', 'neutral')
+                        st.write(f"**Emotional State**: {emotional_state}")
+                        
+                        confidence = analysis.get('confidence_level', 'medium')
+                        st.write(f"**Confidence Level**: {confidence}")
+                    
+                    # Show detailed analysis
+                    detailed_analysis = analysis.get('detailed_analysis', 'No detailed analysis available')
+                    st.write(f"**AI Analysis**: {detailed_analysis}")
+                    
+                    # Save to database if logged in
+                    if st.session_state.get('logged_in', False):
+                        save_emotion_analysis(
+                            session_id=st.session_state.session_id,
+                            expressions=expressions,
+                            ai_analysis=detailed_analysis,
+                            analysis_type="camera"
+                        )
+                        st.info("Analysis saved to your history!")
+                    else:
+                        st.info("Login to save analysis history!")
+                        
+                except Exception as e:
+                    st.error(f"Error processing camera photo: {str(e)}")
+        
+        # Tips for better camera results
+        st.markdown("#### Tips for Better Camera Results")
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("**Lighting & Position:**")
+            st.markdown("• Ensure good lighting on your face")
+            st.markdown("• Face the camera directly")
+            st.markdown("• Keep camera at eye level")
+            st.markdown("• Avoid backlighting")
+        
+        with col2:
+            st.markdown("**During Video Calls:**")
+            st.markdown("• Take photos during key moments")
+            st.markdown("• Analyze different emotional states")
+            st.markdown("• Use for self-awareness during meetings")
+            st.markdown("• Track emotional patterns over time")
 
 
