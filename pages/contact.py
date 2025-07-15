@@ -286,7 +286,7 @@ Submitted at: {timestamp}
                 mailto_subject = f"Emoticon Contact Form - {subject}"
                 mailto_body = email_content
                 
-                mailto_link = f"mailto:support@emoticon.ai?subject={urllib.parse.quote(mailto_subject)}&body={urllib.parse.quote(mailto_body)}"
+                mailto_link = f"mailto:emoticon.contact@gmail.com?subject={urllib.parse.quote(mailto_subject)}&body={urllib.parse.quote(mailto_body)}"
                 
                 st.success("Thank you for your message! Click the link below to send via your email client:")
                 st.markdown(f"[📧 Send Email]({mailto_link})", unsafe_allow_html=True)
@@ -304,7 +304,7 @@ with col2:
     st.markdown("""
     ### Direct Contact
     
-    📧 **Email**: support@emoticon.ai
+    📧 **Email**: emoticon.contact@gmail.com
     
     📱 **Phone**: +61 451 961 015
     
@@ -374,7 +374,7 @@ with st.expander("How do I report a bug or suggest a feature?"):
     st.markdown("""
     You can report bugs or suggest features by:
     1. Using the contact form above with "Bug Report" or "Feature Request" as the subject
-    2. Emailing us directly at support@emoticon.ai
+    2. Emailing us directly at emoticon.contact@gmail.com
     3. Opening an issue on our GitHub repository
     """)
 
