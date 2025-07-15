@@ -672,7 +672,7 @@ st.markdown("### Describe Your Scenario")
 context_input = st.text_area(
     "Tell us about your situation to get more personalized analysis:",
     value=st.session_state.get('analysis_context', ''),
-    placeholder="Example: I'm analyzing a job interview video to understand the candidate's confidence level and honesty during technical questions...",
+    placeholder="Example: Job interview analysis for confidence and honesty assessment...",
     height=80,
     key="analysis_context_input"
 )
