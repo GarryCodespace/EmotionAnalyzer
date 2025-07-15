@@ -451,9 +451,12 @@ if 'session_id' not in st.session_state:
 # Image Upload Analysis
 st.markdown("---")
 
-# History Sidebar
+# History Sidebar Panel
 if st.session_state.get('show_history', False):
-    with st.sidebar:
+    # Create side panel layout
+    col1, col2 = st.columns([1, 3])
+    
+    with col1:
         st.markdown("### 📊 Analysis History")
         
         # Get user's analysis history from database
@@ -518,11 +521,24 @@ if st.session_state.get('show_history', False):
             st.session_state.clear()
             st.session_state.session_id = session_id
             st.rerun()
+    
+    with col2:
+        # Main content area when history panel is open
+        st.markdown("### Image Upload Analysis")
+        uploaded_file = st.file_uploader("Upload an image for expression analysis", type=['jpg', 'jpeg', 'png'], key="history_upload")
+        
+        if uploaded_file is not None:
+            analyze_uploaded_image(uploaded_file)
+else:
+    # When history panel is not shown, display normally
+    st.markdown("### Image Upload Analysis")
+    uploaded_file = st.file_uploader("Upload an image for expression analysis", type=['jpg', 'jpeg', 'png'])
+    
+    if uploaded_file is not None:
+        analyze_uploaded_image(uploaded_file)
 
-st.markdown("### Image Upload Analysis")
-uploaded_file = st.file_uploader("Upload an image for expression analysis", type=['jpg', 'jpeg', 'png'])
-
-if uploaded_file is not None:
+def analyze_uploaded_image(uploaded_file):
+    """Analyze the uploaded image"""
     # Display uploaded image
     uploaded_file.seek(0)  # Reset file pointer
     image = cv2.imdecode(np.frombuffer(uploaded_file.read(), np.uint8), cv2.IMREAD_COLOR)
@@ -581,22 +597,58 @@ if uploaded_file is not None:
         
         for idx, expr in enumerate(detected_expressions[:8]):
             expression_text = f"{expr.title()}"
+            confidence = confidence_scores.get(expr, 0.0)
             
             if idx % 2 == 0:
-                expr_col1.markdown(f"• {expression_text}")
+                expr_col1.markdown(f"• {expression_text} ({confidence:.0%})")
             else:
-                expr_col2.markdown(f"• {expression_text}")
-        
-        # Create face detection format for compatibility
-        face_detections = [{
-            'face_id': 1,
-            'expressions': [
-                {'name': expr, 'confidence': confidence_scores.get(expr, 0.8)}
-                for expr in detected_expressions
-            ]
-        }]
-        
-        # Get all expressions for analysis
+                expr_col2.markdown(f"• {expression_text} ({confidence:.0%})")
+    else:
+        st.info("**Facial Expressions**: No significant expressions detected")
+    
+    # Deception Analysis
+    st.markdown("### Deception Analysis")
+    deception_analysis = lie_detector.analyze_deception(detected_expressions, body_patterns)
+    
+    deception_probability = deception_analysis.get('deception_probability', 0.0)
+    confidence_level = deception_analysis.get('confidence_level', 'Low')
+    key_indicators = deception_analysis.get('key_indicators', [])
+    
+    # Display deception probability with color coding
+    if deception_probability >= 0.7:
+        st.error(f"**Deception Risk**: HIGH ({deception_probability:.1%}) - Confidence: {confidence_level}")
+    elif deception_probability >= 0.4:
+        st.warning(f"**Deception Risk**: MEDIUM ({deception_probability:.1%}) - Confidence: {confidence_level}")
+    else:
+        st.success(f"**Deception Risk**: LOW ({deception_probability:.1%}) - Confidence: {confidence_level}")
+    
+    # Display key indicators
+    if key_indicators:
+        st.markdown("**Key Deception Indicators:**")
+        for indicator in key_indicators[:5]:
+            st.markdown(f"• {indicator}")
+    
+    # Get AI interpretation
+    ai_interpretation = deception_analysis.get('ai_interpretation', '')
+    if ai_interpretation:
+        st.markdown("**AI Deception Analysis:**")
+        st.markdown(ai_interpretation)
+    
+    # Save analysis to database
+    try:
+        expressions_json = json.dumps(detected_expressions) if detected_expressions else "[]"
+        save_emotion_analysis(
+            st.session_state.session_id,
+            detected_expressions,
+            detailed_analysis,
+            "image",
+            deception_probability
+        )
+        st.success("Analysis saved to history")
+    except Exception as e:
+        st.error(f"Could not save analysis: {str(e)}")
+
+# Continue with video upload section
         all_expressions = detected_expressions
         
         # Combine facial expressions and body language for comprehensive analysis
