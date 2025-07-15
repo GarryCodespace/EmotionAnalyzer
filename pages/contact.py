@@ -277,7 +277,7 @@ with col2:
     
     📧 **Email**: support@emoticon.ai
     
-    📱 **Phone**: +1 (555) 123-4567
+    📱 **Phone**: +61 451 961 015
     
     🕐 **Hours**: Monday - Friday, 9 AM - 6 PM PST
     
