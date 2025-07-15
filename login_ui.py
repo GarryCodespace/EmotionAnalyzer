@@ -240,8 +240,24 @@ def show_account_settings():
     """Display account settings modal"""
     st.markdown("### Account Settings")
     
+    # Check if user is logged in
+    if not st.session_state.get('logged_in', False):
+        st.error("You must be logged in to view account settings")
+        if st.button("← Back to App", key="close_account_settings"):
+            st.session_state.show_account_settings = False
+            st.rerun()
+        return
+    
     # Get user info
-    user_info = auth_system.get_user_info(st.session_state.user_id)
+    user_id = st.session_state.get('user_id')
+    if not user_id:
+        st.error("User ID not found. Please login again.")
+        if st.button("← Back to App", key="close_account_settings"):
+            st.session_state.show_account_settings = False
+            st.rerun()
+        return
+    
+    user_info = auth_system.get_user_info(user_id)
     
     if user_info['success']:
         user_data = user_info['user']
