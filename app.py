@@ -498,83 +498,121 @@ setInterval(nuclearCapitalizationFix, 100);
 
 
 
-# Add top header with search and login buttons
+# Add top header with search and login buttons using JavaScript injection
 st.markdown("""
 <style>
-.top-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    background: rgba(0, 0, 0, 0.95);
-    backdrop-filter: blur(10px);
-    padding: 12px 24px;
-    z-index: 1000;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.search-btn {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    color: white;
-}
-
-.search-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: scale(1.05);
-}
-
-.login-btn {
-    background: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 25px;
-    padding: 8px 20px;
-    color: white;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-decoration: none;
-}
-
-.login-btn:hover {
-    background: rgba(255, 255, 255, 0.25);
-    transform: translateY(-1px);
-}
-
 .main-content {
     margin-top: 70px;
 }
 
-.search-icon {
-    width: 18px;
-    height: 18px;
-    stroke: currentColor;
-    fill: none;
-    stroke-width: 2;
+body {
+    margin: 0;
+    padding: 0;
 }
 </style>
 
-<div class="top-header">
-    <div class="search-btn" onclick="toggleSearch()">
-        <svg class="search-icon" viewBox="0 0 24 24">
+<script>
+// Create and inject the header directly into the DOM
+function createTopHeader() {
+    // Remove existing header if it exists
+    const existingHeader = document.getElementById('top-header');
+    if (existingHeader) {
+        existingHeader.remove();
+    }
+    
+    // Create header element
+    const header = document.createElement('div');
+    header.id = 'top-header';
+    header.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 999999;
+        background: #000000;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 16px;
+        padding: 12px 24px;
+        border-bottom: 1px solid #333;
+        width: 100%;
+        box-sizing: border-box;
+    `;
+    
+    // Create search button
+    const searchBtn = document.createElement('div');
+    searchBtn.style.cssText = `
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: white;
+    `;
+    searchBtn.innerHTML = `
+        <svg style="width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2;" viewBox="0 0 24 24">
             <circle cx="11" cy="11" r="8"></circle>
             <path d="M21 21l-4.35-4.35"></path>
         </svg>
-    </div>
-    <div class="login-btn" onclick="showLogin()">Log in</div>
-</div>
+    `;
+    searchBtn.onclick = function() { toggleSearch(); };
+    
+    // Create login button
+    const loginBtn = document.createElement('div');
+    loginBtn.style.cssText = `
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 25px;
+        padding: 8px 20px;
+        color: white;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    `;
+    loginBtn.textContent = 'Log in';
+    loginBtn.onclick = function() { showLogin(); };
+    
+    // Add hover effects
+    searchBtn.onmouseover = function() {
+        this.style.background = 'rgba(255, 255, 255, 0.2)';
+        this.style.transform = 'scale(1.05)';
+    };
+    searchBtn.onmouseout = function() {
+        this.style.background = 'rgba(255, 255, 255, 0.1)';
+        this.style.transform = 'scale(1)';
+    };
+    
+    loginBtn.onmouseover = function() {
+        this.style.background = 'rgba(255, 255, 255, 0.25)';
+        this.style.transform = 'translateY(-1px)';
+    };
+    loginBtn.onmouseout = function() {
+        this.style.background = 'rgba(255, 255, 255, 0.15)';
+        this.style.transform = 'translateY(0)';
+    };
+    
+    // Add buttons to header
+    header.appendChild(searchBtn);
+    header.appendChild(loginBtn);
+    
+    // Insert header at the beginning of body
+    document.body.insertBefore(header, document.body.firstChild);
+}
+
+// Run when DOM is ready and periodically to ensure header stays visible
+document.addEventListener('DOMContentLoaded', createTopHeader);
+setTimeout(createTopHeader, 100);
+setTimeout(createTopHeader, 500);
+setTimeout(createTopHeader, 1000);
+setInterval(createTopHeader, 2000);
+</script>
 
 <script>
 function toggleSearch() {
