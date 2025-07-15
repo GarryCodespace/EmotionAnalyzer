@@ -416,28 +416,7 @@ if 'session_id' not in st.session_state:
 if 'camera_running' not in st.session_state:
     st.session_state.camera_running = False
 
-# Demo section for users who can't access webcam
-st.markdown("---")
-st.markdown("## 🎯 Quick Demo - Try These Features")
 
-demo_col1, demo_col2, demo_col3 = st.columns(3)
-
-with demo_col1:
-    st.markdown("### 📸 Image Analysis")
-    st.markdown("Upload a photo to analyze facial expressions and body language")
-    st.markdown("*Works with any image containing people*")
-
-with demo_col2:
-    st.markdown("### 🎥 Video Analysis")
-    st.markdown("Upload a video to detect emotion changes over time")
-    st.markdown("*Supports MP4, AVI, MOV, MKV files*")
-
-with demo_col3:
-    st.markdown("### 🔍 AI Lie Detection")
-    st.markdown("Analyze micro-expressions for deception indicators")
-    st.markdown("*Available in both image and video modes*")
-
-st.markdown("---")
 
 
 
@@ -472,31 +451,12 @@ if st.session_state.camera_running:
         
         if not cap.isOpened():
             st.error("❌ Could not access webcam. This is common in containerized environments.")
-            st.info("💡 **Alternative Options Available:**")
-            
-            # Create columns for alternatives
-            alt_col1, alt_col2 = st.columns(2)
-            
-            with alt_col1:
-                st.markdown("### 📸 Image Upload")
-                st.markdown("Upload a photo to test AI emotion detection")
-                if st.button("🖼️ Go to Image Upload", key="goto_image"):
-                    st.balloons()
-                    st.success("Scroll down to the 'Upload Image for Analysis' section!")
-            
-            with alt_col2:
-                st.markdown("### 🎥 Video Analysis")
-                st.markdown("Upload a video file for emotion analysis")
-                if st.button("📹 Go to Video Analysis", key="goto_video"):
-                    st.balloons()
-                    st.success("Scroll down to the 'Upload Video for Analysis' section!")
-            
-            # Additional info
-            st.markdown("---")
-            st.markdown("**For Full Webcam Access:**")
-            st.markdown("- Run this application locally on your computer")
-            st.markdown("- Or use the image/video upload features above")
-            
+            st.info("💡 **Alternative Options:**")
+            st.markdown("""
+            - **Upload Image**: Use the image upload feature below to test expression analysis
+            - **Demo Mode**: Try the gesture simulation feature
+            - **Local Setup**: Download and run this application locally for full webcam access
+            """)
             st.session_state.camera_running = False
         else:
             # Set camera properties for better performance
@@ -681,21 +641,8 @@ st.markdown("---")
 st.markdown("### 🧪 Alternative Testing Methods")
 
 # Image Upload Feature
-st.markdown("#### 📸 Upload Image for Analysis")
-st.markdown("*Since webcam access is limited in this environment, use image upload to test the AI emotion detection*")
-
-# Tips for better analysis
-with st.expander("💡 Tips for Better Analysis"):
-    st.markdown("""
-    **For Best Results:**
-    - Use clear, well-lit photos
-    - Ensure faces are visible and not too small
-    - Front-facing photos work best
-    - Multiple people in the image are supported
-    - Body language is also analyzed when visible
-    """)
-
-uploaded_file = st.file_uploader("Choose an image file", type=['jpg', 'jpeg', 'png'], help="Upload a photo to analyze facial expressions and body language")
+st.markdown("#### 📸 Image Upload Analysis")
+uploaded_file = st.file_uploader("Upload an image for expression analysis", type=['jpg', 'jpeg', 'png'])
 
 if uploaded_file is not None:
     # Display uploaded image
