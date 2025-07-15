@@ -804,12 +804,12 @@ if uploaded_video is not None:
         st.video(uploaded_video)
         
         # Process video with progress bar
-        with st.spinner('Analyzing video for significant expression changes...'):
-            video_analyzer = VideoEmotionAnalyzer(significance_threshold=0.25)
-            analyses = video_analyzer.process_video(tmp_video_path, max_analyses=10)
+        with st.spinner('Analyzing video for significant expression changes using AI...'):
+            video_analyzer = VideoEmotionAnalyzer(significance_threshold=0.3)
+            analyses = video_analyzer.process_video(tmp_video_path, max_analyses=8)
             video_summary = video_analyzer.get_video_summary()
         
-        if analyses:
+        if analyses and len(analyses) > 0:
             st.success(f"**Found {len(analyses)} significant expression moments**")
             
             # Display video summary
@@ -860,7 +860,12 @@ if uploaded_video is not None:
                     st.rerun()
         
         else:
-            st.info("No significant expression changes detected in this video")
+            st.info("**No significant expression changes detected in this video**")
+            st.markdown("This could mean:")
+            st.markdown("• The expressions were too subtle for AI detection")
+            st.markdown("• The person maintained a neutral expression throughout")
+            st.markdown("• The video quality may be too low for accurate analysis")
+            st.markdown("• Try uploading a video with more varied facial expressions")
             
     except Exception as e:
         st.error(f"Video analysis error: {str(e)}")
