@@ -265,7 +265,6 @@ def main():
         **Recruiting Team**
         - Email: emoticon.contact@gmail.com
         - LinkedIn: /company/emoticon-ai
-        - Twitter: @EmoticonAI
         """)
     
     with col2:
