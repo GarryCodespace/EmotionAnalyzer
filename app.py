@@ -750,6 +750,26 @@ if st.session_state.get('show_upload_image', False):
 if st.session_state.get('show_upload_video', False):
     st.markdown("---")
     st.markdown("### Upload Video")
+    
+    # Video upload tips
+    with st.expander("📝 Tips for Better Video Analysis"):
+        st.markdown("""
+        **For faster processing:**
+        • Upload videos under 50MB when possible
+        • Use good lighting with clear face visibility
+        • MP4 format works best for compatibility
+        
+        **Processing time:**
+        • Short videos (< 2 min): ~30 seconds
+        • Medium videos (2-5 min): ~1-2 minutes  
+        • Long videos (> 5 min): ~3-5 minutes
+        
+        **Best results:**
+        • Single person clearly visible
+        • Front-facing camera angle
+        • Minimal background motion
+        """)
+    
     uploaded_video = st.file_uploader("Choose video file", type=['mp4', 'avi', 'mov', 'mkv'], key="video_upload_tool")
     
     if uploaded_video is not None:
@@ -757,6 +777,14 @@ if st.session_state.get('show_upload_video', False):
         # Check daily usage limit
         if not payment_ui.check_daily_limit():
             st.stop()
+        
+        # Get video info
+        file_size = len(uploaded_video.read())
+        uploaded_video.seek(0)  # Reset file pointer
+        
+        # Show file size warning for large files
+        if file_size > 50 * 1024 * 1024:  # 50MB
+            st.warning("⚠️ Large video file detected. Processing may take longer.")
         
         # Save uploaded video to temporary file
         with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp_file:
@@ -770,11 +798,23 @@ if st.session_state.get('show_upload_video', False):
             # Display video
             st.video(uploaded_video)
             
-            # Process video with progress bar
-            with st.spinner('Analyzing video expressions using AI...'):
-                video_analyzer = VideoEmotionAnalyzer(significance_threshold=0.1)
-                analyses = video_analyzer.process_video(tmp_video_path, max_analyses=10)
-                video_summary = video_analyzer.get_video_summary()
+            # Create progress placeholder
+            progress_bar = st.progress(0)
+            status_text = st.empty()
+            
+            def update_progress(progress):
+                progress_bar.progress(progress)
+                status_text.text(f"Processing video... {progress}%")
+            
+            # Process video with progress tracking
+            status_text.text("Analyzing video expressions using AI...")
+            video_analyzer = VideoEmotionAnalyzer(significance_threshold=0.1)
+            analyses = video_analyzer.process_video(tmp_video_path, max_analyses=10, progress_callback=update_progress)
+            video_summary = video_analyzer.get_video_summary()
+            
+            # Clear progress indicators
+            progress_bar.empty()
+            status_text.empty()
             
             if analyses and len(analyses) > 0:
                 st.success(f"**Found {len(analyses)} expression moments**")
