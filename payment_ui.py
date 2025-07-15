@@ -18,15 +18,14 @@ class PaymentUI:
         self.stripe_enabled = False
         
         try:
-            # Try to get Stripe keys from environment or secrets
-            self.stripe_public_key = os.environ.get('STRIPE_PUBLIC_KEY')
+            # Set Stripe keys
+            self.stripe_public_key = "pk_test_51Rl0074cR0nOpicwRvblCf3JU6tY6k01jpwGkvlJYGt8iLCvvlhym04wVi1mu5Wk30Uxmoqy4bZvTsGXcBv5iQLP00zhJhLuPD"
             self.stripe_secret_key = os.environ.get('STRIPE_SECRET_KEY')
             
             # Also try streamlit secrets if available
             if not self.stripe_secret_key and hasattr(st, 'secrets'):
                 try:
                     self.stripe_secret_key = st.secrets.get('STRIPE_SECRET_KEY')
-                    self.stripe_public_key = st.secrets.get('STRIPE_PUBLIC_KEY')
                 except:
                     pass
             
