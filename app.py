@@ -395,15 +395,11 @@ header_col1, header_col2, header_col3 = st.columns([2, 6, 2])
 with header_col1:
     st.markdown("<br><br>", unsafe_allow_html=True)  # Push logo down to align with subtitle
     
-    # Clickable logo using HTML/JavaScript
-    logo_html = """
-    <div onclick="window.parent.postMessage({type: 'streamlit:rerun', data: {action: 'go_home'}}, '*')" 
-         style="cursor: pointer; display: inline-block;">
-        <img src="logo.png" width="120" style="cursor: pointer;" 
-             onerror="this.outerHTML='<div style=&quot;font-size: 4rem; cursor: pointer;&quot;>🎭</div>';">
-    </div>
-    """
-    st.markdown(logo_html, unsafe_allow_html=True)
+    # Logo display
+    try:
+        st.image("logo.png", width=120)
+    except:
+        st.markdown("🎭", unsafe_allow_html=True)
     
     # Handle logo click
     if st.button("🏠", key="home_btn", help="Go to home page"):
