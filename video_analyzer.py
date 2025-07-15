@@ -205,6 +205,15 @@ class VideoEmotionAnalyzer:
         from ai_vision_analyzer import AIVisionAnalyzer
         ai_vision = AIVisionAnalyzer()
         
+        # Resize frame for faster processing if large
+        height, width = rgb_frame.shape[:2]
+        if width > 640 or height > 480:
+            # Resize to max 640x480 for faster processing
+            scale = min(640/width, 480/height)
+            new_width = int(width * scale)
+            new_height = int(height * scale)
+            rgb_frame = cv2.resize(rgb_frame, (new_width, new_height))
+        
         # Analyze frame with AI vision
         ai_analysis = ai_vision.analyze_facial_expressions(rgb_frame)
         
@@ -247,6 +256,7 @@ class VideoEmotionAnalyzer:
     def process_video(self, video_path: str, max_analyses: int = 10, progress_callback=None) -> List[Dict]:
         """
         Process entire video and return significant moments using AI analysis
+        Optimized for long videos with smart frame skipping
         
         Args:
             video_path: Path to video file
@@ -268,16 +278,35 @@ class VideoEmotionAnalyzer:
         analyses = []
         frame_count = 0
         
-        # For long videos, skip more frames to reduce processing time
-        if duration > 300:  # 5 minutes
+        # Aggressive frame skipping for long videos
+        if duration > 600:  # 10 minutes - very long video
+            frame_skip = max(1, int(fps * 10))  # Process every 10 seconds
+            max_analyses = min(max_analyses, 8)  # Limit analyses for very long videos
+        elif duration > 300:  # 5 minutes - long video
+            frame_skip = max(1, int(fps * 8))  # Process every 8 seconds
+            max_analyses = min(max_analyses, 10)
+        elif duration > 120:  # 2 minutes - medium video  
             frame_skip = max(1, int(fps * 5))  # Process every 5 seconds
-        elif duration > 120:  # 2 minutes  
-            frame_skip = max(1, int(fps * 3))  # Process every 3 seconds
         else:
-            frame_skip = max(1, int(fps * 1.5))  # Process every 1.5 seconds
+            frame_skip = max(1, int(fps * 2))  # Process every 2 seconds
         
-        # Jump to processing frames at intervals
-        target_frames = list(range(0, total_frames, frame_skip))
+        # Calculate target frames with smart distribution
+        target_frames = []
+        current_frame = 0
+        
+        # Process beginning, middle, and end sections more densely
+        sections = [
+            (0, min(int(fps * 30), total_frames // 3)),  # First 30 seconds or 1/3
+            (total_frames // 3, 2 * total_frames // 3),   # Middle third
+            (2 * total_frames // 3, total_frames)          # Final third
+        ]
+        
+        for start, end in sections:
+            section_frames = list(range(start, end, frame_skip))
+            target_frames.extend(section_frames[:max_analyses // 3 + 1])
+        
+        # Limit total frames to process
+        target_frames = target_frames[:max_analyses * 2]
         
         for i, target_frame in enumerate(target_frames):
             if len(analyses) >= max_analyses:

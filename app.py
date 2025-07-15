@@ -842,18 +842,19 @@ if st.session_state.get('show_upload_video', False):
     # Video upload tips
     with st.expander("📝 Tips for Better Video Analysis"):
         st.markdown("""
-        **For faster processing:**
-        • Upload videos under 50MB when possible
-        • Use good lighting with clear face visibility
-        • MP4 format works best for compatibility
+        **File Limits:**
+        • Maximum file size: 200MB
+        • Recommended: Under 50MB for faster processing
+        • Supported formats: MP4, AVI, MOV, MKV
         
         **Processing time:**
         • Short videos (< 2 min): ~30 seconds
-        • Medium videos (2-5 min): ~1-2 minutes  
-        • Long videos (> 5 min): ~3-5 minutes
+        • Medium videos (2-10 min): ~1-3 minutes  
+        • Long videos (> 10 min): ~5-8 minutes
         
         **Best results:**
         • Single person clearly visible
+        • Good lighting with clear face visibility
         • Front-facing camera angle
         • Minimal background motion
         """)
@@ -870,9 +871,13 @@ if st.session_state.get('show_upload_video', False):
         file_size = len(uploaded_video.read())
         uploaded_video.seek(0)  # Reset file pointer
         
-        # Show file size warning for large files
-        if file_size > 50 * 1024 * 1024:  # 50MB
-            st.warning("⚠️ Large video file detected. Processing may take longer.")
+        # Check file size limits
+        file_size_mb = file_size / (1024 * 1024)
+        if file_size > 200 * 1024 * 1024:  # 200MB limit
+            st.error(f"File size ({file_size_mb:.1f}MB) exceeds 200MB limit. Please upload a smaller video.")
+            st.stop()
+        elif file_size > 50 * 1024 * 1024:  # 50MB warning
+            st.warning(f"⚠️ Large video file ({file_size_mb:.1f}MB) detected. Processing may take longer.")
         
         # Save uploaded video to temporary file
         with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp_file:
