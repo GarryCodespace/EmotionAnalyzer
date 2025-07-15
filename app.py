@@ -719,8 +719,6 @@ if st.session_state.get('analysis_context'):
 
 # Add Analysis History to Sidebar
 with st.sidebar:
-    st.markdown("### 📊 Analysis History")
-    
     # Show usage statistics
     current_plan = PaymentPlans.get_user_plan()
     plan_info = PaymentPlans.get_plan_info(current_plan)
@@ -742,59 +740,6 @@ with st.sidebar:
     if st.session_state.get('logged_in', False):
         if st.button("💳 Billing", key="billing_sidebar", use_container_width=True):
             st.switch_page("pages/billing.py")
-    
-    # Only show history for logged in users
-    if st.session_state.get('logged_in', False):
-        st.markdown("---")
-        st.markdown("### 📊 Recent Analysis")
-        
-        # Get user's analysis history from database
-        try:
-            history = get_user_history(st.session_state.session_id, limit=5)
-            if history:
-                for idx, analysis in enumerate(history):
-                    timestamp = analysis.timestamp.strftime('%H:%M %m/%d')
-                    analysis_type = analysis.analysis_type.title()
-                    
-                    # Create expandable history item
-                    with st.expander(f"{analysis_type} - {timestamp}"):
-                        st.write(f"**Type:** {analysis_type}")
-                        st.write(f"**Time:** {analysis.timestamp.strftime('%Y-%m-%d %H:%M:%S')}")
-                        
-                        # Show detected expressions
-                        if analysis.detected_expressions:
-                            import json
-                            try:
-                                expressions = json.loads(analysis.detected_expressions)
-                                if expressions:
-                                    st.write("**Detected:** " + ", ".join(expressions))
-                            except:
-                                st.write("**Detected:** " + analysis.detected_expressions)
-                        
-                        # Show AI analysis
-                        if analysis.ai_analysis:
-                            st.write("**Analysis:**")
-                            st.write(analysis.ai_analysis)
-                        
-                        # Show confidence score if available
-                        if analysis.confidence_score is not None:
-                            st.write(f"**Confidence:** {analysis.confidence_score:.1%}")
-            else:
-                st.info("No analysis history yet")
-        except Exception as e:
-            st.error(f"Could not load history: {str(e)}")
-        
-        # Quick actions in sidebar for logged in users
-        st.markdown("---")
-        if st.button("🔄 Refresh History", key="refresh_history_sidebar", use_container_width=True):
-            st.rerun()
-        
-        if st.button("🗑️ Clear Session", key="clear_session_sidebar", use_container_width=True):
-            # Clear session state but keep session_id
-            session_id = st.session_state.session_id
-            st.session_state.clear()
-            st.session_state.session_id = session_id
-            st.rerun()
     else:
         st.markdown("### Get Started")
         st.info("Create an account to save your analysis history and unlock premium features!")
