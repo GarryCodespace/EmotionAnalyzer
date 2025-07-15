@@ -10,7 +10,7 @@ def create_screen_recorder_component():
     """Create a screen recording component for interviews"""
     
     screen_recorder_html = """
-    <div id="screen-recorder-container" style="text-align: center; margin: 20px 0;">
+    <div id="screen-recorder-container" style="text-align: center; margin: 20px 0; padding-bottom: 50px; min-height: 100vh;">
         <div id="screen-display" style="position: relative; display: inline-block;">
             <video id="screenVideo" width="800" height="600" autoplay muted playsinline style="border: 2px solid #ddd; border-radius: 8px; background: #f0f0f0;"></video>
             <canvas id="screenCanvas" width="800" height="600" style="display: none;"></canvas>
@@ -46,13 +46,13 @@ def create_screen_recorder_component():
         
         <div id="screenStatus" style="margin: 15px 0; font-weight: bold; color: #666; font-size: 16px;">Click 'Start Screen Recording' to begin</div>
         
-        <div id="interviewTips" style="margin: 20px 0; padding: 15px; background: #e3f2fd; border-radius: 8px; text-align: left;">
-            <h4 style="margin-top: 0; color: #1976d2;">Interview Tips:</h4>
-            <ul style="margin: 10px 0; padding-left: 20px;">
-                <li>Start recording before joining your video interview</li>
-                <li>The analysis overlay shows your emotional state in real-time</li>
-                <li>Use insights to maintain confident and positive expressions</li>
-                <li>Perfect for Zoom, Teams, Google Meet, and other video platforms</li>
+        <div id="interviewTips" style="margin: 20px 0; padding: 20px; background: #e3f2fd; border-radius: 8px; text-align: left; min-height: 150px; overflow: visible;">
+            <h4 style="margin-top: 0; margin-bottom: 15px; color: #1976d2;">Interview Tips:</h4>
+            <ul style="margin: 10px 0; padding-left: 20px; line-height: 1.6;">
+                <li style="margin-bottom: 8px;">Start recording before joining your video interview</li>
+                <li style="margin-bottom: 8px;">The analysis overlay shows your emotional state in real-time</li>
+                <li style="margin-bottom: 8px;">Use insights to maintain confident and positive expressions</li>
+                <li style="margin-bottom: 8px;">Perfect for Zoom, Teams, Google Meet, and other video platforms</li>
             </ul>
         </div>
     </div>
@@ -245,7 +245,7 @@ def show_screen_recorder_interview():
     screen_recorder_html = create_screen_recorder_component()
     
     # Display component and get frame data
-    component_value = components.html(screen_recorder_html, height=900)
+    component_value = components.html(screen_recorder_html, height=1200)
     
     # Process screen frame data
     if component_value and isinstance(component_value, dict):
