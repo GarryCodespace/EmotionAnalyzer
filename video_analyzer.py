@@ -178,7 +178,7 @@ class VideoEmotionAnalyzer:
     
     def analyze_video_frame(self, frame, timestamp: float) -> Optional[Dict]:
         """
-        Analyze a single video frame
+        Analyze a single video frame using AI vision analysis
         
         Args:
             frame: OpenCV frame
@@ -194,22 +194,37 @@ class VideoEmotionAnalyzer:
             return None
         
         landmarks = results.multi_face_landmarks[0].landmark
-        current_expressions = self.detect_expressions(landmarks)
         
-        # Check if this is a significant change
-        if self.is_significant_change(landmarks, current_expressions, timestamp):
-            # Generate AI analysis ONLY if expressions are detected AND significant
-            if current_expressions and len(current_expressions) > 0:
-                ai_analysis = analyze_expression(", ".join(current_expressions))
-                
+        # Check temporal constraint - prevent analyses too close together
+        if timestamp - self.last_analysis_time < self.min_time_between_analyses:
+            self.frame_count += 1
+            return None
+        
+        # Check if landmarks have changed significantly
+        landmark_change = self.calculate_landmark_distance(self.previous_landmarks, landmarks)
+        
+        if landmark_change > self.significance_threshold:
+            # Use AI vision analysis for accurate expression detection
+            from ai_vision_analyzer import AIVisionAnalyzer
+            ai_vision = AIVisionAnalyzer()
+            
+            # Analyze frame with AI vision
+            ai_analysis = ai_vision.analyze_facial_expressions(rgb_frame)
+            
+            # Extract expressions and analysis from AI
+            ai_expressions = ai_analysis.get('expressions', [])
+            analysis_text = ai_analysis.get('analysis', 'No significant expression detected')
+            confidence_scores = ai_analysis.get('confidence_scores', {})
+            
+            # Only proceed if AI detects meaningful expressions
+            if ai_expressions and len(ai_expressions) > 0:
                 analysis_result = {
                     'timestamp': timestamp,
-                    'expressions': current_expressions,
-                    'ai_analysis': ai_analysis,
+                    'expressions': ai_expressions,
+                    'ai_analysis': analysis_text,
                     'frame_number': self.frame_count,
-                    'significance_score': self.calculate_landmark_distance(
-                        self.previous_landmarks, landmarks
-                    ) if self.previous_landmarks else 1.0
+                    'confidence_scores': confidence_scores,
+                    'significance_score': landmark_change
                 }
                 
                 self.analysis_history.append(analysis_result)
@@ -217,16 +232,16 @@ class VideoEmotionAnalyzer:
                 # Update previous state and last analysis time
                 self.last_analysis_time = timestamp
                 self.previous_landmarks = landmarks
-                self.previous_expressions = set(current_expressions)
+                self.previous_expressions = set(ai_expressions)
                 
                 return analysis_result
         
         self.frame_count += 1
         return None
     
-    def process_video(self, video_path: str, max_analyses: int = 20) -> List[Dict]:
+    def process_video(self, video_path: str, max_analyses: int = 10) -> List[Dict]:
         """
-        Process entire video and return significant moments
+        Process entire video and return significant moments using AI analysis
         
         Args:
             video_path: Path to video file
@@ -246,18 +261,19 @@ class VideoEmotionAnalyzer:
         analyses = []
         frame_count = 0
         
-        # Process every nth frame to optimize performance
-        frame_skip = max(1, total_frames // (max_analyses * 3))
+        # Process every 2-3 seconds to find significant moments
+        frame_skip = max(1, int(fps * 2))  # Process every 2 seconds
         
         while cap.isOpened() and len(analyses) < max_analyses:
             ret, frame = cap.read()
             if not ret:
                 break
             
-            # Skip frames for performance
+            # Skip frames for performance and better temporal separation
             if frame_count % frame_skip == 0:
                 timestamp = frame_count / fps
                 
+                # Only analyze if we have a face and sufficient time gap
                 analysis = self.analyze_video_frame(frame, timestamp)
                 if analysis:
                     analyses.append(analysis)
@@ -265,6 +281,11 @@ class VideoEmotionAnalyzer:
             frame_count += 1
         
         cap.release()
+        
+        # If no significant expressions were found, return empty list
+        if not analyses:
+            return []
+        
         return analyses
     
     def get_video_summary(self) -> Dict:
