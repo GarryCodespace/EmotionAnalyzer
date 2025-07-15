@@ -483,6 +483,7 @@ with header_col2:
     st.markdown("<br>", unsafe_allow_html=True)  # Reduce spacing for closer text
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;<h1 style='font-size: 3rem; margin: 0; margin-bottom: -35px;'>Emoticon</h1>", unsafe_allow_html=True)
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;<p style='margin-top: -35px;'>Live AI Emotion Interpretation from Micro-Expressions</p>", unsafe_allow_html=True)
+    st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;<p style='margin-top: -10px; font-size: 0.9rem; color: #666;'>Try it now - Upload an image to experience AI emotion analysis</p>", unsafe_allow_html=True)
 with header_col3:
     st.markdown("<br>", unsafe_allow_html=True)  # Add some spacing
     
@@ -622,10 +623,49 @@ with st.sidebar:
             st.session_state.session_id = session_id
             st.rerun()
     else:
-        st.info("Login to view analysis history and save unlimited analyses")
-        if st.button("Login", key="login_sidebar", use_container_width=True):
-            st.session_state.show_login_modal = True
-            st.rerun()
+        st.markdown("### 🚀 Get Started")
+        st.info("Create an account to save your analysis history and unlock premium features!")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("Login", key="login_sidebar", use_container_width=True):
+                st.session_state.show_login_modal = True
+                st.rerun()
+        with col2:
+            if st.button("Register", key="register_sidebar", use_container_width=True):
+                st.session_state.show_login_modal = True
+                st.session_state.show_register = True
+                st.rerun()
+        
+        st.markdown("---")
+        st.markdown("### 🎯 Try It Now")
+        st.success("Upload an image below to experience AI emotion analysis!")
+        
+        # Show basic plan info
+        st.markdown("### 📋 Current Plan")
+        st.markdown("**Free Trial**: 5 analyses per day")
+        
+        # Show upgrade option
+        if st.button("💎 Upgrade Plan", key="upgrade_sidebar", use_container_width=True):
+            st.switch_page("pages/pricing.py")
+
+# Welcome message for new users
+if not st.session_state.get('logged_in', False):
+    st.markdown("---")
+    st.markdown("### 🎯 Try Emoticon Now - No Login Required!")
+    st.info("Upload an image below to experience advanced AI emotion analysis. Get instant insights into facial expressions, body language, and emotional states.")
+    
+    # Show demo benefits
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.markdown("**🔍 AI Vision Analysis**")
+        st.markdown("Advanced facial expression detection")
+    with col2:
+        st.markdown("**💡 Emotional Insights**")
+        st.markdown("Psychological interpretation of expressions")
+    with col3:
+        st.markdown("**⚡ Instant Results**")
+        st.markdown("Get analysis in seconds")
 
 # Image Upload Analysis
 st.markdown("---")
