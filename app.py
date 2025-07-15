@@ -599,17 +599,10 @@ with st.sidebar:
 st.markdown("---")
 st.markdown("### Image Upload Analysis")
 
-# Check if user is logged in
-if not st.session_state.get('logged_in', False):
-    st.info("Please log in to access emotion analysis features")
-    if st.button("Login to Analyze Images", key="login_for_image_analysis"):
-        st.session_state.show_login_modal = True
-        st.rerun()
-else:
-    uploaded_file = st.file_uploader("Upload an image for expression analysis", type=['jpg', 'jpeg', 'png'])
-    
-    if uploaded_file is not None:
-        analyze_uploaded_image(uploaded_file)
+uploaded_file = st.file_uploader("Upload an image for expression analysis", type=['jpg', 'jpeg', 'png'])
+
+if uploaded_file is not None:
+    analyze_uploaded_image(uploaded_file)
 
 def analyze_uploaded_image(uploaded_file):
     """Analyze the uploaded image"""
@@ -708,107 +701,27 @@ def analyze_uploaded_image(uploaded_file):
         st.markdown("**AI Deception Analysis:**")
         st.markdown(ai_interpretation)
     
-    # Save analysis to database
-    try:
-        expressions_json = json.dumps(detected_expressions) if detected_expressions else "[]"
-        save_emotion_analysis(
-            st.session_state.session_id,
-            detected_expressions,
-            detailed_analysis,
-            "image",
-            deception_probability
-        )
-        st.success("Analysis saved to history")
-    except Exception as e:
-        st.error(f"Could not save analysis: {str(e)}")
-
-# Continue with video upload section
-        all_expressions = detected_expressions
-        
-        # Combine facial expressions and body language for comprehensive analysis
-        all_signals = detected_expressions + detected_body_language
-        
+    # Save analysis to database only if logged in
+    if st.session_state.get('logged_in', False):
         try:
-            analysis = ai_vision.analyze_emotion_context(image, all_signals)
-            st.info(f"**Comprehensive AI Analysis (Face + Body)**: {analysis}")
-            
-            # Save to database
+            expressions_json = json.dumps(detected_expressions) if detected_expressions else "[]"
             save_emotion_analysis(
-                session_id=st.session_state.session_id,
-                expressions=all_signals,
-                ai_analysis=analysis,
-                analysis_type="image"
+                st.session_state.session_id,
+                detected_expressions,
+                detailed_analysis,
+                "image",
+                deception_probability
             )
+            st.success("Analysis saved to history")
         except Exception as e:
-            st.error(f"Analysis error: {str(e)}")
-        
-        # Add lie detector button and analysis
-        st.markdown("---")
-        lie_detector_col1, lie_detector_col2 = st.columns([1, 2])
-        
-        with lie_detector_col1:
-            if st.button("AI Lie Detector Analysis", key="lie_detector_image"):
-                st.session_state.run_lie_detector = True
-        
-        with lie_detector_col2:
-            st.markdown("*Analyze micro-expressions and body language for deception indicators*")
-        
-        # Run lie detector analysis if button pressed
-        if st.session_state.get('run_lie_detector', False):
-            try:
-                with st.spinner('Analyzing behavioral patterns for deception indicators...'):
-                    # Get deception indicators from AI analysis
-                    deception_indicators = ai_analysis.get("deception_indicators", [])
-                    
-                    # Run AI-powered deception analysis
-                    deception_analysis = ai_vision.analyze_deception_probability(image, deception_indicators)
-                
-                # Display results
-                st.markdown("### 🕵️ Deception Analysis Results")
-                
-                # Main probability display
-                probability = deception_analysis['deception_probability']
-                confidence_level = deception_analysis['confidence_level']
-                
-                # Color coding based on probability
-                if probability < 0.3:
-                    color = "green"
-                    icon = "✅"
-                elif probability < 0.6:
-                    color = "orange"
-                    icon = "⚠️"
-                else:
-                    color = "red"
-                    icon = "🚨"
-                
-                st.markdown(f"""
-                <div style="background-color: {color}; padding: 15px; border-radius: 10px; margin: 10px 0;">
-                    <h3 style="color: white; margin: 0;">{icon} Deception Probability: {probability:.1%}</h3>
-                    <p style="color: white; margin: 5px 0;">Confidence Level: {confidence_level}</p>
-                </div>
-                """, unsafe_allow_html=True)
-                
-                # Key indicators
-                if deception_analysis['key_indicators']:
-                    st.markdown("**🔍 Key Deception Indicators:**")
-                    for indicator in deception_analysis['key_indicators']:
-                        st.markdown(f"• {indicator.replace('_', ' ').title()}")
-                
-                # Risk assessment
-                st.markdown(f"**⚠️ Risk Assessment**: {deception_analysis['risk_assessment'].title()}")
-                
-                # Interpretation
-                st.markdown("**🧠 AI Interpretation:**")
-                st.info(deception_analysis['interpretation'])
-                
-                # Reset the button state
-                st.session_state.run_lie_detector = False
-                
-            except Exception as e:
-                st.error(f"Lie detector analysis error: {str(e)}")
-                st.session_state.run_lie_detector = False
+            st.error(f"Could not save analysis: {str(e)}")
     else:
-        st.warning("No clear expressions detected in this image")
+        st.info("💡 Login to save analysis history and access advanced features")
+        if st.button("Login to Save History", key="login_for_image_save"):
+            st.session_state.show_login_modal = True
+            st.rerun()
+
+
 
 # Video Upload Feature
 video_col1, video_col2 = st.columns([2, 1])
@@ -826,65 +739,59 @@ with video_col2:
     else:
         st.info("Login required for advanced features")
 
-# Check if user is logged in for video analysis
-if not st.session_state.get('logged_in', False):
-    st.info("Please log in to access video analysis features")
-    if st.button("Login to Analyze Videos", key="login_for_video_analysis"):
-        st.session_state.show_login_modal = True
-        st.rerun()
-else:
-    uploaded_video = st.file_uploader("Upload a video for expression analysis", type=['mp4', 'avi', 'mov', 'mkv'])
+uploaded_video = st.file_uploader("Upload a video for expression analysis", type=['mp4', 'avi', 'mov', 'mkv'])
+
+if uploaded_video is not None:
+    # Save uploaded video to temporary file
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp_file:
+        tmp_file.write(uploaded_video.read())
+        tmp_video_path = tmp_file.name
     
-    if uploaded_video is not None:
-        # Save uploaded video to temporary file
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp_file:
-            tmp_file.write(uploaded_video.read())
-            tmp_video_path = tmp_file.name
+    try:
+        # Display video
+        st.video(uploaded_video)
         
-        try:
-            # Display video
-            st.video(uploaded_video)
+        # Process video with progress bar
+        with st.spinner('Analyzing video for significant expression changes...'):
+            video_analyzer = VideoEmotionAnalyzer(significance_threshold=0.25)
+            analyses = video_analyzer.process_video(tmp_video_path, max_analyses=10)
+            video_summary = video_analyzer.get_video_summary()
+        
+        if analyses:
+            st.success(f"**Found {len(analyses)} significant expression moments**")
             
-            # Process video with progress bar
-            with st.spinner('Analyzing video for significant expression changes...'):
-                video_analyzer = VideoEmotionAnalyzer(significance_threshold=0.25)
-                analyses = video_analyzer.process_video(tmp_video_path, max_analyses=10)
-                video_summary = video_analyzer.get_video_summary()
+            # Display video summary
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("Total Analyses", video_summary['total_analyses'])
+                if video_summary['dominant_emotions']:
+                    st.markdown("**Dominant Emotions:**")
+                    for emotion, count in video_summary['dominant_emotions']:
+                        st.write(f"• {emotion}: {count} times")
             
-            if analyses:
-                st.success(f"**Found {len(analyses)} significant expression moments**")
-                
-                # Display video summary
-                col1, col2 = st.columns(2)
-                with col1:
-                    st.metric("Total Analyses", video_summary['total_analyses'])
-                    if video_summary['dominant_emotions']:
-                        st.markdown("**Dominant Emotions:**")
-                        for emotion, count in video_summary['dominant_emotions']:
-                            st.write(f"• {emotion}: {count} times")
-                
-                with col2:
-                    st.markdown("**Expression Timeline:**")
-                    for moment in video_summary['timeline'][:5]:
-                        timestamp = moment['timestamp']
-                        minutes = int(timestamp // 60)
-                        seconds = int(timestamp % 60)
-                        time_str = f"{minutes}:{seconds:02d}" if minutes > 0 else f"{seconds}s"
-                        st.write(f"{time_str}: {', '.join(moment['expressions'])}")
-                
-                # Display detailed analyses
-                st.markdown("**Detailed Analysis of Significant Moments:**")
-                for i, analysis in enumerate(analyses[:8]):  # Show top 8 analyses
-                    timestamp = analysis['timestamp']
+            with col2:
+                st.markdown("**Expression Timeline:**")
+                for moment in video_summary['timeline'][:5]:
+                    timestamp = moment['timestamp']
                     minutes = int(timestamp // 60)
                     seconds = int(timestamp % 60)
                     time_str = f"{minutes}:{seconds:02d}" if minutes > 0 else f"{seconds}s"
-                    with st.expander(f"Moment {i+1} - {time_str} (Significance: {analysis['significance_score']:.2f})"):
-                        st.write(f"**Detected Expressions**: {', '.join(analysis['expressions'])}")
-                        st.write(f"**AI Analysis**: {analysis['ai_analysis']}")
-                        st.write(f"**Frame**: {analysis['frame_number']}")
-                        
-                        # Save significant analyses to database
+                    st.write(f"{time_str}: {', '.join(moment['expressions'])}")
+            
+            # Display detailed analyses
+            st.markdown("**Detailed Analysis of Significant Moments:**")
+            for i, analysis in enumerate(analyses[:8]):  # Show top 8 analyses
+                timestamp = analysis['timestamp']
+                minutes = int(timestamp // 60)
+                seconds = int(timestamp % 60)
+                time_str = f"{minutes}:{seconds:02d}" if minutes > 0 else f"{seconds}s"
+                with st.expander(f"Moment {i+1} - {time_str} (Significance: {analysis['significance_score']:.2f})"):
+                    st.write(f"**Detected Expressions**: {', '.join(analysis['expressions'])}")
+                    st.write(f"**AI Analysis**: {analysis['ai_analysis']}")
+                    st.write(f"**Frame**: {analysis['frame_number']}")
+                    
+                    # Save significant analyses to database only if logged in
+                    if st.session_state.get('logged_in', False):
                         save_emotion_analysis(
                             session_id=st.session_state.session_id,
                             expressions=analysis['expressions'],
@@ -893,15 +800,22 @@ else:
                             confidence=analysis['significance_score']
                         )
             
-            else:
-                st.info("No significant expression changes detected in this video")
-                
-        except Exception as e:
-            st.error(f"Video analysis error: {str(e)}")
-        finally:
-            # Clean up temporary file
-            if os.path.exists(tmp_video_path):
-                os.unlink(tmp_video_path)
+            # Show login prompt if not logged in
+            if not st.session_state.get('logged_in', False):
+                st.info("💡 Login to save analysis history and access advanced features")
+                if st.button("Login to Save History", key="login_for_video_save"):
+                    st.session_state.show_login_modal = True
+                    st.rerun()
+        
+        else:
+            st.info("No significant expression changes detected in this video")
+            
+    except Exception as e:
+        st.error(f"Video analysis error: {str(e)}")
+    finally:
+        # Clean up temporary file
+        if os.path.exists(tmp_video_path):
+            os.unlink(tmp_video_path)
 
 # Demo Mode
 st.markdown("#### Demo Mode - Expression Simulation")
