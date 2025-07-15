@@ -102,6 +102,10 @@ Interface: Removed session data and statistics display from sidebar for cleaner 
 - **Temporal Analysis**: Compares consecutive frames for landmark movement patterns
 - **Batch Processing**: Processes uploaded videos efficiently with frame skipping
 - **Timeline Generation**: Creates expression timeline with significant moments
+- **Long Video Optimization**: Aggressive frame skipping for videos >10 minutes (every 10 seconds)
+- **File Size Limits**: 200MB maximum file size with warnings for files >50MB
+- **Memory Optimization**: Frame resizing to 640x480 for faster AI processing
+- **Smart Sections**: Analyzes beginning, middle, and end sections more densely
 
 ### 9. Screen Recorder Mode
 - **External Application Recording**: Captures entire screen for video calls (Zoom, Teams, etc.)
