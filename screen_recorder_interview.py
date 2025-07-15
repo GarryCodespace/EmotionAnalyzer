@@ -16,11 +16,14 @@ def create_screen_recorder_component():
             <canvas id="screenCanvas" width="800" height="600" style="display: none;"></canvas>
             
             <!-- Analysis overlay -->
-            <div id="analysisOverlay" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; font-size: 14px; display: none; max-width: 300px;">
-                <div id="overlayStatus" style="font-weight: bold; color: #4CAF50;">Ready</div>
-                <div id="overlayExpressions" style="margin-top: 5px;">No expressions detected</div>
-                <div id="overlayEmotion" style="margin-top: 5px;">Emotion: Neutral</div>
-                <div id="overlayConfidence" style="margin-top: 5px;">Confidence: Medium</div>
+            <div id="analysisOverlay" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.9); color: white; padding: 15px; border-radius: 8px; font-size: 13px; display: none; max-width: 350px; line-height: 1.4;">
+                <div id="overlayStatus" style="font-weight: bold; color: #4CAF50; margin-bottom: 10px;">Ready</div>
+                <div id="overlayDetailedAnalysis" style="margin-top: 5px; font-size: 12px; line-height: 1.5;">Click Start Analysis to begin detailed emotional analysis</div>
+                <div id="overlayBasicInfo" style="margin-top: 10px; font-size: 11px; opacity: 0.8; border-top: 1px solid #555; padding-top: 8px;">
+                    <div id="overlayExpressions">Expressions: None detected</div>
+                    <div id="overlayEmotion">Emotion: Neutral</div>
+                    <div id="overlayConfidence">Confidence: Medium</div>
+                </div>
             </div>
         </div>
         
@@ -205,8 +208,9 @@ def create_screen_recorder_component():
             if (event.data.type === 'screen_analysis_result') {
                 const result = event.data.data;
                 
-                // Update overlay
-                document.getElementById('overlayStatus').textContent = `Frame ${result.frame_count || screenFrameCount}`;
+                // Update overlay with detailed analysis
+                document.getElementById('overlayStatus').textContent = `Analysis Complete - Frame ${result.frame_count || screenFrameCount}`;
+                document.getElementById('overlayDetailedAnalysis').textContent = result.detailed_analysis || 'No detailed analysis available';
                 document.getElementById('overlayExpressions').textContent = 'Expressions: ' + (result.expressions || 'None detected');
                 document.getElementById('overlayEmotion').textContent = 'Emotion: ' + (result.emotion || 'Neutral');
                 document.getElementById('overlayConfidence').textContent = 'Confidence: ' + (result.confidence || 'Medium');
@@ -366,6 +370,9 @@ def process_screen_frame(frame_data):
             )
         
         # Send results back to JavaScript
+        # Escape quotes in detailed analysis to prevent JavaScript errors
+        detailed_analysis_escaped = detailed_analysis.replace("'", "\\'").replace('"', '\\"')
+        
         js_code = f"""
         <script>
             setTimeout(function() {{
@@ -375,6 +382,7 @@ def process_screen_frame(frame_data):
                         expressions: '{expressions_text}',
                         emotion: '{emotional_state}',
                         confidence: '{confidence_level}',
+                        detailed_analysis: '{detailed_analysis_escaped}',
                         frame_count: {result['frame_count']}
                     }}
                 }}, '*');
