@@ -777,61 +777,9 @@ with tools_col1:
     </div>
     """, unsafe_allow_html=True)
     
-    # Style the file uploader to look like a plus button
-    st.markdown("""
-    <style>
-    .stFileUploader label {
-        display: none !important;
-    }
-    .stFileUploader > div {
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        height: 38px !important;
-        background: #f0f2f6 !important;
-        border: 1px solid #d1d5db !important;
-        border-radius: 0.375rem !important;
-        cursor: pointer !important;
-        transition: all 0.2s !important;
-    }
-    .stFileUploader > div:hover {
-        background: #e5e7eb !important;
-        border-color: #9ca3af !important;
-    }
-    .stFileUploader > div > div {
-        display: none !important;
-    }
-    .stFileUploader > div::before {
-        content: "➕" !important;
-        font-size: 16px !important;
-        color: #374151 !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        width: 100% !important;
-        height: 100% !important;
-    }
-    .stFileUploader > div > div:first-child {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        width: 100% !important;
-        height: 100% !important;
-    }
-    .stFileUploader > div > div:first-child::before {
-        content: "➕" !important;
-        font-size: 16px !important;
-        color: #374151 !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    
-    # File uploader that looks like a plus button
-    uploaded_file = st.file_uploader("Browse files", type=['jpg', 'jpeg', 'png'], key="image_uploader_plus", label_visibility="collapsed")
-    
-    # Process uploaded file immediately
-    if uploaded_file is not None:
-        analyze_uploaded_image(uploaded_file)
+    if st.button("➕", key="upload_image_tool", use_container_width=True):
+        st.session_state.show_upload_image = True
+        st.rerun()
 
 with tools_col2:
     st.markdown("""
@@ -882,11 +830,45 @@ with tools_col5:
 
 
 
-# Show upload interfaces when tools are activated (kept for video upload)
+# Show upload interfaces when tools are activated
 if st.session_state.get('show_upload_image', False):
-    # Reset the flag since we now handle image upload directly in the plus button
-    st.session_state.show_upload_image = False
-    st.rerun()
+    st.markdown("---")
+    st.markdown("### Upload Image")
+    
+    # Hide drag-and-drop text with custom CSS
+    st.markdown("""
+    <style>
+    .uploadedFile {
+        display: none;
+    }
+    .css-1kyxreq {
+        display: none;
+    }
+    .css-1eznxh6 {
+        display: none;
+    }
+    .css-1pqgz65 {
+        display: none;
+    }
+    .css-1djdyxw {
+        display: none;
+    }
+    [data-testid="stFileUploader"] > div > div > div > div > div:nth-child(2) {
+        display: none;
+    }
+    [data-testid="stFileUploader"] > div > div > div > div > div:nth-child(3) {
+        display: none;
+    }
+    [data-testid="stFileUploader"] > div > div > div > div > div:nth-child(4) {
+        display: none;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    uploaded_file = st.file_uploader("Browse files", type=['jpg', 'jpeg', 'png'], key="image_upload_tool")
+    
+    if uploaded_file is not None:
+        analyze_uploaded_image(uploaded_file)
     
     if st.button("Close", key="close_upload_image"):
         st.session_state.show_upload_image = False
