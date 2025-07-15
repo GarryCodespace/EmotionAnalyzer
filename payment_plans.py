@@ -102,6 +102,11 @@ class PaymentPlans:
     @staticmethod
     def get_user_plan(user_id: Optional[int] = None) -> str:
         """Get current user's plan from session state or database"""
+        # Admin override for specific user
+        if st.session_state.get('user_email') == 'garryyuan1@gmail.com':
+            st.session_state.user_plan = 'pro'
+            return 'pro'
+        
         if user_id and st.session_state.get('logged_in', False):
             # In production, this would query the database
             return st.session_state.get('user_plan', 'free')
