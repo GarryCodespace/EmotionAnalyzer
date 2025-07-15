@@ -10,7 +10,7 @@ Preferred communication style: Simple, everyday language.
 UI Design: Light theme (dark mode removed), proper capitalization (first letter only), seamless button integration with blue notification boxes (#e3f2fd background).
 User Experience: Homepage-first approach - users can try the product before being prompted to login. Authentication is optional for basic features, required only for saving history and premium features.
 Payment Structure: Free tier includes 1 lie detection + 1 stress analysis per day. Professional tier ($14.99/month) provides unlimited lie detection and stress analysis.
-Login Experience: After successful login, users are redirected back to the home page automatically.
+Login Experience: After successful login, users are redirected back to the home page automatically. Sessions persist for 30 days with automatic refresh, eliminating the need for daily logins. Browser cookies maintain login state across sessions.
 Use Case Scenarios: Added popular use cases (For Fun, Interview, Date, Interrogation) with clickable buttons that auto-fill context for personalized AI analysis.
 Interface: Removed session data and statistics display from sidebar for cleaner interface.
 
@@ -103,11 +103,21 @@ Interface: Removed session data and statistics display from sidebar for cleaner 
 - **Batch Processing**: Processes uploaded videos efficiently with frame skipping
 - **Timeline Generation**: Creates expression timeline with significant moments
 - **Long Video Optimization**: Aggressive frame skipping for videos >10 minutes (every 10 seconds)
-- **File Size Limits**: 200MB maximum file size with warnings for files >50MB
+- **File Size Limits**: 50MB maximum file size with warnings for files >25MB
 - **Memory Optimization**: Frame resizing to 640x480 for faster AI processing
 - **Smart Sections**: Analyzes beginning, middle, and end sections more densely
 
-### 9. Screen Recorder Mode
+### 9. Enhanced Persistent Login System
+- **Extended Session Duration**: 30-day session lifetime with automatic refresh
+- **Session Auto-Refresh**: Automatically extends sessions when they expire within 7 days
+- **Browser Cookie Persistence**: Maintains login state across browser sessions
+- **Automatic Login**: Users stay logged in without daily re-authentication
+- **Session State Management**: Combines Streamlit session state with browser cookies
+- **Security**: Secure cookie storage with SameSite=Strict policy
+- **Graceful Degradation**: Handles expired sessions by clearing stored data
+- **Welcome Messages**: Shows friendly "Welcome back" message for auto-login
+
+### 10. Screen Recorder Mode
 - **External Application Recording**: Captures entire screen for video calls (Zoom, Teams, etc.)
 - **Live Analysis Popups**: Shows real-time emotion analysis in overlay windows
 - **Major Change Detection**: Only triggers popups for significant expression changes

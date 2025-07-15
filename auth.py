@@ -9,6 +9,7 @@ import sqlalchemy as sa
 class AuthSystem:
     def __init__(self):
         self.session_duration = timedelta(days=30)  # 30-day session
+        self.session_refresh_threshold = timedelta(days=7)  # Refresh if session expires within 7 days
     
     def hash_password(self, password: str) -> str:
         """Hash password with salt"""
@@ -154,7 +155,7 @@ class AuthSystem:
             close_db(db)
     
     def validate_session(self, session_token: str) -> Dict[str, Any]:
-        """Validate user session token"""
+        """Validate user session token and auto-refresh if needed"""
         db = get_db()
         if not db:
             return {'valid': False, 'error': 'Database connection failed'}
@@ -175,11 +176,21 @@ class AuthSystem:
             if not user or not user.is_active:
                 return {'valid': False, 'error': 'User not found or inactive'}
             
+            # Auto-refresh session if expiring within threshold
+            needs_refresh = session.expires_at - datetime.utcnow() < self.session_refresh_threshold
+            new_expires_at = session.expires_at
+            
+            if needs_refresh:
+                new_expires_at = datetime.utcnow() + self.session_duration
+                session.expires_at = new_expires_at
+                db.commit()
+            
             return {
                 'valid': True,
                 'user_id': user.id,
                 'email': user.email,
-                'session_expires': session.expires_at.isoformat()
+                'session_expires': new_expires_at.isoformat(),
+                'refreshed': needs_refresh
             }
             
         except Exception as e:

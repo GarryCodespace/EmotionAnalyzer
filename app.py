@@ -432,8 +432,15 @@ try:
 except Exception as e:
     st.error(f"❌ Database connection issue: {str(e)}")
 
-# Initialize auth session
+# Initialize auth session and auto-login
 init_auth_session()
+auto_login_success = auto_login()
+
+# Show welcome message for auto-login (only once per session)
+if auto_login_success and st.session_state.get('logged_in', False) and not st.session_state.get('welcome_shown', False):
+    user_email = st.session_state.get('user_email', 'User')
+    st.info(f"Welcome back, {user_email}! You're automatically logged in for 30 days.")
+    st.session_state.welcome_shown = True
 
 # Show account settings if requested
 if st.session_state.get('show_account_settings', False):
