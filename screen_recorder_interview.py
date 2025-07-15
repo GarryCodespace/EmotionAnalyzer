@@ -16,10 +16,10 @@ def create_screen_recorder_component():
             <canvas id="screenCanvas" width="800" height="600" style="display: none;"></canvas>
             
             <!-- Analysis overlay -->
-            <div id="analysisOverlay" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.9); color: white; padding: 15px; border-radius: 8px; font-size: 13px; display: none; max-width: 350px; line-height: 1.4;">
-                <div id="overlayStatus" style="font-weight: bold; color: #4CAF50; margin-bottom: 10px;">Ready</div>
-                <div id="overlayDetailedAnalysis" style="margin-top: 5px; font-size: 12px; line-height: 1.5;">Click Start Analysis to begin detailed emotional analysis</div>
-                <div id="overlayBasicInfo" style="margin-top: 10px; font-size: 11px; opacity: 0.8; border-top: 1px solid #555; padding-top: 8px;">
+            <div id="analysisOverlay" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.9); color: white; padding: 20px; border-radius: 10px; font-size: 14px; display: none; max-width: 400px; line-height: 1.6; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
+                <div id="overlayStatus" style="font-weight: bold; color: #4CAF50; margin-bottom: 15px; font-size: 16px;">📊 AI Analysis</div>
+                <div id="overlayDetailedAnalysis" style="margin-bottom: 15px; font-size: 13px; line-height: 1.5; color: #f0f0f0;">Click Start Analysis to begin detailed emotional intelligence analysis of your interview performance</div>
+                <div id="overlayBasicInfo" style="font-size: 11px; opacity: 0.7; border-top: 1px solid #555; padding-top: 10px; display: none;">
                     <div id="overlayExpressions">Expressions: None detected</div>
                     <div id="overlayEmotion">Emotion: Neutral</div>
                     <div id="overlayConfidence">Confidence: Medium</div>
@@ -208,12 +208,12 @@ def create_screen_recorder_component():
             if (event.data.type === 'screen_analysis_result') {
                 const result = event.data.data;
                 
-                // Update overlay with detailed analysis
-                document.getElementById('overlayStatus').textContent = `Analysis Complete - Frame ${result.frame_count || screenFrameCount}`;
+                // Update overlay with detailed analysis paragraph
+                document.getElementById('overlayStatus').innerHTML = `📊 AI Analysis - Frame ${result.frame_count || screenFrameCount}`;
                 document.getElementById('overlayDetailedAnalysis').textContent = result.detailed_analysis || 'No detailed analysis available';
-                document.getElementById('overlayExpressions').textContent = 'Expressions: ' + (result.expressions || 'None detected');
-                document.getElementById('overlayEmotion').textContent = 'Emotion: ' + (result.emotion || 'Neutral');
-                document.getElementById('overlayConfidence').textContent = 'Confidence: ' + (result.confidence || 'Medium');
+                
+                // Hide basic info for cleaner paragraph-focused display
+                document.getElementById('overlayBasicInfo').style.display = 'none';
                 
                 // Update main status
                 document.getElementById('screenStatus').textContent = 
@@ -314,15 +314,16 @@ def process_screen_frame(frame_data):
         
         # Enhanced analysis for interview context
         context_prompt = """
-        This is a screen recording during a job interview. Analyze the person's facial expressions and body language 
-        for interview performance. Focus on:
-        - Confidence and professionalism
-        - Engagement and attentiveness  
-        - Stress or anxiety indicators
-        - Authenticity and genuineness
-        - Overall interview presence
+        This is a screen recording during a job interview. Provide a comprehensive paragraph analysis (4-6 sentences) 
+        of the person's emotional state and interview performance. Focus on:
         
-        Provide specific feedback for interview improvement.
+        1. EMOTIONAL INTELLIGENCE ANALYSIS: Assess confidence level, stress indicators, engagement signals, and authenticity
+        2. INTERVIEW PERFORMANCE: Evaluate professionalism, attentiveness, body language, and overall presence
+        3. BEHAVIORAL INSIGHTS: Identify micro-expressions, posture changes, and non-verbal communication patterns
+        4. ACTIONABLE FEEDBACK: Provide specific recommendations for improvement
+        
+        Write in a detailed, professional tone similar to an AI coach analyzing interview performance. 
+        Be specific about what you observe and provide constructive insights.
         """
         
         analysis = ai_vision.analyze_emotion_context(image_array, [context_prompt])
