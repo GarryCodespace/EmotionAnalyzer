@@ -53,6 +53,26 @@ class ExpressionStats(Base):
     last_detected = sa.Column(sa.DateTime, default=datetime.utcnow)
     avg_confidence = sa.Column(sa.Float, nullable=True)
 
+class User(Base):
+    __tablename__ = "users"
+    
+    id = sa.Column(sa.Integer, primary_key=True, index=True)
+    email = sa.Column(sa.String(255), unique=True, index=True, nullable=False)
+    password_hash = sa.Column(sa.String(255), nullable=False)
+    created_at = sa.Column(sa.DateTime, default=datetime.utcnow)
+    last_login = sa.Column(sa.DateTime, nullable=True)
+    is_active = sa.Column(sa.Boolean, default=True)
+    
+class UserLogin(Base):
+    __tablename__ = "user_logins"
+    
+    id = sa.Column(sa.Integer, primary_key=True, index=True)
+    user_id = sa.Column(sa.Integer, sa.ForeignKey("users.id"), nullable=False)
+    session_token = sa.Column(sa.String(255), unique=True, index=True, nullable=False)
+    login_time = sa.Column(sa.DateTime, default=datetime.utcnow)
+    expires_at = sa.Column(sa.DateTime, nullable=False)
+    is_active = sa.Column(sa.Boolean, default=True)
+
 # Database functions
 def init_database():
     """Initialize database tables"""
