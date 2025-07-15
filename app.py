@@ -227,34 +227,79 @@ div[data-testid="stInfo"] > div {
     color: #0c5460;
 }
 
-/* Capitalize sidebar navigation items */
-.css-1d391kg p {
+/* Capitalize sidebar navigation items - Updated selectors */
+[data-testid="stSidebar"] .stRadio > div > div > div > label > div > p {
     text-transform: capitalize;
 }
 
-/* Alternative selector for sidebar navigation */
-[data-testid="stSidebar"] .css-1d391kg p {
+[data-testid="stSidebar"] .stRadio label p {
     text-transform: capitalize;
 }
 
-/* More specific selector for navigation items */
-.css-1d391kg p:first-child {
+[data-testid="stSidebar"] nav ul li a {
     text-transform: capitalize;
 }
 
-/* Target nav links in sidebar */
-.css-1d391kg a {
+[data-testid="stSidebar"] nav ul li a p {
     text-transform: capitalize;
 }
 
-/* Target navigation labels */
-.css-1d391kg span {
+/* Target page navigation links */
+[data-testid="stSidebar"] [data-testid="stNavigation"] a {
     text-transform: capitalize;
 }
 
-/* General sidebar navigation capitalization */
-[data-testid="stSidebar"] ul li a {
+[data-testid="stSidebar"] [data-testid="stNavigation"] a span {
     text-transform: capitalize;
+}
+
+/* More general approach - target all navigation text */
+[data-testid="stSidebar"] nav a {
+    text-transform: capitalize;
+}
+
+[data-testid="stSidebar"] nav a span {
+    text-transform: capitalize;
+}
+
+/* Fallback for any navigation text */
+[data-testid="stSidebar"] ul li {
+    text-transform: capitalize;
+}
+
+/* Modern Streamlit navigation selectors */
+[data-testid="stSidebar"] [data-testid="stNav"] a {
+    text-transform: capitalize !important;
+}
+
+[data-testid="stSidebar"] [data-testid="stNav"] a span {
+    text-transform: capitalize !important;
+}
+
+[data-testid="stSidebar"] [data-testid="stNav"] button {
+    text-transform: capitalize !important;
+}
+
+[data-testid="stSidebar"] [data-testid="stNav"] button span {
+    text-transform: capitalize !important;
+}
+
+/* Direct targeting of page links */
+[data-testid="stSidebar"] a[href*="pages/"] {
+    text-transform: capitalize !important;
+}
+
+[data-testid="stSidebar"] a[href*="pages/"] span {
+    text-transform: capitalize !important;
+}
+
+/* Comprehensive sidebar text capitalization */
+[data-testid="stSidebar"] * {
+    text-transform: none;
+}
+
+[data-testid="stSidebar"] a, [data-testid="stSidebar"] button {
+    text-transform: capitalize !important;
 }
 
 .stMarkdown {
