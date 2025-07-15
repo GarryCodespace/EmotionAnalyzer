@@ -698,7 +698,7 @@ with tools_col1:
     </div>
     """, unsafe_allow_html=True)
     
-    if st.button("+", key="upload_image_tool", use_container_width=True):
+    if st.button("➕", key="upload_image_tool", use_container_width=True):
         st.session_state.show_upload_image = True
         st.rerun()
 
@@ -709,7 +709,7 @@ with tools_col2:
     </div>
     """, unsafe_allow_html=True)
     
-    if st.button("+", key="upload_video_tool", use_container_width=True):
+    if st.button("➕", key="upload_video_tool", use_container_width=True):
         st.session_state.show_upload_video = True
         st.rerun()
 
@@ -720,7 +720,7 @@ with tools_col3:
     </div>
     """, unsafe_allow_html=True)
     
-    if st.button("+", key="lie_detector_tool", use_container_width=True):
+    if st.button("➕", key="lie_detector_tool", use_container_width=True):
         st.session_state.show_lie_detector_tool = True
         st.rerun()
 
@@ -731,7 +731,7 @@ with tools_col4:
     </div>
     """, unsafe_allow_html=True)
     
-    if st.button("+", key="analytics_tool", use_container_width=True):
+    if st.button("➕", key="analytics_tool", use_container_width=True):
         st.switch_page("pages/analytics.py")
 
 # Show upload interfaces when tools are activated
