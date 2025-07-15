@@ -13,6 +13,7 @@ from video_analyzer import VideoEmotionAnalyzer
 from body_language_analyzer import BodyLanguageAnalyzer
 from lie_detector import LieDetector
 from ai_vision_analyzer import AIVisionAnalyzer
+from login_ui import require_authentication, show_user_menu, show_account_settings, init_auth_session
 
 # Setup MediaPipe
 mp_face_mesh = mp.solutions.face_mesh
@@ -488,6 +489,18 @@ try:
     init_database()
 except Exception as e:
     st.error(f"❌ Database connection issue: {str(e)}")
+
+# Check authentication - require login to access the app
+if not require_authentication():
+    st.stop()
+
+# Show account settings if requested
+if st.session_state.get('show_account_settings', False):
+    show_account_settings()
+    st.stop()
+
+# Show user menu in sidebar
+show_user_menu()
 
 # API Key Status Check
 try:
