@@ -653,7 +653,6 @@ with st.sidebar:
 if not st.session_state.get('logged_in', False):
     st.markdown("---")
     st.markdown("### 🎯 Try Emoticon Now - No Login Required!")
-    st.info("Upload an image below to experience advanced AI emotion analysis. Get instant insights into facial expressions, body language, and emotional states.")
     
     # Show demo benefits
     col1, col2, col3 = st.columns(3)
@@ -686,8 +685,7 @@ with use_case_col4:
 
 st.markdown("---")
 
-# Upload instructions
-st.info("Click the ➕ buttons below to upload files or access AI tools")
+
 
 # AI Tools Section
 st.markdown("---")
