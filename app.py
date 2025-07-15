@@ -395,7 +395,6 @@ with header_col3:
 # Initialize database
 try:
     init_database()
-    st.success("✅ Database connected successfully")
 except Exception as e:
     st.error(f"❌ Database connection issue: {str(e)}")
 
@@ -403,9 +402,7 @@ except Exception as e:
 try:
     import os
     api_key = os.environ.get("OPENAI_API_KEY")
-    if api_key:
-        st.success("✅ OpenAI API connected successfully")
-    else:
+    if not api_key:
         st.error("❌ OpenAI API key not found")
 except Exception as e:
     st.error(f"❌ OpenAI connection issue: {str(e)}")
