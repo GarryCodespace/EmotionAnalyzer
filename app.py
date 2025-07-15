@@ -777,9 +777,35 @@ with tools_col1:
     </div>
     """, unsafe_allow_html=True)
     
+    # Hide file uploader interface completely
+    st.markdown("""
+    <style>
+    .stFileUploader {
+        display: none;
+    }
+    [data-testid="stFileUploader"] {
+        display: none;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Create file uploader that triggers on plus button click
+    uploaded_file = st.file_uploader("Browse files", type=['jpg', 'jpeg', 'png'], key="hidden_image_uploader", label_visibility="collapsed")
+    
+    # Custom plus button that triggers file dialog
     if st.button("➕", key="upload_image_tool", use_container_width=True):
-        st.session_state.show_upload_image = True
-        st.rerun()
+        st.markdown("""
+        <script>
+        const fileInput = document.querySelector('input[type="file"]');
+        if (fileInput) {
+            fileInput.click();
+        }
+        </script>
+        """, unsafe_allow_html=True)
+    
+    # Process uploaded file immediately
+    if uploaded_file is not None:
+        analyze_uploaded_image(uploaded_file)
 
 with tools_col2:
     st.markdown("""
@@ -830,45 +856,11 @@ with tools_col5:
 
 
 
-# Show upload interfaces when tools are activated
+# Show upload interfaces when tools are activated (kept for video upload)
 if st.session_state.get('show_upload_image', False):
-    st.markdown("---")
-    st.markdown("### Upload Image")
-    
-    # Hide drag-and-drop text with custom CSS
-    st.markdown("""
-    <style>
-    .uploadedFile {
-        display: none;
-    }
-    .css-1kyxreq {
-        display: none;
-    }
-    .css-1eznxh6 {
-        display: none;
-    }
-    .css-1pqgz65 {
-        display: none;
-    }
-    .css-1djdyxw {
-        display: none;
-    }
-    [data-testid="stFileUploader"] > div > div > div > div > div:nth-child(2) {
-        display: none;
-    }
-    [data-testid="stFileUploader"] > div > div > div > div > div:nth-child(3) {
-        display: none;
-    }
-    [data-testid="stFileUploader"] > div > div > div > div > div:nth-child(4) {
-        display: none;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    
-    uploaded_file = st.file_uploader("Browse files", type=['jpg', 'jpeg', 'png'], key="image_upload_tool")
-    
-    if uploaded_file is not None:
-        analyze_uploaded_image(uploaded_file)
+    # Reset the flag since we now handle image upload directly in the plus button
+    st.session_state.show_upload_image = False
+    st.rerun()
     
     if st.button("Close", key="close_upload_image"):
         st.session_state.show_upload_image = False
