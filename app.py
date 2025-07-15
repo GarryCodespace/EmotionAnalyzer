@@ -456,67 +456,71 @@ if st.session_state.get('show_projects', False):
     with st.sidebar:
         st.markdown("### 📁 Projects")
         
-        # Project navigation menu
-        menu_items = [
-            ("💬 New chat", "new_chat"),
-            ("🔍 Search chats", "search"),
-            ("📚 Library", "library"),
-            ("⏰ Codex", "codex"),
-            ("▶️ Sora", "sora"),
-            ("🤖 GPTs", "gpts"),
-            ("📁 New project", "new_project"),
-            ("🚀 Startup", "startup"),
-            ("⭐ View plans", "plans")
-        ]
+        # Analysis History
+        st.markdown("#### 📸 Photo Analysis History")
         
-        for item, key in menu_items:
-            if st.button(item, key=f"sidebar_{key}", use_container_width=True):
-                if key == "new_project":
-                    st.session_state.show_new_project = True
-                    st.rerun()
-                else:
-                    st.success(f"Selected: {item}")
+        # Get user's analysis history from database
+        try:
+            history = get_user_history(st.session_state.session_id, limit=20)
+            if history:
+                for idx, analysis in enumerate(history):
+                    timestamp = analysis.timestamp.strftime('%H:%M %m/%d')
+                    analysis_type = analysis.analysis_type.title()
+                    
+                    # Create expandable history item
+                    with st.expander(f"{analysis_type} - {timestamp}"):
+                        st.write(f"**Type:** {analysis_type}")
+                        st.write(f"**Time:** {analysis.timestamp.strftime('%Y-%m-%d %H:%M:%S')}")
+                        
+                        # Show detected expressions
+                        if analysis.detected_expressions:
+                            import json
+                            try:
+                                expressions = json.loads(analysis.detected_expressions)
+                                if expressions:
+                                    st.write("**Detected:** " + ", ".join(expressions))
+                            except:
+                                st.write("**Detected:** " + analysis.detected_expressions)
+                        
+                        # Show AI analysis
+                        if analysis.ai_analysis:
+                            st.write("**Analysis:**")
+                            st.write(analysis.ai_analysis)
+                        
+                        # Show confidence if available
+                        if analysis.confidence_score:
+                            st.write(f"**Confidence:** {analysis.confidence_score:.2f}")
+                        
+                        # Re-analyze button
+                        if st.button("View Details", key=f"history_{analysis.id}"):
+                            st.session_state.selected_history = analysis.id
+                            st.rerun()
+            else:
+                st.write("No analysis history yet. Upload photos or videos to start building your history.")
+        except Exception as e:
+            st.write("History temporarily unavailable")
         
         st.markdown("---")
         
-        # Project list
-        st.markdown("#### Your Projects")
-        for project in st.session_state.projects:
-            with st.expander(project['name']):
-                st.write(f"**Type:** {project['type']}")
-                st.write(f"**Description:** {project['description']}")
-                st.write(f"**Created:** {project['created']}")
-                if st.button("Open", key=f"open_{project['id']}"):
-                    st.success(f"Opening {project['name']}...")
+        # Quick actions
+        st.markdown("#### Quick Actions")
+        if st.button("🔄 Refresh History", key="refresh_history", use_container_width=True):
+            st.rerun()
         
-        # New project form
-        if st.session_state.get('show_new_project', False):
-            st.markdown("#### Create New Project")
-            with st.form("sidebar_new_project"):
-                project_name = st.text_input("Project Name")
-                project_type = st.selectbox("Type", ["startup", "course", "other"])
-                project_description = st.text_area("Description")
-                
-                col1, col2 = st.columns(2)
-                with col1:
-                    if st.form_submit_button("Create"):
-                        if project_name:
-                            new_project = {
-                                'id': str(uuid.uuid4()),
-                                'name': project_name,
-                                'type': project_type,
-                                'description': project_description,
-                                'created': datetime.now().strftime('%Y-%m-%d'),
-                                'status': 'active'
-                            }
-                            st.session_state.projects.append(new_project)
-                            st.session_state.show_new_project = False
-                            st.success(f"Created: {project_name}")
-                            st.rerun()
-                with col2:
-                    if st.form_submit_button("Cancel"):
-                        st.session_state.show_new_project = False
-                        st.rerun()
+        if st.button("📊 View Statistics", key="view_stats", use_container_width=True):
+            try:
+                stats = get_expression_statistics()
+                st.session_state.show_stats = True
+                st.rerun()
+            except Exception as e:
+                st.error("Statistics unavailable")
+        
+        if st.button("🗑️ Clear Session", key="clear_session", use_container_width=True):
+            # Clear session state but keep session_id
+            session_id = st.session_state.session_id
+            st.session_state.clear()
+            st.session_state.session_id = session_id
+            st.rerun()
 
 st.markdown("### Image Upload Analysis")
 uploaded_file = st.file_uploader("Upload an image for expression analysis", type=['jpg', 'jpeg', 'png'])
