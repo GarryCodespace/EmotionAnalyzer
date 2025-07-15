@@ -401,13 +401,7 @@ with header_col1:
     except:
         st.markdown("🎭", unsafe_allow_html=True)
     
-    # Handle logo click
-    if st.button("🏠", key="home_btn", help="Go to home page"):
-        # Clear all session states to go back to home
-        for key in list(st.session_state.keys()):
-            if key.startswith('show_'):
-                del st.session_state[key]
-        st.rerun()
+
 with header_col2:
     st.markdown("<br>", unsafe_allow_html=True)  # Reduce spacing for closer text
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;<h1 style='font-size: 3rem; margin: 0; margin-bottom: -35px;'>Emoticon</h1>", unsafe_allow_html=True)
