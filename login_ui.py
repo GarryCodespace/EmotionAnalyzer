@@ -101,7 +101,7 @@ def logout_user():
         auth_system.logout_user(st.session_state.session_token)
     
     # Clear session state
-    keys_to_clear = ['logged_in', 'user_email', 'user_id', 'session_token', 'show_account_settings']
+    keys_to_clear = ['logged_in', 'user_email', 'user_id', 'session_token', 'show_account_settings', 'show_login_modal']
     for key in keys_to_clear:
         if key in st.session_state:
             del st.session_state[key]
@@ -109,6 +109,26 @@ def logout_user():
     st.success("Logged out successfully")
     time.sleep(1)
     st.rerun()
+
+def show_login_modal():
+    """Display login modal"""
+    st.markdown("## Login to Emoticon")
+    st.markdown("*Access advanced emotion analysis features*")
+    
+    # Initialize registration state
+    if 'show_register' not in st.session_state:
+        st.session_state.show_register = False
+    
+    # Show appropriate form
+    if st.session_state.show_register:
+        show_register_form()
+    else:
+        show_login_form()
+    
+    # Close modal button
+    if st.button("← Back to App", key="close_login_modal"):
+        st.session_state.show_login_modal = False
+        st.rerun()
 
 def show_account_settings():
     """Display account settings modal"""
