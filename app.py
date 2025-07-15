@@ -170,8 +170,7 @@ cooldown_seconds = 5
 st.set_page_config(page_title="Emoticon – Emotion Detector", layout="wide")
 
 # Force light theme
-if 'dark_mode' not in st.session_state:
-    st.session_state.dark_mode = False
+
 
 # Initialize projects data
 if 'projects' not in st.session_state:
@@ -202,146 +201,93 @@ if 'projects' not in st.session_state:
         }
     ]
 
-# Apply theme
-if st.session_state.dark_mode:
-    st.markdown("""
-    <style>
-    .stApp {
-        background-color: #1e1e1e;
-        color: #ffffff;
-    }
-    .stMarkdown {
-        color: #ffffff;
-    }
-    .stButton > button {
-        background-color: #2d2d2d;
-        color: #ffffff;
-        border: 1px solid #444;
-    }
-    .stSelectbox > div > div {
-        background-color: #2d2d2d;
-        color: #ffffff;
-    }
-    .stTextInput > div > div > input {
-        background-color: #2d2d2d;
-        color: #ffffff;
-    }
-    
-    /* Capitalize sidebar navigation items */
-    .css-1d391kg p {
-        text-transform: capitalize;
-    }
-    
-    /* Alternative selector for sidebar navigation */
-    [data-testid="stSidebar"] .css-1d391kg p {
-        text-transform: capitalize;
-    }
-    
-    /* More specific selector for navigation items */
-    .css-1d391kg p:first-child {
-        text-transform: capitalize;
-    }
-    
-    /* Target nav links in sidebar */
-    .css-1d391kg a {
-        text-transform: capitalize;
-    }
-    
-    /* Target navigation labels */
-    .css-1d391kg span {
-        text-transform: capitalize;
-    }
-    
-    /* General sidebar navigation capitalization */
-    [data-testid="stSidebar"] ul li a {
-        text-transform: capitalize;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-else:
-    st.markdown("""
-    <style>
-    .stApp {
-        background-color: #ffffff;
-        color: #000000;
-    }
-    .stButton > button {
-        background-color: #f0f0f0;
-        color: #000000;
-        border: 1px solid #ccc;
-    }
-    .stButton > button:hover {
-        background-color: #e0e0e0;
-        border: 1px solid #aaa;
-    }
-    .stSelectbox > div > div {
-        background-color: #f8f8f8;
-        color: #000000;
-        border: 1px solid #ddd;
-    }
-    .stTextInput > div > div > input {
-        background-color: #f8f8f8;
-        color: #000000;
-        border: 1px solid #ddd;
-    }
-    
-    /* Capitalize sidebar navigation items */
-    .css-1d391kg p {
-        text-transform: capitalize;
-    }
-    
-    /* Alternative selector for sidebar navigation */
-    [data-testid="stSidebar"] .css-1d391kg p {
-        text-transform: capitalize;
-    }
-    
-    /* More specific selector for navigation items */
-    .css-1d391kg p:first-child {
-        text-transform: capitalize;
-    }
-    
-    /* Target nav links in sidebar */
-    .css-1d391kg a {
-        text-transform: capitalize;
-    }
-    
-    /* Target navigation labels */
-    .css-1d391kg span {
-        text-transform: capitalize;
-    }
-    
-    /* General sidebar navigation capitalization */
-    [data-testid="stSidebar"] ul li a {
-        text-transform: capitalize;
-    }
-    div[data-testid="stAlert"] > div {
-        background-color: #fff3cd;
-        border: 1px solid #ffeaa7;
-        color: #856404;
-    }
-    div[data-testid="stSuccess"] > div {
-        background-color: #d4edda;
-        border: 1px solid #c3e6cb;
-        color: #155724;
-    }
-    div[data-testid="stError"] > div {
-        background-color: #f8d7da;
-        border: 1px solid #f5c6cb;
-        color: #721c24;
-    }
-    div[data-testid="stInfo"] > div {
-        background-color: #d1ecf1;
-        border: 1px solid #bee5eb;
-        color: #0c5460;
-    }
-    .stMarkdown {
-        color: #000000 !important;
-    }
-    .stText {
-        color: #000000 !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+# Apply light theme
+st.markdown("""
+<style>
+.stApp {
+    background-color: #ffffff;
+    color: #000000;
+}
+.stButton > button {
+    background-color: #f0f0f0;
+    color: #000000;
+    border: 1px solid #ccc;
+}
+.stButton > button:hover {
+    background-color: #e0e0e0;
+    border: 1px solid #aaa;
+}
+.stSelectbox > div > div {
+    background-color: #f8f8f8;
+    color: #000000;
+    border: 1px solid #ddd;
+}
+.stTextInput > div > div > input {
+    background-color: #f8f8f8;
+    color: #000000;
+    border: 1px solid #ddd;
+}
+
+/* Change yellow alert/warning boxes to blue */
+div[data-testid="stAlert"] > div {
+    background-color: #e3f2fd;
+    border: 1px solid #90caf9;
+    color: #1565c0;
+}
+div[data-testid="stSuccess"] > div {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+div[data-testid="stError"] > div {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+div[data-testid="stInfo"] > div {
+    background-color: #d1ecf1;
+    border: 1px solid #bee5eb;
+    color: #0c5460;
+}
+
+/* Capitalize sidebar navigation items */
+.css-1d391kg p {
+    text-transform: capitalize;
+}
+
+/* Alternative selector for sidebar navigation */
+[data-testid="stSidebar"] .css-1d391kg p {
+    text-transform: capitalize;
+}
+
+/* More specific selector for navigation items */
+.css-1d391kg p:first-child {
+    text-transform: capitalize;
+}
+
+/* Target nav links in sidebar */
+.css-1d391kg a {
+    text-transform: capitalize;
+}
+
+/* Target navigation labels */
+.css-1d391kg span {
+    text-transform: capitalize;
+}
+
+/* General sidebar navigation capitalization */
+[data-testid="stSidebar"] ul li a {
+    text-transform: capitalize;
+}
+
+.stMarkdown {
+    color: #000000 !important;
+}
+.stText {
+    color: #000000 !important;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # Top navigation menu
 st.markdown("""
@@ -506,11 +452,7 @@ with header_col3:
             st.session_state.show_login_modal = True
             st.rerun()
     
-    # Theme toggle button
-    theme_button_text = "🌙 Dark" if not st.session_state.dark_mode else "☀️ Light"
-    if st.button(theme_button_text, key="theme_toggle"):
-        st.session_state.dark_mode = not st.session_state.dark_mode
-        st.rerun()
+
 
 # Initialize database
 try:
