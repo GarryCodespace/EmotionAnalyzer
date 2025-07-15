@@ -7,6 +7,65 @@ def main():
         layout="wide"
     )
     
+    # Styling for navigation buttons
+    st.markdown("""
+    <style>
+    [data-testid="stColumns"] [data-testid="stButton"] > button {
+        background-color: #1f1f1f !important;
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+        color: #ffffff !important;
+        font-size: 16px;
+        font-weight: 500;
+        padding: 12px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    [data-testid="stColumns"] [data-testid="stButton"] > button:focus {
+        outline: none !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+
+    [data-testid="stColumns"] [data-testid="stButton"]:nth-child(4) > button {
+        background-color: #0066cc;
+        color: #ffffff;
+    }
+
+    [data-testid="stColumns"] [data-testid="stButton"] > button:hover {
+        background-color: #0066cc;
+        color: #ffffff;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Navigation functionality using columns - styled buttons
+    nav_col1, nav_col2, nav_col3, nav_col4, nav_col5 = st.columns([1, 1, 1, 1, 2])
+
+    with nav_col1:
+        if st.button("Home", key="nav_home", use_container_width=True):
+            st.switch_page("app.py")
+
+    with nav_col2:
+        if st.button("About", key="nav_about", use_container_width=True):
+            st.switch_page("pages/about.py")
+
+    with nav_col3:
+        if st.button("Contact", key="nav_contact", use_container_width=True):
+            st.switch_page("pages/contact.py")
+
+    with nav_col4:
+        if st.button("Career", key="nav_career", use_container_width=True):
+            st.switch_page("pages/career.py")
+
+    with nav_col5:
+        if st.button("Screen Recorder", key="nav_screen", use_container_width=True):
+            st.switch_page("pages/screen_recorder.py")
+    
     # Header
     st.title("💼 Career Opportunities")
     st.markdown("*Join our mission to revolutionize emotional intelligence through AI*")

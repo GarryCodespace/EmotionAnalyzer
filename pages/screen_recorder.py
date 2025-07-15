@@ -63,7 +63,7 @@ def main():
     """, unsafe_allow_html=True)
 
     # Navigation functionality using columns - styled buttons
-    nav_col1, nav_col2, nav_col3, nav_col4 = st.columns([1, 1, 1, 2])
+    nav_col1, nav_col2, nav_col3, nav_col4, nav_col5 = st.columns([1, 1, 1, 1, 2])
 
     with nav_col1:
         if st.button("Home", key="nav_home", use_container_width=True):
@@ -78,6 +78,10 @@ def main():
             st.switch_page("pages/contact.py")
 
     with nav_col4:
+        if st.button("Career", key="nav_career", use_container_width=True):
+            st.switch_page("pages/career.py")
+
+    with nav_col5:
         if st.button("Screen Recorder", key="nav_screen", use_container_width=True):
             st.switch_page("pages/screen_recorder.py")
 
