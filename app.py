@@ -631,11 +631,6 @@ with st.sidebar:
 st.markdown("---")
 st.markdown("### Image Upload Analysis")
 
-uploaded_file = st.file_uploader("Upload an image for expression analysis", type=['jpg', 'jpeg', 'png'])
-
-if uploaded_file is not None:
-    analyze_uploaded_image(uploaded_file)
-
 def analyze_uploaded_image(uploaded_file):
     """Analyze the uploaded image"""
     # Check daily usage limit
@@ -766,7 +761,10 @@ def analyze_uploaded_image(uploaded_file):
             st.session_state.show_login_modal = True
             st.rerun()
 
+uploaded_file = st.file_uploader("Upload an image for expression analysis", type=['jpg', 'jpeg', 'png'])
 
+if uploaded_file is not None:
+    analyze_uploaded_image(uploaded_file)
 
 # Video Upload Feature
 video_col1, video_col2 = st.columns([2, 1])
