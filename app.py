@@ -546,49 +546,54 @@ with st.sidebar:
         try:
             history = get_user_history(st.session_state.session_id, limit=10)
             if history:
-            for idx, analysis in enumerate(history):
-                timestamp = analysis.timestamp.strftime('%H:%M %m/%d')
-                analysis_type = analysis.analysis_type.title()
-                
-                # Create expandable history item
-                with st.expander(f"{analysis_type} - {timestamp}"):
-                    st.write(f"**Type:** {analysis_type}")
-                    st.write(f"**Time:** {analysis.timestamp.strftime('%Y-%m-%d %H:%M:%S')}")
+                for idx, analysis in enumerate(history):
+                    timestamp = analysis.timestamp.strftime('%H:%M %m/%d')
+                    analysis_type = analysis.analysis_type.title()
                     
-                    # Show detected expressions
-                    if analysis.detected_expressions:
-                        import json
-                        try:
-                            expressions = json.loads(analysis.detected_expressions)
-                            if expressions:
-                                st.write("**Detected:** " + ", ".join(expressions))
-                        except:
-                            st.write("**Detected:** " + analysis.detected_expressions)
-                    
-                    # Show AI analysis
-                    if analysis.ai_analysis:
-                        st.write("**Analysis:**")
-                        st.write(analysis.ai_analysis)
-                    
-                    # Show confidence score if available
-                    if analysis.confidence_score is not None:
-                        st.write(f"**Confidence:** {analysis.confidence_score:.1%}")
-        else:
-            st.info("No analysis history yet. Upload an image to get started!")
-    except Exception as e:
-        st.error(f"Could not load history: {str(e)}")
-    
-    # Quick actions in sidebar
-    st.markdown("---")
-    if st.button("🔄 Refresh History", key="refresh_history_sidebar", use_container_width=True):
-        st.rerun()
-    
-    if st.button("🗑️ Clear Session", key="clear_session_sidebar", use_container_width=True):
-        # Clear session state but keep session_id
-        session_id = st.session_state.session_id
-        st.session_state.clear()
-        st.session_state.session_id = session_id
-        st.rerun()
+                    # Create expandable history item
+                    with st.expander(f"{analysis_type} - {timestamp}"):
+                        st.write(f"**Type:** {analysis_type}")
+                        st.write(f"**Time:** {analysis.timestamp.strftime('%Y-%m-%d %H:%M:%S')}")
+                        
+                        # Show detected expressions
+                        if analysis.detected_expressions:
+                            import json
+                            try:
+                                expressions = json.loads(analysis.detected_expressions)
+                                if expressions:
+                                    st.write("**Detected:** " + ", ".join(expressions))
+                            except:
+                                st.write("**Detected:** " + analysis.detected_expressions)
+                        
+                        # Show AI analysis
+                        if analysis.ai_analysis:
+                            st.write("**Analysis:**")
+                            st.write(analysis.ai_analysis)
+                        
+                        # Show confidence score if available
+                        if analysis.confidence_score is not None:
+                            st.write(f"**Confidence:** {analysis.confidence_score:.1%}")
+            else:
+                st.info("No analysis history yet. Upload an image to get started!")
+        except Exception as e:
+            st.error(f"Could not load history: {str(e)}")
+        
+        # Quick actions in sidebar for logged in users
+        st.markdown("---")
+        if st.button("🔄 Refresh History", key="refresh_history_sidebar", use_container_width=True):
+            st.rerun()
+        
+        if st.button("🗑️ Clear Session", key="clear_session_sidebar", use_container_width=True):
+            # Clear session state but keep session_id
+            session_id = st.session_state.session_id
+            st.session_state.clear()
+            st.session_state.session_id = session_id
+            st.rerun()
+    else:
+        st.info("Login to view analysis history")
+        if st.button("Login", key="login_sidebar", use_container_width=True):
+            st.session_state.show_login_modal = True
+            st.rerun()
 
 # Image Upload Analysis
 st.markdown("---")
@@ -829,74 +834,74 @@ if not st.session_state.get('logged_in', False):
         st.rerun()
 else:
     uploaded_video = st.file_uploader("Upload a video for expression analysis", type=['mp4', 'avi', 'mov', 'mkv'])
-
-if uploaded_video is not None:
-    # Save uploaded video to temporary file
-    with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp_file:
-        tmp_file.write(uploaded_video.read())
-        tmp_video_path = tmp_file.name
     
-    try:
-        # Display video
-        st.video(uploaded_video)
+    if uploaded_video is not None:
+        # Save uploaded video to temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp_file:
+            tmp_file.write(uploaded_video.read())
+            tmp_video_path = tmp_file.name
         
-        # Process video with progress bar
-        with st.spinner('Analyzing video for significant expression changes...'):
-            video_analyzer = VideoEmotionAnalyzer(significance_threshold=0.25)
-            analyses = video_analyzer.process_video(tmp_video_path, max_analyses=10)
-            video_summary = video_analyzer.get_video_summary()
-        
-        if analyses:
-            st.success(f"**Found {len(analyses)} significant expression moments**")
+        try:
+            # Display video
+            st.video(uploaded_video)
             
-            # Display video summary
-            col1, col2 = st.columns(2)
-            with col1:
-                st.metric("Total Analyses", video_summary['total_analyses'])
-                if video_summary['dominant_emotions']:
-                    st.markdown("**Dominant Emotions:**")
-                    for emotion, count in video_summary['dominant_emotions']:
-                        st.write(f"• {emotion}: {count} times")
+            # Process video with progress bar
+            with st.spinner('Analyzing video for significant expression changes...'):
+                video_analyzer = VideoEmotionAnalyzer(significance_threshold=0.25)
+                analyses = video_analyzer.process_video(tmp_video_path, max_analyses=10)
+                video_summary = video_analyzer.get_video_summary()
             
-            with col2:
-                st.markdown("**Expression Timeline:**")
-                for moment in video_summary['timeline'][:5]:
-                    timestamp = moment['timestamp']
+            if analyses:
+                st.success(f"**Found {len(analyses)} significant expression moments**")
+                
+                # Display video summary
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.metric("Total Analyses", video_summary['total_analyses'])
+                    if video_summary['dominant_emotions']:
+                        st.markdown("**Dominant Emotions:**")
+                        for emotion, count in video_summary['dominant_emotions']:
+                            st.write(f"• {emotion}: {count} times")
+                
+                with col2:
+                    st.markdown("**Expression Timeline:**")
+                    for moment in video_summary['timeline'][:5]:
+                        timestamp = moment['timestamp']
+                        minutes = int(timestamp // 60)
+                        seconds = int(timestamp % 60)
+                        time_str = f"{minutes}:{seconds:02d}" if minutes > 0 else f"{seconds}s"
+                        st.write(f"{time_str}: {', '.join(moment['expressions'])}")
+                
+                # Display detailed analyses
+                st.markdown("**Detailed Analysis of Significant Moments:**")
+                for i, analysis in enumerate(analyses[:8]):  # Show top 8 analyses
+                    timestamp = analysis['timestamp']
                     minutes = int(timestamp // 60)
                     seconds = int(timestamp % 60)
                     time_str = f"{minutes}:{seconds:02d}" if minutes > 0 else f"{seconds}s"
-                    st.write(f"{time_str}: {', '.join(moment['expressions'])}")
+                    with st.expander(f"Moment {i+1} - {time_str} (Significance: {analysis['significance_score']:.2f})"):
+                        st.write(f"**Detected Expressions**: {', '.join(analysis['expressions'])}")
+                        st.write(f"**AI Analysis**: {analysis['ai_analysis']}")
+                        st.write(f"**Frame**: {analysis['frame_number']}")
+                        
+                        # Save significant analyses to database
+                        save_emotion_analysis(
+                            session_id=st.session_state.session_id,
+                            expressions=analysis['expressions'],
+                            ai_analysis=analysis['ai_analysis'],
+                            analysis_type="video",
+                            confidence=analysis['significance_score']
+                        )
             
-            # Display detailed analyses
-            st.markdown("**Detailed Analysis of Significant Moments:**")
-            for i, analysis in enumerate(analyses[:8]):  # Show top 8 analyses
-                timestamp = analysis['timestamp']
-                minutes = int(timestamp // 60)
-                seconds = int(timestamp % 60)
-                time_str = f"{minutes}:{seconds:02d}" if minutes > 0 else f"{seconds}s"
-                with st.expander(f"Moment {i+1} - {time_str} (Significance: {analysis['significance_score']:.2f})"):
-                    st.write(f"**Detected Expressions**: {', '.join(analysis['expressions'])}")
-                    st.write(f"**AI Analysis**: {analysis['ai_analysis']}")
-                    st.write(f"**Frame**: {analysis['frame_number']}")
-                    
-                    # Save significant analyses to database
-                    save_emotion_analysis(
-                        session_id=st.session_state.session_id,
-                        expressions=analysis['expressions'],
-                        ai_analysis=analysis['ai_analysis'],
-                        analysis_type="video",
-                        confidence=analysis['significance_score']
-                    )
-        
-        else:
-            st.info("No significant expression changes detected in this video")
-            
-    except Exception as e:
-        st.error(f"Video analysis error: {str(e)}")
-    finally:
-        # Clean up temporary file
-        if os.path.exists(tmp_video_path):
-            os.unlink(tmp_video_path)
+            else:
+                st.info("No significant expression changes detected in this video")
+                
+        except Exception as e:
+            st.error(f"Video analysis error: {str(e)}")
+        finally:
+            # Clean up temporary file
+            if os.path.exists(tmp_video_path):
+                os.unlink(tmp_video_path)
 
 # Demo Mode
 st.markdown("#### Demo Mode - Expression Simulation")
