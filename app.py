@@ -843,8 +843,8 @@ if st.session_state.get('show_upload_video', False):
     with st.expander("📝 Tips for Better Video Analysis"):
         st.markdown("""
         **File Limits:**
-        • Maximum file size: 200MB
-        • Recommended: Under 50MB for faster processing
+        • Maximum file size: 50MB (reduced for better stability)
+        • Recommended: Under 25MB for faster processing
         • Supported formats: MP4, AVI, MOV, MKV
         
         **Processing time:**
@@ -861,23 +861,54 @@ if st.session_state.get('show_upload_video', False):
     
     uploaded_video = st.file_uploader("Choose video file", type=['mp4', 'avi', 'mov', 'mkv'], key="video_upload_tool")
     
+    # Add video compression tips
+    st.info("📱 **For Large Videos**: Use live camera or interview mode for real-time analysis without file size limits!")
+    
     if uploaded_video is not None:
         # Process the video directly
         # Check daily usage limit
         if not payment_ui.check_daily_limit():
             st.stop()
         
-        # Get video info
-        file_size = len(uploaded_video.read())
-        uploaded_video.seek(0)  # Reset file pointer
+        try:
+            # Get video info
+            file_size = len(uploaded_video.read())
+            uploaded_video.seek(0)  # Reset file pointer
+            
+            # Check file size limits (reduced for better stability)
+            file_size_mb = file_size / (1024 * 1024)
+            if file_size > 50 * 1024 * 1024:  # 50MB limit (reduced from 200MB)
+                st.error(f"File size ({file_size_mb:.1f}MB) exceeds 50MB limit. Please upload a smaller video.")
+                st.info("💡 **Alternative Solutions:**")
+                st.markdown("• **Use Live Camera**: Real-time analysis with no file size limits")
+                st.markdown("• **Use Interview Mode**: Perfect for screen recording during video calls")
+                st.markdown("• **Compress Video**: Use online tools to reduce file size")
+                st.markdown("• **Record Shorter Clips**: Break long videos into smaller segments")
+                
+                # Suggest alternative modes
+                col1, col2 = st.columns(2)
+                with col1:
+                    if st.button("🎥 Try Live Camera Instead", key="switch_to_live"):
+                        st.session_state.show_upload_video = False
+                        st.session_state.show_web_camera = True
+                        st.rerun()
+                with col2:
+                    if st.button("🎯 Try Interview Mode Instead", key="switch_to_interview"):
+                        st.session_state.show_upload_video = False
+                        st.session_state.show_interview_recorder = True
+                        st.rerun()
+                
+                st.stop()
+            elif file_size > 25 * 1024 * 1024:  # 25MB warning
+                st.warning(f"⚠️ Large video file ({file_size_mb:.1f}MB) detected. Processing may take longer.")
         
-        # Check file size limits
-        file_size_mb = file_size / (1024 * 1024)
-        if file_size > 200 * 1024 * 1024:  # 200MB limit
-            st.error(f"File size ({file_size_mb:.1f}MB) exceeds 200MB limit. Please upload a smaller video.")
+        except Exception as e:
+            st.error(f"Error reading video file: {str(e)}")
+            st.info("💡 **Try these alternatives:**")
+            st.markdown("• Use Live Camera mode for real-time analysis")
+            st.markdown("• Use Interview Mode for screen recording")
+            st.markdown("• Ensure video file is not corrupted")
             st.stop()
-        elif file_size > 50 * 1024 * 1024:  # 50MB warning
-            st.warning(f"⚠️ Large video file ({file_size_mb:.1f}MB) detected. Processing may take longer.")
         
         # Save uploaded video to temporary file
         with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp_file:
@@ -1180,13 +1211,29 @@ if st.session_state.get('show_deception_level_tool', False):
 if st.session_state.get('uploaded_video') is not None:
     uploaded_video = st.session_state.uploaded_video
     st.session_state.uploaded_video = None  # Clear it to prevent re-processing
+    
     # Check daily usage limit
     if not payment_ui.check_daily_limit():
         st.stop()
     
+    # Check file size (limit to 50MB for better stability)
+    file_size = len(uploaded_video.getvalue())
+    if file_size > 50 * 1024 * 1024:  # 50MB limit (reduced for stability)
+        st.error("Video file too large. Please upload a video smaller than 50MB.")
+        st.info("💡 **Tips to reduce file size:**")
+        st.markdown("• Record at lower resolution (720p instead of 1080p or 4K)")
+        st.markdown("• Use shorter video clips (under 3 minutes)")
+        st.markdown("• Compress video using online tools before uploading")
+        st.markdown("• Try the live camera or interview mode for real-time analysis")
+        st.stop()
+    
+    # Show file size info
+    size_mb = file_size / (1024 * 1024)
+    st.info(f"📁 Video file size: {size_mb:.1f}MB")
+    
     # Save uploaded video to temporary file
     with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp_file:
-        tmp_file.write(uploaded_video.read())
+        tmp_file.write(uploaded_video.getvalue())
         tmp_video_path = tmp_file.name
     
     # Track usage
