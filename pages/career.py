@@ -231,31 +231,7 @@ def main():
                 if st.button(f"Apply Now", key=f"apply_{job['title']}"):
                     st.success("Application submitted! We'll be in touch soon.")
     
-    # Benefits
-    st.markdown("---")
-    st.markdown("## 🎁 Benefits & Perks")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("""
-        ### 💰 Compensation & Benefits
-        - Competitive salary and equity
-        - Comprehensive health insurance
-        - 401(k) retirement plan
-        - Flexible PTO policy
-        - Professional development budget
-        """)
-    
-    with col2:
-        st.markdown("""
-        ### 🏠 Work Environment
-        - Remote-first culture
-        - Flexible working hours
-        - Modern tech stack and tools
-        - Collaborative team environment
-        - Regular team building events
-        """)
+
     
     # Application process
     st.markdown("---")
@@ -304,9 +280,9 @@ def main():
     with col2:
         st.markdown("""
         **Questions About Roles?**
-        - Technical roles: tech@emoticon.ai
-        - Research positions: research@emoticon.ai
-        - General inquiries: hello@emoticon.ai
+        - Contact our recruiting team at careers@emoticon.ai
+        - Follow us on LinkedIn: /company/emoticon-ai
+        - Visit our website for more information
         """)
     
     # Footer
