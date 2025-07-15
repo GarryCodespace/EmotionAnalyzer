@@ -1384,7 +1384,7 @@ with col2:
 col1, col2, col3 = st.columns(3)
 with col1:
     if st.button("📹 Start Web Camera", type="primary"):
-        st.session_state.show_simple_camera = True
+        st.session_state.show_realtime_analyzer = True
         st.rerun()
 
 with col2:
@@ -1499,6 +1499,12 @@ if st.session_state.get('show_web_camera', False):
             st.markdown("• Adjust analysis interval based on your needs")
             st.markdown("• Perfect for self-awareness during meetings")
             st.markdown("• Track emotional patterns over time")
+
+# Real-Time Emotion Analyzer Section
+if st.session_state.get('show_realtime_analyzer', False):
+    st.markdown("---")
+    from realtime_emotion_analyzer import realtime_emotion_analyzer
+    realtime_emotion_analyzer()
 
 # Working Screen Recorder Section
 if st.session_state.get('show_working_recorder', False):
