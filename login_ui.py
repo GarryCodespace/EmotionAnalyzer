@@ -134,9 +134,10 @@ def show_login_form():
                     st.session_state.user_email = result['email']
                     st.session_state.user_id = result['user_id']
                     st.session_state.session_token = result['session_token']
+                    st.session_state.show_login_modal = False
                     st.success("Login successful!")
                     time.sleep(1)
-                    st.rerun()
+                    st.switch_page("app.py")
                 else:
                     st.error(result['error'])
 
