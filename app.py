@@ -498,7 +498,7 @@ setInterval(nuclearCapitalizationFix, 100);
 
 
 
-# Add top header with search and login buttons using JavaScript injection
+# Clean header styling without buttons
 st.markdown("""
 <style>
 .main-content {
@@ -510,201 +510,18 @@ body {
     padding: 0;
 }
 </style>
-
-<script>
-// Create and inject the header directly into the DOM
-function createTopHeader() {
-    // Remove existing header if it exists
-    const existingHeader = document.getElementById('top-header');
-    if (existingHeader) {
-        existingHeader.remove();
-    }
-    
-    // Create header element
-    const header = document.createElement('div');
-    header.id = 'top-header';
-    header.style.cssText = `
-        position: fixed;
-        top: 16px;
-        right: 16px;
-        z-index: 999999;
-        background: transparent;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 8px;
-        padding: 0;
-        width: auto;
-        box-sizing: border-box;
-    `;
-    
-    // Create search button
-    const searchBtn = document.createElement('div');
-    searchBtn.style.cssText = `
-        background: #f0f0f0;
-        border: 1px solid #d0d0d0;
-        border-radius: 8px;
-        width: 44px;
-        height: 44px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        color: #333;
-        margin-bottom: 8px;
-    `;
-    searchBtn.innerHTML = `
-        <svg style="width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2;" viewBox="0 0 24 24">
-            <circle cx="11" cy="11" r="8"></circle>
-            <path d="M21 21l-4.35-4.35"></path>
-        </svg>
-    `;
-    searchBtn.onclick = function() { toggleSearch(); };
-    
-    // Create login button
-    const loginBtn = document.createElement('div');
-    loginBtn.style.cssText = `
-        background: #f0f0f0;
-        border: 1px solid #d0d0d0;
-        border-radius: 8px;
-        padding: 12px 20px;
-        color: #333;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        text-decoration: none;
-        font-size: 14px;
-        min-width: 60px;
-        text-align: center;
-    `;
-    loginBtn.textContent = 'Log in';
-    loginBtn.onclick = function() { showLogin(); };
-    
-    // Add hover effects
-    searchBtn.onmouseover = function() {
-        this.style.background = '#e0e0e0';
-        this.style.borderColor = '#c0c0c0';
-    };
-    searchBtn.onmouseout = function() {
-        this.style.background = '#f0f0f0';
-        this.style.borderColor = '#d0d0d0';
-    };
-    
-    loginBtn.onmouseover = function() {
-        this.style.background = '#e0e0e0';
-        this.style.borderColor = '#c0c0c0';
-    };
-    loginBtn.onmouseout = function() {
-        this.style.background = '#f0f0f0';
-        this.style.borderColor = '#d0d0d0';
-    };
-    
-    // Add buttons to header
-    header.appendChild(searchBtn);
-    header.appendChild(loginBtn);
-    
-    // Insert header at the beginning of body
-    document.body.insertBefore(header, document.body.firstChild);
-}
-
-// Run when DOM is ready and periodically to ensure header stays visible
-document.addEventListener('DOMContentLoaded', createTopHeader);
-setTimeout(createTopHeader, 100);
-setTimeout(createTopHeader, 500);
-setTimeout(createTopHeader, 1000);
-setInterval(createTopHeader, 2000);
-</script>
-
-<script>
-function toggleSearch() {
-    // Find and click the hidden search button
-    const searchButton = document.querySelector('[data-testid="stButton"][title="search_btn"]');
-    if (searchButton) {
-        searchButton.click();
-    }
-}
-
-function showLogin() {
-    // Find and click the hidden login button
-    const loginButton = document.querySelector('[data-testid="stButton"][title="login_btn"]');
-    if (loginButton) {
-        loginButton.click();
-    }
-}
-</script>
 """, unsafe_allow_html=True)
 
-# Hidden buttons for JavaScript interaction (invisible)
-st.markdown("""
-<style>
-.hidden-buttons {
-    display: none !important;
-    visibility: hidden !important;
-    position: absolute !important;
-    top: -9999px !important;
-    left: -9999px !important;
-    height: 0px !important;
-    width: 0px !important;
-    opacity: 0 !important;
-    z-index: -9999 !important;
-}
-
-.hidden-buttons * {
-    display: none !important;
-    visibility: hidden !important;
-    height: 0px !important;
-    width: 0px !important;
-    opacity: 0 !important;
-}
-
-/* Hide all buttons in the hidden container */
-.hidden-buttons button,
-.hidden-buttons [data-testid="stButton"],
-.hidden-buttons [data-testid="stPopover"] {
-    display: none !important;
-    visibility: hidden !important;
-    position: absolute !important;
-    top: -9999px !important;
-    left: -9999px !important;
-    height: 0px !important;
-    width: 0px !important;
-    opacity: 0 !important;
-    z-index: -9999 !important;
-}
-</style>
-""", unsafe_allow_html=True)
-
-# Create a completely hidden container for the buttons
-st.markdown("""
-<div class="hidden-buttons" style="position: absolute; top: -9999px; left: -9999px; height: 0; width: 0; opacity: 0; z-index: -9999;">
-""", unsafe_allow_html=True)
-
-# Hidden search button for JavaScript to trigger
-if st.button("🔍", key="search_btn", help="Search"):
-    st.session_state.show_search = True
-    st.rerun()
-
-# Hidden login functionality
+# Login functionality (no buttons, just functionality)
 if st.session_state.get('logged_in', False):
     user_email = st.session_state.get('user_email', 'User')
     user_name = user_email.split('@')[0].title()
     
-    # User dropdown menu
-    with st.popover(f"👤 {user_name}"):
-        st.markdown(f"**{user_email}**")
-        st.markdown("---")
-        if st.button("Account Settings", key="account_settings_btn", use_container_width=True):
-            st.session_state.show_account_settings = True
-            st.rerun()
-        if st.button("Logout", key="logout_btn", use_container_width=True):
-            logout_user()
+    # Login functionality is available but no visible buttons
+    pass
 else:
-    if st.button("Log in", key="login_btn"):
-        st.session_state.show_login_modal = True
-        st.rerun()
-
-st.markdown('</div>', unsafe_allow_html=True)
+    # Login functionality is available but no visible buttons
+    pass
 
 # Main content container
 st.markdown('<div class="main-content">', unsafe_allow_html=True)
