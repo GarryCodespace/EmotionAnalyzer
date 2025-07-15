@@ -667,9 +667,132 @@ if not st.session_state.get('logged_in', False):
         st.markdown("**⚡ Instant Results**")
         st.markdown("Get analysis in seconds")
 
-# Image Upload Analysis
+# Combined Upload Analysis with Use Cases
 st.markdown("---")
-st.markdown("### Image Upload Analysis")
+st.markdown("### Upload Analysis - Perfect for Any Scenario")
+
+# Show use case suggestions in a stylish format
+st.markdown("**Popular Use Cases:**")
+use_case_col1, use_case_col2, use_case_col3, use_case_col4 = st.columns(4)
+
+with use_case_col1:
+    st.markdown("• **For Fun** - Analyze photos")
+with use_case_col2:
+    st.markdown("• **Interview** - Assess candidates")
+with use_case_col3:
+    st.markdown("• **Date** - Read emotions")
+with use_case_col4:
+    st.markdown("• **Interrogation** - Detect deception")
+
+st.markdown("---")
+
+# File upload section with styled interface
+st.markdown("""
+<style>
+.upload-section {
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 10px 0;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+.upload-section:hover {
+    border-color: #007bff;
+    background: #e3f2fd;
+}
+.upload-icon {
+    font-size: 48px;
+    margin-bottom: 10px;
+    color: #6c757d;
+}
+.upload-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #343a40;
+}
+.upload-subtitle {
+    font-size: 14px;
+    color: #6c757d;
+    margin-bottom: 15px;
+}
+</style>
+""", unsafe_allow_html=True)
+
+upload_col1, upload_col2 = st.columns(2)
+
+with upload_col1:
+    st.markdown("""
+    <div class="upload-section">
+        <div class="upload-icon">📁</div>
+        <div class="upload-title">Image Analysis</div>
+        <div class="upload-subtitle">Upload photos for instant emotion detection</div>
+    </div>
+    """, unsafe_allow_html=True)
+    uploaded_file = st.file_uploader("Choose image file", type=['jpg', 'jpeg', 'png'], key="image_upload", label_visibility="collapsed")
+    
+with upload_col2:
+    st.markdown("""
+    <div class="upload-section">
+        <div class="upload-icon">📹</div>
+        <div class="upload-title">Video Analysis</div>
+        <div class="upload-subtitle">Upload videos for timeline emotion tracking</div>
+    </div>
+    """, unsafe_allow_html=True)
+    uploaded_video = st.file_uploader("Choose video file", type=['mp4', 'avi', 'mov', 'mkv'], key="video_upload", label_visibility="collapsed")
+
+# AI Tools Section
+st.markdown("---")
+st.markdown("### AI Tools")
+
+# Tools with plus sign like design
+tools_col1, tools_col2 = st.columns(2)
+
+with tools_col1:
+    st.markdown("""
+    <div class="upload-section">
+        <div class="upload-icon">🔍</div>
+        <div class="upload-title">AI Lie Detector</div>
+        <div class="upload-subtitle">Advanced deception analysis from expressions</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    if st.button("➕ Access Lie Detector", key="lie_detector_tool", use_container_width=True):
+        st.session_state.show_lie_detector_tool = True
+        st.rerun()
+
+with tools_col2:
+    st.markdown("""
+    <div class="upload-section">
+        <div class="upload-icon">📊</div>
+        <div class="upload-title">Expression Analytics</div>
+        <div class="upload-subtitle">Detailed emotion pattern analysis</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    if st.button("➕ View Analytics", key="analytics_tool", use_container_width=True):
+        st.switch_page("pages/analytics.py")
+
+# Show AI Lie Detector Tool if activated
+if st.session_state.get('show_lie_detector_tool', False):
+    st.markdown("---")
+    st.markdown("### AI Lie Detector Tool")
+    
+    # Check if user has access to lie detector
+    if not payment_ui.check_feature_access('lie_detector'):
+        st.warning("AI Lie Detector requires Professional plan or higher")
+        if st.button("Upgrade to Professional", key="upgrade_for_lie_detector"):
+            st.switch_page("pages/pricing.py")
+    else:
+        st.success("AI Lie Detector Active - Upload an image or video above to analyze deception patterns")
+        st.info("This tool analyzes micro-expressions, body language, and behavioral patterns to assess truthfulness probability")
+        
+        # Reset tool state
+        if st.button("Close Tool", key="close_lie_detector"):
+            st.session_state.show_lie_detector_tool = False
+            st.rerun()
 
 def analyze_uploaded_image(uploaded_file):
     """Analyze the uploaded image"""
@@ -801,28 +924,9 @@ def analyze_uploaded_image(uploaded_file):
             st.session_state.show_login_modal = True
             st.rerun()
 
-uploaded_file = st.file_uploader("Upload an image for expression analysis", type=['jpg', 'jpeg', 'png'])
-
+# Process uploaded files
 if uploaded_file is not None:
     analyze_uploaded_image(uploaded_file)
-
-# Video Upload Feature
-video_col1, video_col2 = st.columns([2, 1])
-with video_col1:
-    st.markdown("#### Video Analysis")
-    st.markdown("*Upload a video for AI-powered expression analysis - detects all facial expressions*")
-
-with video_col2:
-    if st.session_state.get('logged_in', False):
-        live_lie_detector = st.checkbox('Live Lie Detector', key='live_lie_detector')
-        if live_lie_detector:
-            st.session_state.enable_live_lie_detector = True
-        else:
-            st.session_state.enable_live_lie_detector = False
-    else:
-        st.info("Login required for advanced features")
-
-uploaded_video = st.file_uploader("Upload a video for expression analysis", type=['mp4', 'avi', 'mov', 'mkv'])
 
 if uploaded_video is not None:
     # Check daily usage limit
