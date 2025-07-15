@@ -244,13 +244,14 @@ class VideoEmotionAnalyzer:
         self.frame_count += 1
         return analysis_result
     
-    def process_video(self, video_path: str, max_analyses: int = 10) -> List[Dict]:
+    def process_video(self, video_path: str, max_analyses: int = 10, progress_callback=None) -> List[Dict]:
         """
         Process entire video and return significant moments using AI analysis
         
         Args:
             video_path: Path to video file
             max_analyses: Maximum number of analyses to perform
+            progress_callback: Optional callback function to report progress
             
         Returns:
             List of analysis results for significant moments
@@ -262,28 +263,43 @@ class VideoEmotionAnalyzer:
         
         fps = cap.get(cv2.CAP_PROP_FPS)
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        duration = total_frames / fps if fps > 0 else 0
         
         analyses = []
         frame_count = 0
         
-        # Process every 1-2 seconds to find more expressions
-        frame_skip = max(1, int(fps * 1.5))  # Process every 1.5 seconds
+        # For long videos, skip more frames to reduce processing time
+        if duration > 300:  # 5 minutes
+            frame_skip = max(1, int(fps * 5))  # Process every 5 seconds
+        elif duration > 120:  # 2 minutes  
+            frame_skip = max(1, int(fps * 3))  # Process every 3 seconds
+        else:
+            frame_skip = max(1, int(fps * 1.5))  # Process every 1.5 seconds
         
-        while cap.isOpened() and len(analyses) < max_analyses:
+        # Jump to processing frames at intervals
+        target_frames = list(range(0, total_frames, frame_skip))
+        
+        for i, target_frame in enumerate(target_frames):
+            if len(analyses) >= max_analyses:
+                break
+                
+            # Report progress
+            if progress_callback:
+                progress = min(100, int((i / len(target_frames)) * 100))
+                progress_callback(progress)
+                
+            # Set frame position
+            cap.set(cv2.CAP_PROP_POS_FRAMES, target_frame)
             ret, frame = cap.read()
             if not ret:
-                break
+                continue
             
-            # Skip frames for performance and better temporal separation
-            if frame_count % frame_skip == 0:
-                timestamp = frame_count / fps
-                
-                # Only analyze if we have a face and sufficient time gap
-                analysis = self.analyze_video_frame(frame, timestamp)
-                if analysis:
-                    analyses.append(analysis)
+            timestamp = target_frame / fps
             
-            frame_count += 1
+            # Only analyze if we have a face and sufficient time gap
+            analysis = self.analyze_video_frame(frame, timestamp)
+            if analysis:
+                analyses.append(analysis)
         
         cap.release()
         
