@@ -1793,6 +1793,49 @@ if st.session_state.get('show_search', False):
         st.session_state.show_search = False
         st.rerun()
 
+# Analysis Results Section
+st.markdown("---")
+st.markdown("## 📊 Analysis Results")
+
+if 'analysis_history' not in st.session_state:
+    st.session_state.analysis_history = []
+
+if st.session_state.analysis_history:
+    st.markdown("### Recent Analysis History")
+    
+    for i, analysis in enumerate(reversed(st.session_state.analysis_history[-10:])):
+        timestamp = analysis.get('timestamp', 'Unknown time')
+        analysis_type = analysis.get('type', 'Unknown')
+        expressions = analysis.get('expressions', [])
+        ai_analysis = analysis.get('ai_analysis', 'No analysis available')
+        
+        with st.expander(f"Analysis {len(st.session_state.analysis_history) - i}: {analysis_type} - {timestamp}"):
+            if expressions:
+                st.write(f"**Detected Expressions**: {', '.join(expressions)}")
+            st.write(f"**AI Analysis**: {ai_analysis}")
+            
+            # Show confidence if available
+            if 'confidence' in analysis:
+                st.write(f"**Confidence**: {analysis['confidence']:.2f}")
+else:
+    st.info("No analysis results yet. Start live analysis to see results here.")
+
+st.markdown("### 💡 Tips for Best Results")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.markdown("**Lighting:**")
+    st.markdown("• Ensure good lighting on your face")
+    st.markdown("• Avoid backlighting")
+    st.markdown("• Keep camera at eye level")
+
+with col2:
+    st.markdown("**During Video Calls:**")
+    st.markdown("• Keep this window visible")
+    st.markdown("• Position camera for clear face view")
+    st.markdown("• Minimize background movement")
+
 # Close main content div
 st.markdown('</div>', unsafe_allow_html=True)
 
