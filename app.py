@@ -824,29 +824,30 @@ with col2:
 st.markdown("---")
 st.markdown("### 📋 Instructions")
 st.markdown("""
-1. **Webcam Mode**: Click ▶ Start for live emotion detection (requires camera access)
-2. **Image Upload**: Upload a photo to analyze facial expressions
-3. **Video Analysis**: Upload a video for intelligent analysis of significant expression changes
-4. **Demo Mode**: Test AI analysis with simulated expressions
-5. **AI Analysis**: OpenAI GPT provides psychological insights for all modes
-6. **Session Data**: View your personal analysis history and overall statistics
+1. **Image Upload**: Upload a photo to analyze facial expressions and body language
+2. **Video Analysis**: Upload a video for intelligent analysis of significant expression changes
+3. **AI-Powered Analysis**: OpenAI GPT-4o provides comprehensive psychological insights
+4. **Lie Detection**: Advanced deception analysis using micro-expressions and body language
+5. **Session Data**: View your personal analysis history and overall statistics
+6. **Multi-Face Support**: Analyze multiple people simultaneously in images and videos
 """)
 
 st.markdown("### 🔧 Features")
 st.markdown("""
-- **Real-time processing**: Live webcam feed with instant gesture detection
-- **100+ Gestures**: Comprehensive micro-expression recognition
-- **Video analysis**: Smart detection of significant expression changes in videos
-- **AI-powered insights**: OpenAI GPT analysis of emotional states
-- **Database storage**: Persistent storage of analysis history and statistics
-- **Multi-modal input**: Webcam, image upload, and video upload support
-- **Intelligent filtering**: Only analyzes significant expression changes to reduce noise
+- **AI Vision Analysis**: OpenAI GPT-4o Vision API for comprehensive emotion detection
+- **Multi-Modal Input**: Image upload and video analysis support
+- **Body Language Detection**: Full body posture and gesture analysis
+- **Lie Detection**: Advanced deception probability analysis
+- **Database Storage**: Persistent storage of analysis history and statistics
+- **Multi-Face Support**: Analyze multiple people simultaneously
+- **Intelligent Filtering**: Only analyzes significant expression changes to reduce noise
 """)
 
 st.markdown("### ⚙️ Technical Details")
 st.markdown("""
-- **MediaPipe**: Face mesh for precise facial landmark detection
-- **OpenCV**: Real-time computer vision processing
-- **OpenAI GPT-4o**: Advanced emotion interpretation
-- **Streamlit**: Interactive web interface
+- **OpenAI GPT-4o Vision**: Advanced AI vision analysis for comprehensive emotion detection
+- **MediaPipe**: Face mesh and body pose detection for landmark analysis
+- **OpenCV**: Computer vision processing for image and video handling
+- **PostgreSQL**: Database storage for analysis history and statistics
+- **Streamlit**: Interactive web interface for seamless user experience
 """)
