@@ -225,6 +225,29 @@ def show_live_camera():
     if component_value and isinstance(component_value, dict):
         if 'live_frame' in component_value:
             process_live_frame(component_value)
+    
+    # Display recent analysis results
+    if 'live_analysis_results' in st.session_state and st.session_state.live_analysis_results:
+        st.markdown("### Recent Analysis Results")
+        
+        # Show latest result prominently
+        latest = st.session_state.live_analysis_results[-1]
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Latest Expressions", latest['expressions'])
+        with col2:
+            st.metric("Emotional State", latest['emotion'])
+        with col3:
+            st.metric("Confidence", latest['confidence'])
+        
+        # Show analysis history
+        with st.expander(f"Analysis History ({len(st.session_state.live_analysis_results)} results)"):
+            for i, result in enumerate(reversed(st.session_state.live_analysis_results)):
+                st.write(f"**Frame #{result['frame_count']}**: {result['expressions']} - {result['emotion']} ({result['confidence']})")
+                if i == 0:  # Show detailed analysis for latest result
+                    st.write(f"*Detailed Analysis*: {result['detailed_analysis']}")
+                st.write("---")
 
 def process_live_frame(frame_data):
     """Process live video frame"""
@@ -265,21 +288,66 @@ def process_live_frame(frame_data):
                 analysis_type="live_camera"
             )
         
-        # Send results back to JavaScript
+        # Prepare results for display
+        expressions = analysis.get('facial_expressions', [])
+        expressions_text = ', '.join(expressions) if expressions else 'No expressions detected'
+        
+        emotional_state = analysis.get('emotional_state', 'neutral')
+        confidence_level = analysis.get('confidence_level', 'medium')
+        detailed_analysis = analysis.get('detailed_analysis', 'No detailed analysis available')
+        
+        # Store results in session state for display
+        if 'live_analysis_results' not in st.session_state:
+            st.session_state.live_analysis_results = []
+        
         result = {
-            'expressions': ', '.join(analysis.get('facial_expressions', [])),
-            'emotion': analysis.get('emotional_state', 'neutral'),
-            'confidence': analysis.get('confidence_level', 'medium'),
-            'frame_count': frame_data.get('frame_count', 0)
+            'frame_count': frame_data.get('frame_count', 0),
+            'timestamp': frame_data.get('timestamp', time.time() * 1000),
+            'expressions': expressions_text,
+            'emotion': emotional_state,
+            'confidence': confidence_level,
+            'detailed_analysis': detailed_analysis
         }
         
-        # Use JavaScript to send results back to the component
+        # Keep only last 5 results
+        st.session_state.live_analysis_results.append(result)
+        if len(st.session_state.live_analysis_results) > 5:
+            st.session_state.live_analysis_results.pop(0)
+        
+        # Display current analysis results
+        st.success(f"**Live Analysis #{result['frame_count']} Complete!**")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            st.write(f"**Expressions**: {expressions_text}")
+            st.write(f"**Emotional State**: {emotional_state}")
+        with col2:
+            st.write(f"**Confidence**: {confidence_level}")
+            st.write(f"**Frame**: #{result['frame_count']}")
+        
+        with st.expander("Detailed Analysis"):
+            st.write(detailed_analysis)
+        
+        # Use JavaScript to update the component display
         js_code = f"""
         <script>
-            window.parent.postMessage({{
-                type: 'analysis_result',
-                data: {result}
-            }}, '*');
+            setTimeout(function() {{
+                try {{
+                    if (parent.document.getElementById('expressionResults')) {{
+                        parent.document.getElementById('expressionResults').innerHTML = 
+                            '<strong>Expressions:</strong> {expressions_text}';
+                        parent.document.getElementById('emotionResults').innerHTML = 
+                            '<strong>Emotional State:</strong> {emotional_state}';
+                        parent.document.getElementById('confidenceResults').innerHTML = 
+                            '<strong>Confidence:</strong> {confidence_level}';
+                        parent.document.getElementById('liveStatus').textContent = 
+                            '✅ Analysis #{result['frame_count']} complete - {expressions_text}';
+                        parent.document.getElementById('liveStatus').style.color = '#28a745';
+                    }}
+                }} catch(e) {{
+                    console.log('Could not update parent elements:', e);
+                }}
+            }}, 100);
         </script>
         """
         
