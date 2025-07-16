@@ -154,6 +154,8 @@ def show_login_form():
                             st.session_state.show_upload_video = True
                         elif redirect_to == "live_camera":
                             st.session_state.show_working_live_analyzer = True
+                        elif redirect_to == "simple_detector":
+                            st.session_state.show_simple_detector = True
                         # Clear redirect state
                         if 'login_redirect' in st.session_state:
                             del st.session_state.login_redirect
@@ -221,6 +223,8 @@ def show_register_form():
                                 st.session_state.show_upload_video = True
                             elif redirect_to == "live_camera":
                                 st.session_state.show_working_live_analyzer = True
+                            elif redirect_to == "simple_detector":
+                                st.session_state.show_simple_detector = True
                             # Clear redirect state
                             if 'login_redirect' in st.session_state:
                                 del st.session_state.login_redirect

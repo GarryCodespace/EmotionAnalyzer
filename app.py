@@ -1510,11 +1510,11 @@ with col1:
 
 with col2:
     st.markdown("**How to Use:**")
-    st.markdown("1. Click 'Start Web Camera' below")
-    st.markdown("2. Allow camera access in your browser")
-    st.markdown("3. Click 'Analyze Expression' for instant results")
-    st.markdown("4. Use during video calls for live feedback")
-    st.markdown("5. No downloads or installations required!")
+    st.markdown("1. Click 'Start Web Camera' for advanced analysis")
+    st.markdown("2. Click 'Simple Detector' for basic emotion tracking")
+    st.markdown("3. Allow camera access in your browser")
+    st.markdown("4. Get automatic photos when emotions change")
+    st.markdown("5. View AI analysis of each emotion detected")
     
     # Interview Mode button aligned with item 5
     if st.button("🎯 Interview Mode", type="primary"):
@@ -1531,6 +1531,17 @@ with col1:
             st.rerun()
         else:
             st.session_state.show_working_live_analyzer = True
+            st.rerun()
+
+with col2:
+    if st.button("📸 Simple Detector", type="primary"):
+        # Check if user is logged in
+        if not st.session_state.get('logged_in', False):
+            st.session_state.show_login_modal = True
+            st.session_state.login_redirect = "simple_detector"
+            st.rerun()
+        else:
+            st.session_state.show_simple_detector = True
             st.rerun()
 
 with col3:
@@ -1646,6 +1657,12 @@ if st.session_state.get('show_working_live_analyzer', False):
     st.markdown("---")
     from working_live_analyzer import working_live_analyzer
     working_live_analyzer()
+
+# Simple Emotion Detector Section
+if st.session_state.get('show_simple_detector', False):
+    st.markdown("---")
+    from simple_emotion_detector import simple_emotion_detector
+    simple_emotion_detector()
 
 # Working Screen Recorder Section
 if st.session_state.get('show_working_recorder', False):
