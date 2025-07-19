@@ -1,4 +1,4 @@
-modules = ["python-3.11", "postgresql-16"]
+modules = ["python-3.11", "postgresql-16", "nodejs-20"]
 
 [nix]
 channel = "stable-24_05"
@@ -18,24 +18,19 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Streamlit App"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
 args = "install_deps"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
 args = "FastAPI Server"
 
-[[workflows.workflow]]
-name = "Streamlit App"
-author = "agent"
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "React Frontend"
 
 [[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "streamlit run app.py --server.port 5000"
-waitForPort = 5000
+task = "workflow.run"
+args = "Full Stack App"
 
 [[workflows.workflow]]
 name = "install_deps"
@@ -53,6 +48,28 @@ author = "agent"
 task = "shell.exec"
 args = "uvicorn fast_emotion_api:app --host 0.0.0.0 --port 8000"
 waitForPort = 8000
+
+[[workflows.workflow]]
+name = "React Frontend"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd frontend && npm start"
+waitForPort = 3000
+
+[[workflows.workflow]]
+name = "Full Stack App"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "uvicorn fast_emotion_api:app --host 0.0.0.0 --port 5000"
+waitForPort = 5000
+
+[[ports]]
+localPort = 3000
+externalPort = 3001
 
 [[ports]]
 localPort = 5000
