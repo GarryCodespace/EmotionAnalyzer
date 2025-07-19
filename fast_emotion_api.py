@@ -101,6 +101,100 @@ class FastEmotionAnalyzer:
 # Initialize analyzer
 analyzer = FastEmotionAnalyzer()
 
+def parse_ai_analysis(ai_text):
+    """Parse AI analysis response into structured data"""
+    result = {}
+    
+    try:
+        # Extract primary emotion
+        emotion_match = re.search(r'PRIMARY EMOTION:\s*([^(]+)\s*\(([^%]+)%', ai_text, re.IGNORECASE)
+        if emotion_match:
+            result["emotion"] = emotion_match.group(1).strip()
+            result["confidence"] = float(emotion_match.group(2).strip())
+        
+        # Extract mood
+        mood_match = re.search(r'MOOD:\s*([^\n]+)', ai_text, re.IGNORECASE)
+        if mood_match:
+            result["mood"] = mood_match.group(1).strip()
+        
+        # Extract micro-expressions
+        micro_expressions = []
+        micro_section = re.search(r'MICRO-EXPRESSIONS DETECTED:(.*?)(?=BODY LANGUAGE|FACIAL ANALYSIS|$)', ai_text, re.IGNORECASE | re.DOTALL)
+        if micro_section:
+            for line in micro_section.group(1).split('\n'):
+                if '•' in line and line.strip():
+                    expr = line.split('•')[1].strip()
+                    micro_expressions.append(expr)
+        result["micro_expressions"] = micro_expressions
+        
+        # Extract body language patterns
+        body_language = []
+        body_section = re.search(r'BODY LANGUAGE PATTERNS:(.*?)(?=FACIAL ANALYSIS|DECEPTION|$)', ai_text, re.IGNORECASE | re.DOTALL)
+        if body_section:
+            for line in body_section.group(1).split('\n'):
+                if '•' in line and line.strip():
+                    pattern = line.split('•')[1].strip()
+                    body_language.append(pattern)
+        result["body_language"] = body_language
+        
+        # Extract facial analysis
+        facial_analysis = []
+        facial_section = re.search(r'FACIAL ANALYSIS:(.*?)(?=DECEPTION|STRESS|$)', ai_text, re.IGNORECASE | re.DOTALL)
+        if facial_section:
+            for line in facial_section.group(1).split('\n'):
+                if '•' in line and line.strip():
+                    analysis = line.split('•')[1].strip()
+                    facial_analysis.append(analysis)
+        result["facial_analysis"] = facial_analysis
+        
+        # Extract deception analysis
+        deception_match = re.search(r'Risk Level:\s*([^(]+)\s*\(([^%]+)%\)', ai_text, re.IGNORECASE)
+        if deception_match:
+            result["deception_risk"] = deception_match.group(1).strip()
+            result["deception_percentage"] = float(deception_match.group(2).strip())
+        
+        deception_indicators = []
+        deception_section = re.search(r'Indicators:\s*([^\n]+)', ai_text, re.IGNORECASE)
+        if deception_section:
+            indicators_text = deception_section.group(1).strip()
+            if indicators_text and indicators_text.lower() not in ['none', 'no indicators']:
+                deception_indicators = [indicators_text]
+        result["deception_indicators"] = deception_indicators
+        
+        # Extract stress analysis
+        stress_match = re.search(r'Stress Level:\s*([^%]+)%\s*\(([^)]+)\)', ai_text, re.IGNORECASE)
+        if stress_match:
+            result["stress_percentage"] = float(stress_match.group(1).strip())
+            result["stress_level"] = stress_match.group(2).strip()
+        
+        stress_indicators = []
+        stress_section = re.search(r'Signs:\s*([^\n]+)', ai_text, re.IGNORECASE)
+        if stress_section:
+            signs_text = stress_section.group(1).strip()
+            if signs_text and signs_text.lower() not in ['none', 'no signs']:
+                stress_indicators = [signs_text]
+        result["stress_indicators"] = stress_indicators
+        
+        # Extract recommendations
+        recommendations = []
+        rec_section = re.search(r'RECOMMENDATIONS:(.*?)(?=AI PSYCHOLOGICAL|$)', ai_text, re.IGNORECASE | re.DOTALL)
+        if rec_section:
+            for line in rec_section.group(1).split('\n'):
+                if '•' in line and line.strip():
+                    rec = line.split('•')[1].strip()
+                    recommendations.append(rec)
+        result["recommendations"] = recommendations
+        
+        # Extract psychological analysis
+        psych_match = re.search(r'AI PSYCHOLOGICAL ANALYSIS:\s*([^\n]+(?:\n[^\n]+)*)', ai_text, re.IGNORECASE)
+        if psych_match:
+            result["psychological_analysis"] = psych_match.group(1).strip()
+        
+    except Exception as e:
+        print(f"Error parsing AI analysis: {e}")
+    
+    return result
+
 @app.get("/", response_class=HTMLResponse)
 async def root():
     """Serve complete React-style single-page application"""
@@ -292,6 +386,17 @@ async def root():
                                                 <p className="mt-2 text-sm text-gray-600"><strong>AI Analysis:</strong> {result.ai_analysis}</p>
                                             )}
                                         </div>
+                                        
+                                        {result.micro_expressions && result.micro_expressions.length > 0 && (
+                                            <div className="mb-4">
+                                                <h4 className="text-lg font-semibold mb-2">🔬 Micro-Expressions Detected: {result.micro_expressions_count || result.micro_expressions.length}</h4>
+                                                <ul className="list-disc list-inside">
+                                                    {result.micro_expressions.map((expression, index) => (
+                                                        <li key={index} className="text-sm">• {expression}</li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
                                         
                                         {result.body_language_patterns && result.body_language_patterns.length > 0 && (
                                             <div className="mb-4">
@@ -527,49 +632,122 @@ async def analyze_image(file: UploadFile = File(...)):
         from stress_analyzer import StressAnalyzer
         
         try:
-            # Initialize analyzers
+            # Use OpenAI Vision API for comprehensive micro-expression analysis
+            client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+            
+            # Convert image to base64 for OpenAI Vision API
+            _, buffer = cv2.imencode('.jpg', opencv_image)
+            image_base64 = base64.b64encode(buffer).decode('utf-8')
+            
+            # Advanced micro-expression analysis prompt
+            analysis_prompt = """
+            Analyze this image for comprehensive emotional and behavioral insights. Provide detailed analysis in the following format:
+
+            PRIMARY EMOTION: [emotion] ([confidence]% confidence)
+            MOOD: [detailed mood description]
+            
+            MICRO-EXPRESSIONS DETECTED:
+            • [specific micro-expression] ([confidence]%)
+            • [specific micro-expression] ([confidence]%)
+            • [specific micro-expression] ([confidence]%)
+            
+            BODY LANGUAGE PATTERNS:
+            • [specific body language pattern]
+            • [specific body language pattern]
+            
+            FACIAL ANALYSIS:
+            • [detailed facial expression analysis]
+            • [eye contact and gaze patterns]
+            • [mouth and lip analysis]
+            • [eyebrow and forehead analysis]
+            
+            DECEPTION INDICATORS:
+            Risk Level: [LOW/MEDIUM/HIGH] ([percentage]%)
+            Indicators: [specific indicators if any]
+            
+            STRESS INDICATORS:
+            Stress Level: [percentage]% ([LOW/MEDIUM/HIGH])
+            Signs: [specific stress signs]
+            
+            RECOMMENDATIONS:
+            • [specific recommendation]
+            • [specific recommendation]
+            
+            AI PSYCHOLOGICAL ANALYSIS:
+            [Comprehensive 2-3 sentence analysis of the person's psychological state, emotions, and what their expressions suggest about their thoughts and feelings]
+            """
+            
+            # Call OpenAI Vision API
+            response = client.chat.completions.create(
+                model="gpt-4o",  # the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": analysis_prompt
+                            },
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/jpeg;base64,{image_base64}"
+                                }
+                            }
+                        ]
+                    }
+                ],
+                max_tokens=1000
+            )
+            
+            ai_analysis = response.choices[0].message.content
+            
+            # Parse the AI response to extract structured data
+            parsed_result = parse_ai_analysis(ai_analysis)
+            
+            # Initialize traditional analyzers as backup
             body_analyzer = BodyLanguageAnalyzer()
             lie_detector = LieDetector()
             stress_analyzer = StressAnalyzer()
             
-            # Comprehensive emotion analysis
-            emotion_result = analyzer.analyze_emotion_fast(opencv_image)
-            
-            # Body language analysis
+            # Get traditional analysis for comparison/enhancement
             body_result = body_analyzer.analyze_body_language(opencv_image)
-            
-            # Lie detection analysis
             lie_result = lie_detector.analyze_deception(opencv_image)
-            
-            # Stress analysis
             stress_result = stress_analyzer.analyze_stress(opencv_image)
             
-            # Combine all results
+            # Combine AI analysis with traditional analysis
             comprehensive_result = {
-                # Primary emotion data
-                "emotion": emotion_result.get("emotion", "Unknown"),
-                "confidence": emotion_result.get("confidence", 0.8),
-                "mood": emotion_result.get("mood", "Unable to determine mood"),
-                "ai_analysis": emotion_result.get("analysis", ""),
+                # Primary emotion data from AI
+                "emotion": parsed_result.get("emotion", "Unknown"),
+                "confidence": parsed_result.get("confidence", 85),
+                "mood": parsed_result.get("mood", "Unable to determine mood"),
+                "ai_analysis": parsed_result.get("psychological_analysis", ""),
                 "landmarks_detected": landmarks_count,
                 
-                # Body language data
-                "body_language_patterns": body_result.get("patterns", []),
-                "body_language_count": len(body_result.get("patterns", [])),
-                "facial_expressions": body_result.get("facial_expressions", []),
-                "facial_expressions_count": len(body_result.get("facial_expressions", [])),
+                # Micro-expressions from AI
+                "micro_expressions": parsed_result.get("micro_expressions", []),
+                "micro_expressions_count": len(parsed_result.get("micro_expressions", [])),
                 
-                # Deception analysis
-                "deception_risk": lie_result.get("risk_level", "LOW"),
-                "deception_percentage": lie_result.get("percentage", 0.0),
-                "deception_confidence": lie_result.get("confidence", "Low"),
-                "deception_indicators": lie_result.get("indicators", []),
+                # Body language data (AI + traditional)
+                "body_language_patterns": parsed_result.get("body_language", []) + body_result.get("patterns", [])[:3],
+                "body_language_count": len(parsed_result.get("body_language", [])),
+                "facial_expressions": parsed_result.get("facial_analysis", []),
+                "facial_expressions_count": len(parsed_result.get("facial_analysis", [])),
                 
-                # Stress analysis
-                "stress_level": stress_result.get("level", "Medium"),
-                "stress_percentage": stress_result.get("percentage", 50),
-                "stress_indicators": stress_result.get("indicators", []),
-                "stress_recommendations": stress_result.get("recommendations", [])
+                # Deception analysis (AI enhanced)
+                "deception_risk": parsed_result.get("deception_risk", "LOW"),
+                "deception_percentage": parsed_result.get("deception_percentage", 0.0),
+                "deception_confidence": "High" if parsed_result.get("deception_indicators") else "Low",
+                "deception_indicators": parsed_result.get("deception_indicators", []),
+                
+                # Stress analysis (AI enhanced)
+                "stress_level": parsed_result.get("stress_level", "Medium"),
+                "stress_percentage": parsed_result.get("stress_percentage", 50),
+                "stress_indicators": parsed_result.get("stress_indicators", []),
+                "stress_recommendations": parsed_result.get("recommendations", []),
+                
+                # Raw AI analysis
+                "raw_ai_analysis": ai_analysis
             }
             
             return JSONResponse(comprehensive_result)
@@ -604,7 +782,6 @@ async def analyze_video(file: UploadFile = File(...)):
             })
         
         # Save temporary file
-        import tempfile
         import os
         
         with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as temp_file:
