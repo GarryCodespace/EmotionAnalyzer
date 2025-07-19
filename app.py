@@ -543,10 +543,16 @@ with header_col2:
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;<h1 style='font-size: 3rem; margin: 0; margin-bottom: -35px;'>Emoticon</h1>", unsafe_allow_html=True)
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;<p style='margin-top: -35px;'>Live AI Emotion Interpretation from Micro-Expressions</p>", unsafe_allow_html=True)
     
-    # ChatGPT-Style Interface Button
-    if st.button("🤖 Try ChatGPT-Style Interface", type="primary", key="chatgpt_interface_btn"):
-        st.session_state.show_chatgpt_interface = True
-        st.rerun()
+    # Interface Options
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("🤖 ChatGPT-Style Interface", type="primary", key="chatgpt_interface_btn"):
+            st.session_state.show_chatgpt_interface = True
+            st.rerun()
+    with col2:
+        if st.button("⚡ FastAPI Version", type="secondary", key="fastapi_btn"):
+            st.markdown("🚀 **FastAPI Server**: [Open Fast Interface](http://localhost:8000)")
+            st.info("The FastAPI version offers better performance and faster image analysis.")
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;<p style='margin-top: -10px; font-size: 0.9rem; color: #666;'>Try it now - Upload an image to experience AI emotion analysis</p>", unsafe_allow_html=True)
 with header_col3:
     st.markdown("<br>", unsafe_allow_html=True)  # Add some spacing
