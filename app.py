@@ -542,6 +542,11 @@ with header_col2:
     st.markdown("<br>", unsafe_allow_html=True)  # Reduce spacing for closer text
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;<h1 style='font-size: 3rem; margin: 0; margin-bottom: -35px;'>Emoticon</h1>", unsafe_allow_html=True)
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;<p style='margin-top: -35px;'>Live AI Emotion Interpretation from Micro-Expressions</p>", unsafe_allow_html=True)
+    
+    # ChatGPT-Style Interface Button
+    if st.button("🤖 Try ChatGPT-Style Interface", type="primary", key="chatgpt_interface_btn"):
+        st.session_state.show_chatgpt_interface = True
+        st.rerun()
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;<p style='margin-top: -10px; font-size: 0.9rem; color: #666;'>Try it now - Upload an image to experience AI emotion analysis</p>", unsafe_allow_html=True)
 with header_col3:
     st.markdown("<br>", unsafe_allow_html=True)  # Add some spacing
@@ -905,14 +910,8 @@ with tools_col1:
     """, unsafe_allow_html=True)
     
     if st.button("➕", key="upload_image_tool", use_container_width=True):
-        # Check if user is logged in
-        if not st.session_state.get('logged_in', False):
-            st.session_state.show_login_modal = True
-            st.session_state.login_redirect = "upload_image"
-            st.rerun()
-        else:
-            st.session_state.show_upload_image = True
-            st.rerun()
+        st.session_state.show_upload_image = True
+        st.rerun()
 
 with tools_col2:
     st.markdown("""
@@ -922,14 +921,8 @@ with tools_col2:
     """, unsafe_allow_html=True)
     
     if st.button("➕", key="upload_video_tool", use_container_width=True):
-        # Check if user is logged in
-        if not st.session_state.get('logged_in', False):
-            st.session_state.show_login_modal = True
-            st.session_state.login_redirect = "upload_video"
-            st.rerun()
-        else:
-            st.session_state.show_upload_video = True
-            st.rerun()
+        st.session_state.show_upload_video = True
+        st.rerun()
 
 with tools_col3:
     st.markdown("""
@@ -1524,29 +1517,17 @@ with col2:
 col1, col2, col3 = st.columns(3)
 with col1:
     if st.button("📹 Start Web Camera", type="primary"):
-        # Check if user is logged in
-        if not st.session_state.get('logged_in', False):
-            st.session_state.show_login_modal = True
-            st.session_state.login_redirect = "live_camera"
-            st.rerun()
-        else:
-            st.session_state.show_working_live_analyzer = True
-            st.rerun()
+        st.session_state.show_working_live_analyzer = True
+        st.rerun()
 
 with col2:
     if st.button("📸 Simple Detector", type="primary"):
-        # Check if user is logged in
-        if not st.session_state.get('logged_in', False):
-            st.session_state.show_login_modal = True
-            st.session_state.login_redirect = "simple_detector"
-            st.rerun()
-        else:
-            st.session_state.show_simple_detector = True
-            st.rerun()
+        st.session_state.show_simple_detector = True
+        st.rerun()
 
 with col3:
-    if st.button("🧪 Test Debug", type="secondary"):
-        st.session_state.show_test_recorder = True
+    if st.button("🎯 Landmarks Tracker", type="primary"):
+        st.session_state.show_landmarks_tracker = True
         st.rerun()
 
 # Web Camera Section
@@ -1663,6 +1644,18 @@ if st.session_state.get('show_simple_detector', False):
     st.markdown("---")
     from simple_emotion_detector import simple_emotion_detector
     simple_emotion_detector()
+
+# ChatGPT Interface Section
+if st.session_state.get('show_chatgpt_interface', False):
+    st.markdown("---")
+    from chatgpt_interface import create_chatgpt_interface
+    create_chatgpt_interface()
+
+# Landmarks Tracker Section
+if st.session_state.get('show_landmarks_tracker', False):
+    st.markdown("---")
+    from simple_landmarks_tracker import simple_landmarks_tracker
+    simple_landmarks_tracker()
 
 # Working Screen Recorder Section
 if st.session_state.get('show_working_recorder', False):

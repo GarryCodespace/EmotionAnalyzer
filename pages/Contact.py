@@ -269,8 +269,6 @@ with col2:
     
     📧 **Email**: emoticon.contact@gmail.com
     
-    📱 **Phone**: +61 451 961 015
-    
     🕐 **Hours**: Monday - Friday, 9 AM - 6 PM PST
     
     ---
