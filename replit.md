@@ -21,13 +21,11 @@ Performance: Added Simple Landmarks Tracker for better real-time performance usi
 ## System Architecture
 
 ### Frontend Architecture
-- **Framework**: FastAPI + React (migrated from Streamlit) for modern web interface
-- **React Components**: Single-page application with React hooks and modern UI
+- **Framework**: Streamlit for web-based user interface
 - **Real-time Processing**: OpenCV for video capture and frame processing
-- **User Interaction**: React-based interface with drag-and-drop file upload and live analysis
+- **User Interaction**: Simple web interface for live camera feed and analysis results
 
 ### Backend Architecture
-- **API Framework**: FastAPI for high-performance REST API endpoints
 - **Computer Vision**: MediaPipe Face Mesh for facial landmark detection
 - **Expression Detection**: Custom gesture recognition system using 100+ predefined facial expressions
 - **AI Analysis**: OpenAI GPT-4o integration for emotional interpretation
