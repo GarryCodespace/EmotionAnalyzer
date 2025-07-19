@@ -24,6 +24,10 @@ args = "Streamlit App"
 task = "workflow.run"
 args = "install_deps"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "FastAPI Server"
+
 [[workflows.workflow]]
 name = "Streamlit App"
 author = "agent"
@@ -41,6 +45,15 @@ author = "agent"
 task = "shell.exec"
 args = "uv add opencv-python mediapipe"
 
+[[workflows.workflow]]
+name = "FastAPI Server"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "uvicorn fast_emotion_api:app --host 0.0.0.0 --port 8000"
+waitForPort = 8000
+
 [[ports]]
 localPort = 5000
 externalPort = 80
@@ -48,3 +61,7 @@ externalPort = 80
 [[ports]]
 localPort = 5001
 externalPort = 3000
+
+[[ports]]
+localPort = 8000
+externalPort = 8000
