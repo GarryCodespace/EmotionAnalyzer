@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emoticon AI - FastAPI + React Architecture</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background-color: #f8fafc;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useRef } = React;
+
+        // Header Component
+        const Header = () => (
+            <header className="bg-white shadow-sm border-b">
+                <div className="container mx-auto px-4 py-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                            <span className="text-3xl">🎭</span>
+                            <div>
+                                <h1 className="text-2xl font-bold text-gray-900">Emoticon AI</h1>
+                                <p className="text-sm text-gray-600">FastAPI + React Architecture</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center space-x-4">
+                            <button className="px-4 py-2 text-gray-600 hover:text-gray-900">About</button>
+                            <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Login</button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+        );
+
+        // Navigation Component
+        const Navigation = ({ activeTab, setActiveTab }) => {
+            const tabs = [
+                { id: 'chat', label: 'Chat Interface', icon: '💬' },
+                { id: 'upload', label: 'Upload & Analyze', icon: '📤' },
+                { id: 'landmarks', label: 'Landmarks Tracker', icon: '🎯' }
+            ];
+
+            return (
+                <nav className="bg-gray-50 border-b">
+                    <div className="container mx-auto px-4">
+                        <div className="flex space-x-1">
+                            {tabs.map(tab => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={`flex items-center space-x-2 px-6 py-4 text-sm font-medium transition-colors ${
+                                        activeTab === tab.id
+                                            ? 'text-blue-600 border-b-2 border-blue-600 bg-white'
+                                            : 'text-gray-600 hover:text-gray-900 hover:bg-white'
+                                    }`}
+                                >
+                                    <span>{tab.icon}</span>
+                                    <span>{tab.label}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </nav>
+            );
+        };
+
+        // Chat Interface Component
+        const ChatInterface = () => {
+            const [messages, setMessages] = useState([
+                {
+                    role: 'assistant',
+                    content: 'Hi! I\'m Emoticon AI running on FastAPI + React. Upload an image or ask questions about emotions!',
+                    timestamp: new Date()
+                }
+            ]);
+            const [inputMessage, setInputMessage] = useState('');
+            const [isLoading, setIsLoading] = useState(false);
+            const fileInputRef = useRef(null);
+
+            const handleSendMessage = async () => {
+                if (!inputMessage.trim()) return;
+
+                const userMessage = {
+                    role: 'user',
+                    content: inputMessage,
+                    timestamp: new Date()
+                };
+
+                setMessages(prev => [...prev, userMessage]);
+                setInputMessage('');
+                setIsLoading(true);
+
+                try {
+                    const response = await fetch('/api/chat/analyze', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: inputMessage })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    setMessages(prev => [...prev, {
+                        role: 'assistant',
+                        content: data.response,
+                        timestamp: new Date()
+                    }]);
+                } catch (error) {
+                    setMessages(prev => [...prev, {
+                        role: 'assistant',
+                        content: 'Sorry, I encountered an error. Please try again.',
+                        timestamp: new Date()
+                    }]);
+                }
+
+                setIsLoading(false);
+            };
+
+            const handleImageUpload = async (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const userMessage = {
+                    role: 'user',
+                    content: 'I uploaded an image for analysis',
+                    image: URL.createObjectURL(file),
+                    timestamp: new Date()
+                };
+
+                setMessages(prev => [...prev, userMessage]);
+                setIsLoading(true);
+
+                try {
+                    const reader = new FileReader();
+                    reader.onload = async (e) => {
+                        const response = await fetch('/api/chat/analyze', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                message: 'Analyze this image',
+                                image_base64: e.target.result
+                            })
+                        });
+                        
+                        const data = await response.json();
+                        
+                        setMessages(prev => [...prev, {
+                            role: 'assistant',
+                            content: data.response,
+                            timestamp: new Date()
+                        }]);
+                        setIsLoading(false);
+                    };
+                    reader.readAsDataURL(file);
+                } catch (error) {
+                    setMessages(prev => [...prev, {
+                        role: 'assistant',
+                        content: 'Sorry, I couldn\'t analyze that image. Please try again.',
+                        timestamp: new Date()
+                    }]);
+                    setIsLoading(false);
+                }
+            };
+
+            return (
+                <div className="max-w-4xl mx-auto">
+                    <div className="text-center mb-8">
+                        <h2 className="text-3xl font-bold mb-2">Chat with AI</h2>
+                        <p className="text-gray-600">Ask questions or upload images for emotion analysis</p>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow-lg mb-4 h-96 overflow-y-auto p-4">
+                        <div className="space-y-4">
+                            {messages.map((message, index) => (
+                                <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                    <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                                        message.role === 'user'
+                                            ? 'bg-blue-500 text-white'
+                                            : 'bg-gray-100 text-gray-800'
+                                    }`}>
+                                        {message.image && (
+                                            <img src={message.image} alt="Uploaded" className="w-full rounded mb-2" />
+                                        )}
+                                        <p className="whitespace-pre-wrap">{message.content}</p>
+                                    </div>
+                                </div>
+                            ))}
+                            {isLoading && (
+                                <div className="flex justify-start">
+                                    <div className="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg">
+                                        <div className="flex space-x-1">
+                                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow-lg p-4">
+                        <div className="flex space-x-2">
+                            <input
+                                type="text"
+                                value={inputMessage}
+                                onChange={(e) => setInputMessage(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                                placeholder="Ask about emotions or upload an image..."
+                                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                disabled={isLoading}
+                            />
+                            
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleImageUpload}
+                                accept="image/*"
+                                className="hidden"
+                            />
+                            
+                            <button
+                                onClick={() => fileInputRef.current?.click()}
+                                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                                disabled={isLoading}
+                            >
+                                📤
+                            </button>
+                            
+                            <button
+                                onClick={handleSendMessage}
+                                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                                disabled={isLoading || !inputMessage.trim()}
+                            >
+                                ➤
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Upload Component
+        const UploadInterface = () => {
+            const [selectedFile, setSelectedFile] = useState(null);
+            const [analysis, setAnalysis] = useState(null);
+            const [isLoading, setIsLoading] = useState(false);
+            const [analysisType, setAnalysisType] = useState('emotion');
+            const fileInputRef = useRef(null);
+
+            const analysisTypes = [
+                { id: 'emotion', label: 'Emotion Analysis', icon: '🧠' },
+                { id: 'lie', label: 'Lie Detection', icon: '👁️' },
+                { id: 'stress', label: 'Stress Analysis', icon: '❤️' }
+            ];
+
+            const handleAnalyze = async () => {
+                if (!selectedFile) return;
+
+                setIsLoading(true);
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+
+                try {
+                    const endpoints = {
+                        emotion: '/api/analyze/image',
+                        lie: '/api/analyze/lie-detection',
+                        stress: '/api/analyze/stress'
+                    };
+
+                    const response = await fetch(endpoints[analysisType], {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+                    setAnalysis(data);
+                } catch (error) {
+                    setAnalysis({ success: false, error: 'Analysis failed' });
+                }
+
+                setIsLoading(false);
+            };
+
+            return (
+                <div className="max-w-4xl mx-auto">
+                    <div className="text-center mb-8">
+                        <h2 className="text-3xl font-bold mb-2">Upload & Analyze</h2>
+                        <p className="text-gray-600">Upload an image for AI-powered emotion analysis</p>
+                    </div>
+
+                    <div className="mb-6">
+                        <h3 className="text-lg font-semibold mb-3">Select Analysis Type</h3>
+                        <div className="grid grid-cols-3 gap-4">
+                            {analysisTypes.map(type => (
+                                <button
+                                    key={type.id}
+                                    onClick={() => setAnalysisType(type.id)}
+                                    className={`p-4 rounded-lg border-2 transition-colors ${
+                                        analysisType === type.id
+                                            ? 'border-blue-500 bg-blue-50 text-blue-700'
+                                            : 'border-gray-200 hover:border-gray-300'
+                                    }`}
+                                >
+                                    <div className="text-2xl mb-2">{type.icon}</div>
+                                    <p className="font-medium">{type.label}</p>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+                        <div
+                            onClick={() => fileInputRef.current?.click()}
+                            className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-gray-400"
+                        >
+                            <div className="text-4xl mb-4">📤</div>
+                            <p className="text-lg font-medium mb-2">
+                                {selectedFile ? selectedFile.name : 'Click to upload an image'}
+                            </p>
+                            <p className="text-gray-500">Supports JPG, PNG files</p>
+                        </div>
+
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={(e) => setSelectedFile(e.target.files[0])}
+                            accept="image/*"
+                            className="hidden"
+                        />
+
+                        {selectedFile && (
+                            <div className="mt-4 flex justify-center">
+                                <img
+                                    src={URL.createObjectURL(selectedFile)}
+                                    alt="Selected"
+                                    className="max-w-xs max-h-64 rounded-lg shadow-md"
+                                />
+                            </div>
+                        )}
+
+                        {selectedFile && (
+                            <div className="mt-4 text-center">
+                                <button
+                                    onClick={handleAnalyze}
+                                    disabled={isLoading}
+                                    className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50"
+                                >
+                                    {isLoading ? 'Analyzing...' : `Analyze ${analysisTypes.find(t => t.id === analysisType)?.label}`}
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    {analysis && analysis.success && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <h3 className="text-lg font-semibold mb-3">Analysis Results</h3>
+                            <pre className="text-sm bg-white p-3 rounded border overflow-auto">
+                                {JSON.stringify(analysis, null, 2)}
+                            </pre>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // Main App Component
+        const App = () => {
+            const [activeTab, setActiveTab] = useState('chat');
+
+            const renderContent = () => {
+                switch (activeTab) {
+                    case 'chat':
+                        return <ChatInterface />;
+                    case 'upload':
+                        return <UploadInterface />;
+                    case 'landmarks':
+                        return (
+                            <div className="text-center py-12">
+                                <h2 className="text-2xl font-bold mb-4">🎯 Landmarks Tracker</h2>
+                                <p className="text-gray-600">Real-time facial landmark tracking feature coming soon</p>
+                                <p className="text-sm text-gray-500 mt-2">This will integrate with MediaPipe for live camera analysis</p>
+                            </div>
+                        );
+                    default:
+                        return <ChatInterface />;
+                }
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    <Header />
+                    <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
+                    <main className="container mx-auto px-4 py-8">
+                        {renderContent()}
+                    </main>
+                </div>
+            );
+        };
+
+        // Render the app
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
