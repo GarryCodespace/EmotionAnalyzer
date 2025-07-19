@@ -282,12 +282,83 @@ async def root():
                                     </div>
                                 ) : (
                                     <div>
-                                        <div className={`emotion-badge ${(result.emotion || 'neutral').toLowerCase()}`}>
-                                            {result.emotion || 'Unknown'} ({((result.confidence || 0.8) * 100).toFixed(0)}% confidence)
+                                        <div className="mb-4">
+                                            <h4 className="text-lg font-semibold mb-2">🎭 Primary Emotional State</h4>
+                                            <div className={`emotion-badge ${(result.emotion || 'neutral').toLowerCase()}`}>
+                                                {result.emotion || 'Unknown'} ({((result.confidence || 0.8) * 100).toFixed(0)}% confidence)
+                                            </div>
+                                            <p className="mt-2"><strong>Mood:</strong> {result.mood || 'Unable to determine mood'}</p>
+                                            {result.ai_analysis && (
+                                                <p className="mt-2 text-sm text-gray-600"><strong>AI Analysis:</strong> {result.ai_analysis}</p>
+                                            )}
                                         </div>
-                                        <p className="mt-2"><strong>Mood:</strong> {result.mood || 'Unable to determine mood'}</p>
+                                        
+                                        {result.body_language_patterns && result.body_language_patterns.length > 0 && (
+                                            <div className="mb-4">
+                                                <h4 className="text-lg font-semibold mb-2">🤝 Body Language Patterns Detected: {result.body_language_count || result.body_language_patterns.length}</h4>
+                                                <ul className="list-disc list-inside">
+                                                    {result.body_language_patterns.map((pattern, index) => (
+                                                        <li key={index} className="text-sm">• {pattern}</li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                        
+                                        {result.facial_expressions && result.facial_expressions.length > 0 && (
+                                            <div className="mb-4">
+                                                <h4 className="text-lg font-semibold mb-2">😊 Facial Expressions Detected: {result.facial_expressions_count || result.facial_expressions.length}</h4>
+                                                <ul className="list-disc list-inside">
+                                                    {result.facial_expressions.map((expression, index) => (
+                                                        <li key={index} className="text-sm">• {expression}</li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                        
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                            <div className="bg-gray-50 p-4 rounded-lg">
+                                                <h4 className="text-lg font-semibold mb-2">🔍 Deception Analysis</h4>
+                                                <p><strong>Deception Risk:</strong> {result.deception_risk || 'LOW'} ({(result.deception_percentage || 0).toFixed(1)}%) - Confidence: {result.deception_confidence || 'Low'}</p>
+                                                {result.deception_indicators && result.deception_indicators.length > 0 && (
+                                                    <div className="mt-2">
+                                                        <p className="text-sm font-medium">Indicators:</p>
+                                                        <ul className="list-disc list-inside text-sm">
+                                                            {result.deception_indicators.map((indicator, index) => (
+                                                                <li key={index}>• {indicator}</li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            
+                                            <div className="bg-gray-50 p-4 rounded-lg">
+                                                <h4 className="text-lg font-semibold mb-2">😰 Stress & Anxiety Level</h4>
+                                                <p><strong>Stress Level:</strong> You look {result.stress_percentage || 50}% stressed ({result.stress_level || 'Medium'})</p>
+                                                {result.stress_indicators && result.stress_indicators.length > 0 && (
+                                                    <div className="mt-2">
+                                                        <p className="text-sm font-medium">Stress Indicators:</p>
+                                                        <ul className="list-disc list-inside text-sm">
+                                                            {result.stress_indicators.map((indicator, index) => (
+                                                                <li key={index}>• {indicator}</li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
+                                                {result.stress_recommendations && result.stress_recommendations.length > 0 && (
+                                                    <div className="mt-2">
+                                                        <p className="text-sm font-medium">Recommendations:</p>
+                                                        <ul className="list-disc list-inside text-sm">
+                                                            {result.stress_recommendations.map((rec, index) => (
+                                                                <li key={index}>• {rec}</li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                        
                                         {result.landmarks_detected && (
-                                            <p><strong>Facial landmarks detected:</strong> {result.landmarks_detected}</p>
+                                            <p className="mt-4 text-sm text-gray-500"><strong>Technical:</strong> {result.landmarks_detected} facial landmarks detected</p>
                                         )}
                                     </div>
                                 )}
@@ -324,24 +395,79 @@ async def root():
                             </div>
                         </div>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                            <div className="bg-white p-6 rounded-lg shadow-md text-center">
-                                <div className="text-4xl mb-4">📷</div>
-                                <h3 className="text-xl font-semibold mb-2">Upload Image</h3>
-                                <p className="text-gray-600">Analyze emotions from photos instantly using advanced AI vision technology</p>
+                        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+                            <h2 className="text-2xl font-bold mb-6 text-center">AI Tools</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                                <div className="bg-gray-100 p-4 rounded-lg text-center">
+                                    <div className="text-2xl mb-2">📷</div>
+                                    <h4 className="font-semibold">Upload Image</h4>
+                                    <button className="w-full mt-2 text-4xl text-gray-400 hover:text-blue-600">+</button>
+                                </div>
+                                
+                                <div className="bg-gray-100 p-4 rounded-lg text-center">
+                                    <div className="text-2xl mb-2">🎥</div>
+                                    <h4 className="font-semibold">Upload Video</h4>
+                                    <button className="w-full mt-2 text-4xl text-gray-400 hover:text-blue-600">+</button>
+                                </div>
+                                
+                                <div className="bg-gray-100 p-4 rounded-lg text-center">
+                                    <div className="text-2xl mb-2">🔍</div>
+                                    <h4 className="font-semibold">AI Lie Detector</h4>
+                                    <button className="w-full mt-2 text-4xl text-gray-400 hover:text-blue-600">+</button>
+                                </div>
+                                
+                                <div className="bg-gray-100 p-4 rounded-lg text-center">
+                                    <div className="text-2xl mb-2">😰</div>
+                                    <h4 className="font-semibold">Stress Analyzer</h4>
+                                    <button className="w-full mt-2 text-4xl text-gray-400 hover:text-blue-600">+</button>
+                                </div>
+                                
+                                <div className="bg-gray-100 p-4 rounded-lg text-center">
+                                    <div className="text-2xl mb-2">📊</div>
+                                    <h4 className="font-semibold">Deception Level</h4>
+                                    <button className="w-full mt-2 text-4xl text-gray-400 hover:text-blue-600">+</button>
+                                </div>
                             </div>
-                            
-                            <div className="bg-white p-6 rounded-lg shadow-md text-center">
-                                <div className="text-4xl mb-4">🎥</div>
-                                <h3 className="text-xl font-semibold mb-2">Upload Video</h3>
-                                <p className="text-gray-600">Get comprehensive emotion analysis from video files with timeline insights</p>
+                        </div>
+                        
+                        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+                            <h2 className="text-2xl font-bold mb-4">Popular Use Cases</h2>
+                            <p className="text-gray-600 mb-4">Describe your specific scenario for better analysis</p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                <button className="bg-blue-50 p-4 rounded-lg text-left hover:bg-blue-100">
+                                    <div className="text-2xl mb-2">🎉</div>
+                                    <h4 className="font-semibold">For Fun</h4>
+                                    <p className="text-sm text-gray-600">Discover emotions in photos</p>
+                                </button>
+                                <button className="bg-blue-50 p-4 rounded-lg text-left hover:bg-blue-100">
+                                    <div className="text-2xl mb-2">💼</div>
+                                    <h4 className="font-semibold">Interview</h4>
+                                    <p className="text-sm text-gray-600">Analyze confidence and honesty</p>
+                                </button>
+                                <button className="bg-blue-50 p-4 rounded-lg text-left hover:bg-blue-100">
+                                    <div className="text-2xl mb-2">💕</div>
+                                    <h4 className="font-semibold">Date</h4>
+                                    <p className="text-sm text-gray-600">Understand emotional cues</p>
+                                </button>
+                                <button className="bg-blue-50 p-4 rounded-lg text-left hover:bg-blue-100">
+                                    <div className="text-2xl mb-2">🔍</div>
+                                    <h4 className="font-semibold">Interrogation</h4>
+                                    <p className="text-sm text-gray-600">Professional deception analysis</p>
+                                </button>
                             </div>
-                            
-                            <div className="bg-white p-6 rounded-lg shadow-md text-center">
-                                <div className="text-4xl mb-4">📹</div>
-                                <h3 className="text-xl font-semibold mb-2">Live Camera</h3>
-                                <p className="text-gray-600">Real-time emotion detection using your webcam with instant AI feedback</p>
-                            </div>
+                        </div>
+                        
+                        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+                            <h2 className="text-2xl font-bold mb-4">Describe Your Scenario</h2>
+                            <p className="text-gray-600 mb-4">Tell us about your situation to get more personalized analysis:</p>
+                            <textarea 
+                                className="w-full p-4 border border-gray-300 rounded-lg resize-none"
+                                rows="3"
+                                placeholder="Example: Job interview analysis for confidence and honesty assessment..."
+                            />
+                            <button className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                                Apply Scenario Context
+                            </button>
                         </div>
                         
                         <UploadImageComponent />
@@ -395,18 +521,73 @@ async def analyze_image(file: UploadFile = File(...)):
                 "suggestion": "Please upload an image with a clear, visible face"
             })
         
-        # Analyze emotion
-        result = analyzer.analyze_emotion_fast(opencv_image)
+        # Get comprehensive analysis including body language and detailed insights
+        from body_language_analyzer import BodyLanguageAnalyzer
+        from lie_detector import LieDetector
+        from stress_analyzer import StressAnalyzer
         
-        if "error" in result:
-            return JSONResponse({"error": result["error"]})
-        
-        return JSONResponse({
-            "emotion": result.get("emotion", "Unknown"),
-            "confidence": result.get("confidence", 0.8),
-            "mood": result.get("mood", "Unable to determine mood"),
-            "landmarks_detected": landmarks_count
-        })
+        try:
+            # Initialize analyzers
+            body_analyzer = BodyLanguageAnalyzer()
+            lie_detector = LieDetector()
+            stress_analyzer = StressAnalyzer()
+            
+            # Comprehensive emotion analysis
+            emotion_result = analyzer.analyze_emotion_fast(opencv_image)
+            
+            # Body language analysis
+            body_result = body_analyzer.analyze_body_language(opencv_image)
+            
+            # Lie detection analysis
+            lie_result = lie_detector.analyze_deception(opencv_image)
+            
+            # Stress analysis
+            stress_result = stress_analyzer.analyze_stress(opencv_image)
+            
+            # Combine all results
+            comprehensive_result = {
+                # Primary emotion data
+                "emotion": emotion_result.get("emotion", "Unknown"),
+                "confidence": emotion_result.get("confidence", 0.8),
+                "mood": emotion_result.get("mood", "Unable to determine mood"),
+                "ai_analysis": emotion_result.get("analysis", ""),
+                "landmarks_detected": landmarks_count,
+                
+                # Body language data
+                "body_language_patterns": body_result.get("patterns", []),
+                "body_language_count": len(body_result.get("patterns", [])),
+                "facial_expressions": body_result.get("facial_expressions", []),
+                "facial_expressions_count": len(body_result.get("facial_expressions", [])),
+                
+                # Deception analysis
+                "deception_risk": lie_result.get("risk_level", "LOW"),
+                "deception_percentage": lie_result.get("percentage", 0.0),
+                "deception_confidence": lie_result.get("confidence", "Low"),
+                "deception_indicators": lie_result.get("indicators", []),
+                
+                # Stress analysis
+                "stress_level": stress_result.get("level", "Medium"),
+                "stress_percentage": stress_result.get("percentage", 50),
+                "stress_indicators": stress_result.get("indicators", []),
+                "stress_recommendations": stress_result.get("recommendations", [])
+            }
+            
+            return JSONResponse(comprehensive_result)
+            
+        except Exception as analysis_error:
+            # Fallback to basic emotion analysis if detailed analysis fails
+            result = analyzer.analyze_emotion_fast(opencv_image)
+            
+            if "error" in result:
+                return JSONResponse({"error": result["error"]})
+            
+            return JSONResponse({
+                "emotion": result.get("emotion", "Unknown"),
+                "confidence": result.get("confidence", 0.8),
+                "mood": result.get("mood", "Unable to determine mood"),
+                "landmarks_detected": landmarks_count,
+                "analysis_note": "Basic analysis mode - detailed features unavailable"
+            })
         
     except Exception as e:
         return JSONResponse({"error": f"Processing failed: {str(e)}"})
