@@ -21,9 +21,12 @@ Performance: Added Simple Landmarks Tracker for better real-time performance usi
 ## System Architecture
 
 ### Frontend Architecture
-- **Framework**: Streamlit for web-based user interface
+- **Framework**: Migrated from Streamlit to FastAPI + React architecture
+- **Backend**: FastAPI RESTful API with emotion analysis endpoints
+- **Frontend**: React-based SPA with modern component architecture
 - **Real-time Processing**: OpenCV for video capture and frame processing
-- **User Interaction**: Simple web interface for live camera feed and analysis results
+- **User Interaction**: ChatGPT-style interface and upload components
+- **Communication**: RESTful API calls between frontend and backend
 
 ### Backend Architecture
 - **Computer Vision**: MediaPipe Face Mesh for facial landmark detection

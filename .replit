@@ -1,4 +1,4 @@
-modules = ["python-3.11", "postgresql-16"]
+modules = ["python-3.11", "postgresql-16", "nodejs-20"]
 
 [nix]
 channel = "stable-24_05"
@@ -18,20 +18,11 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Streamlit App"
+args = "install_deps"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "install_deps"
-
-[[workflows.workflow]]
-name = "Streamlit App"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "streamlit run app.py --server.port 5000"
-waitForPort = 5000
+args = "FastAPI Backend"
 
 [[workflows.workflow]]
 name = "install_deps"
@@ -40,6 +31,19 @@ author = "agent"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "uv add opencv-python mediapipe"
+
+[[workflows.workflow]]
+name = "FastAPI Backend"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd backend && python main.py"
+waitForPort = 5000
+
+[[ports]]
+localPort = 3000
+externalPort = 3001
 
 [[ports]]
 localPort = 5000
