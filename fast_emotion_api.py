@@ -14,6 +14,8 @@ import mediapipe as mp
 import base64
 from io import BytesIO
 import json
+import re
+import tempfile
 from openai import OpenAI
 
 # Initialize FastAPI app
@@ -701,9 +703,10 @@ async def analyze_image(file: UploadFile = File(...)):
             )
             
             ai_analysis = response.choices[0].message.content
+            print(f"AI Analysis Response: {ai_analysis}")  # Debug log
             
             # Parse the AI response to extract structured data
-            parsed_result = parse_ai_analysis(ai_analysis)
+            parsed_result = parse_ai_analysis(ai_analysis) if ai_analysis else {}
             
             # Initialize traditional analyzers as backup
             body_analyzer = BodyLanguageAnalyzer()
@@ -753,18 +756,20 @@ async def analyze_image(file: UploadFile = File(...)):
             return JSONResponse(comprehensive_result)
             
         except Exception as analysis_error:
+            print(f"AI analysis error: {analysis_error}")
             # Fallback to basic emotion analysis if detailed analysis fails
             result = analyzer.analyze_emotion_fast(opencv_image)
             
-            if "error" in result:
+            if result and "error" in result:
                 return JSONResponse({"error": result["error"]})
             
+            # Ensure we always return valid data
             return JSONResponse({
-                "emotion": result.get("emotion", "Unknown"),
-                "confidence": result.get("confidence", 0.8),
-                "mood": result.get("mood", "Unable to determine mood"),
+                "emotion": result.get("emotion", "Unknown") if result else "Unknown",
+                "confidence": result.get("confidence", 0.8) if result else 0.8,
+                "mood": result.get("mood", "Unable to determine mood") if result else "Unable to determine mood",
                 "landmarks_detected": landmarks_count,
-                "analysis_note": "Basic analysis mode - detailed features unavailable"
+                "analysis_note": f"Basic analysis mode - AI analysis failed: {str(analysis_error)}"
             })
         
     except Exception as e:
