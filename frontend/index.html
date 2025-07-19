@@ -654,34 +654,110 @@
         const AboutInterface = () => {
             return (
                 <div className="max-w-6xl mx-auto">
-                    <div className="text-center mb-12">
-                        <h2 className="text-4xl font-bold mb-4">About Emoticon AI</h2>
-                        <p className="text-xl text-gray-600">Advanced emotion analysis powered by AI and computer vision</p>
+                    {/* Hero Section */}
+                    <div className="text-center mb-16">
+                        <h1 className="text-5xl font-bold mb-4">Why Emoticon?</h1>
+                        <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+                            Advanced AI emotion detection platform that analyzes facial expressions, body language, and deception patterns 
+                            using OpenAI's GPT-4o vision API. Provides comprehensive psychological insights through image upload, 
+                            video analysis, and real-time processing.
+                        </p>
                     </div>
 
                     {/* Features */}
-                    <div className="grid md:grid-cols-3 gap-8 mb-16">
-                        <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-                            <div className="text-4xl mb-4">🧠</div>
-                            <h3 className="text-xl font-bold mb-2">Microexpression Analysis</h3>
-                            <p className="text-gray-600">Detect subtle facial expressions that reveal true emotions</p>
+                    <div className="mb-16">
+                        <h2 className="text-3xl font-bold text-center mb-8">Features</h2>
+                        <div className="grid md:grid-cols-2 gap-8">
+                            <div className="bg-white p-6 rounded-lg shadow-lg">
+                                <h3 className="text-xl font-bold mb-2">🧠 AI Vision Analysis</h3>
+                                <p className="text-gray-600">OpenAI GPT-4o for comprehensive emotion detection</p>
+                            </div>
+                            
+                            <div className="bg-white p-6 rounded-lg shadow-lg">
+                                <h3 className="text-xl font-bold mb-2">📤 Multi-Modal Input</h3>
+                                <p className="text-gray-600">Image upload and video analysis support</p>
+                            </div>
+                            
+                            <div className="bg-white p-6 rounded-lg shadow-lg">
+                                <h3 className="text-xl font-bold mb-2">👁️ Body Language Detection</h3>
+                                <p className="text-gray-600">Full body posture and gesture analysis</p>
+                            </div>
+                            
+                            <div className="bg-white p-6 rounded-lg shadow-lg">
+                                <h3 className="text-xl font-bold mb-2">🔍 Lie Detection System</h3>
+                                <p className="text-gray-600">Advanced deception probability assessment</p>
+                            </div>
+                            
+                            <div className="bg-white p-6 rounded-lg shadow-lg">
+                                <h3 className="text-xl font-bold mb-2">👥 Multi-Face Support</h3>
+                                <p className="text-gray-600">Analyze multiple people simultaneously</p>
+                            </div>
                         </div>
-                        
-                        <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-                            <div className="text-4xl mb-4">👁️</div>
-                            <h3 className="text-xl font-bold mb-2">Body Language Detection</h3>
-                            <p className="text-gray-600">Analyze posture, gestures, and non-verbal communication</p>
+                    </div>
+
+                    {/* How It Works */}
+                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-8 rounded-lg mb-16">
+                        <h2 className="text-3xl font-bold text-center mb-8">How It Works</h2>
+                        <div className="text-center text-lg text-gray-700 leading-relaxed">
+                            <p>You look at the camera. Our model sees facial landmarks. Expressions are matched. 
+                            Emotional context is inferred. Insight is shown instantly.</p>
                         </div>
-                        
-                        <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-                            <div className="text-4xl mb-4">🎬</div>
-                            <h3 className="text-xl font-bold mb-2">Video Timeline Analysis</h3>
-                            <p className="text-gray-600">Process entire videos for emotion patterns and trends</p>
+                    </div>
+
+                    {/* Technical Implementation */}
+                    <div className="mb-16">
+                        <h2 className="text-3xl font-bold text-center mb-8">Technical Implementation</h2>
+                        <div className="grid md:grid-cols-2 gap-8">
+                            <div className="bg-white p-6 rounded-lg shadow-lg">
+                                <h3 className="text-xl font-bold mb-3">🎯 Computer Vision</h3>
+                                <p className="text-gray-600">MediaPipe Face Mesh for 468 facial landmarks</p>
+                            </div>
+                            
+                            <div className="bg-white p-6 rounded-lg shadow-lg">
+                                <h3 className="text-xl font-bold mb-3">⚡ Expression Detection</h3>
+                                <p className="text-gray-600">100+ predefined gestures using geometric analysis</p>
+                            </div>
+                            
+                            <div className="bg-white p-6 rounded-lg shadow-lg">
+                                <h3 className="text-xl font-bold mb-3">🤖 AI Analysis</h3>
+                                <p className="text-gray-600">OpenAI GPT-4o for psychological insights</p>
+                            </div>
+                            
+                            <div className="bg-white p-6 rounded-lg shadow-lg">
+                                <h3 className="text-xl font-bold mb-3">💾 Database</h3>
+                                <p className="text-gray-600">PostgreSQL for storing analysis results and user sessions</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Key Technologies */}
+                    <div className="mb-16">
+                        <h2 className="text-3xl font-bold text-center mb-8">Key Technologies</h2>
+                        <div className="space-y-6">
+                            <div className="bg-white p-6 rounded-lg shadow-lg">
+                                <h3 className="text-xl font-bold mb-3">MediaPipe Face Mesh</h3>
+                                <p className="text-gray-600">Advanced facial landmark detection that identifies 468 3D points on the human face in real-time, enabling precise gesture recognition.</p>
+                            </div>
+                            
+                            <div className="bg-white p-6 rounded-lg shadow-lg">
+                                <h3 className="text-xl font-bold mb-3">OpenAI GPT-4o Integration</h3>
+                                <p className="text-gray-600">Cutting-edge language model that provides psychological insights and emotional interpretation based on detected facial expressions.</p>
+                            </div>
+                            
+                            <div className="bg-white p-6 rounded-lg shadow-lg">
+                                <h3 className="text-xl font-bold mb-3">Real-time Processing Pipeline</h3>
+                                <p className="text-gray-600">Optimized video processing system that analyzes facial expressions continuously while maintaining high performance.</p>
+                            </div>
+                            
+                            <div className="bg-white p-6 rounded-lg shadow-lg">
+                                <h3 className="text-xl font-bold mb-3">Smart Expression Detection</h3>
+                                <p className="text-gray-600">Intelligent system that recognizes significant expression changes to provide meaningful analysis without overwhelming the user.</p>
+                            </div>
                         </div>
                     </div>
 
                     {/* Pricing */}
-                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-8 rounded-lg">
+                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-8 rounded-lg mb-16">
                         <h2 className="text-3xl font-bold text-center mb-8">Pricing Plans</h2>
                         
                         <div className="grid md:grid-cols-2 gap-8">
@@ -722,7 +798,7 @@
                     </div>
 
                     {/* Use Cases */}
-                    <div className="mt-16">
+                    <div className="mb-16">
                         <h2 className="text-3xl font-bold text-center mb-8">Popular Use Cases</h2>
                         <div className="grid md:grid-cols-4 gap-6">
                             <div className="bg-white p-4 rounded-lg shadow-lg text-center">
@@ -744,6 +820,107 @@
                                 <div className="text-3xl mb-2">🔍</div>
                                 <h4 className="font-bold">Investigation</h4>
                                 <p className="text-sm text-gray-600">Professional deception detection</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* What's Next */}
+                    <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-8 rounded-lg mb-16">
+                        <h2 className="text-3xl font-bold text-center mb-6">What's Next</h2>
+                        <div className="text-center text-lg text-gray-700 leading-relaxed">
+                            <p>Emoticon will grow into a fully-fledged emotional analytics platform — empowering researchers, 
+                            UX designers, and humans who want to understand other humans better.</p>
+                        </div>
+                    </div>
+
+                    {/* Career Opportunities */}
+                    <div className="mb-16">
+                        <h2 className="text-3xl font-bold text-center mb-8">💼 Career Opportunities</h2>
+                        <div className="bg-white p-8 rounded-lg shadow-lg">
+                            <p className="text-lg text-center mb-8">Join our mission to revolutionize emotional intelligence through AI</p>
+                            
+                            <div className="grid md:grid-cols-2 gap-8 mb-8">
+                                <div>
+                                    <h3 className="text-xl font-bold mb-4">🚀 About Emoticon</h3>
+                                    <p className="text-gray-600 mb-4">Emoticon is at the forefront of AI-powered emotional intelligence technology. We're building the next generation of emotion detection and analysis systems.</p>
+                                    <ul className="space-y-2">
+                                        <li><strong>Founded:</strong> 2024</li>
+                                        <li><strong>Team Size:</strong> Growing rapidly</li>
+                                        <li><strong>Technology:</strong> OpenAI GPT-4o, MediaPipe, Python</li>
+                                        <li><strong>Focus:</strong> AI, Computer Vision, Psychology</li>
+                                    </ul>
+                                </div>
+                                
+                                <div>
+                                    <h3 className="text-xl font-bold mb-4">🌟 Why Join Emoticon?</h3>
+                                    <ul className="space-y-3">
+                                        <li className="flex items-start">
+                                            <span className="text-blue-500 mr-2">🧠</span>
+                                            <div>
+                                                <strong>Cutting-Edge Technology</strong>
+                                                <p className="text-sm text-gray-600">Work with latest AI models and computer vision</p>
+                                            </div>
+                                        </li>
+                                        <li className="flex items-start">
+                                            <span className="text-green-500 mr-2">🎯</span>
+                                            <div>
+                                                <strong>Meaningful Impact</strong>
+                                                <p className="text-sm text-gray-600">Help people understand emotions better</p>
+                                            </div>
+                                        </li>
+                                        <li className="flex items-start">
+                                            <span className="text-purple-500 mr-2">🚀</span>
+                                            <div>
+                                                <strong>Growth Opportunities</strong>
+                                                <p className="text-sm text-gray-600">Shape the future of emotional AI</p>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div className="text-center">
+                                <h3 className="text-xl font-bold mb-4">🎯 Current Openings</h3>
+                                <div className="grid md:grid-cols-2 gap-4 mb-6">
+                                    <div className="bg-gray-50 p-3 rounded">Senior AI Engineer - Engineering</div>
+                                    <div className="bg-gray-50 p-3 rounded">Computer Vision Specialist - Research</div>
+                                    <div className="bg-gray-50 p-3 rounded">Psychology Researcher - Research</div>
+                                    <div className="bg-gray-50 p-3 rounded">Frontend Developer - Engineering</div>
+                                    <div className="bg-gray-50 p-3 rounded">Machine Learning Intern - Research</div>
+                                </div>
+                                
+                                <p className="text-gray-600">Contact our recruiting team at <strong>emoticon.contact@gmail.com</strong></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Contact */}
+                    <div className="bg-gradient-to-r from-blue-50 to-green-50 p-8 rounded-lg">
+                        <h2 className="text-3xl font-bold text-center mb-8">Contact Us</h2>
+                        <div className="grid md:grid-cols-2 gap-8">
+                            <div>
+                                <h3 className="text-xl font-bold mb-4">Get in Touch</h3>
+                                <div className="space-y-2">
+                                    <p><strong>📧 Email:</strong> emoticon.contact@gmail.com</p>
+                                    <p><strong>📱 Phone:</strong> +61 451 961 015</p>
+                                    <p><strong>🕐 Hours:</strong> Monday - Friday, 9 AM - 6 PM PST</p>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h3 className="text-xl font-bold mb-4">Follow Us</h3>
+                                <p><strong>📸 INSTAGRAM:</strong> @EMOTICON.AI</p>
+                                
+                                <div className="mt-6">
+                                    <h4 className="font-bold mb-2">Frequently Asked Questions</h4>
+                                    <div className="space-y-1 text-sm">
+                                        <p>• How accurate is the emotion detection?</p>
+                                        <p>• Is my data secure and private?</p>
+                                        <p>• What devices and browsers are supported?</p>
+                                        <p>• Can I use this for commercial purposes?</p>
+                                        <p>• How do I report a bug or suggest a feature?</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
