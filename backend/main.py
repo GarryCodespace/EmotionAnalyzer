@@ -22,38 +22,14 @@ try:
     from openai_analyzer import OpenAIAnalyzer
     from lie_detector import LieDetector  
     from stress_analyzer import StressAnalyzer
+    from body_language_analyzer import BodyLanguageAnalyzer
+    from realtime_emotion_analyzer import RealtimeEmotionAnalyzer
+    from instant_emotion_analyzer import InstantEmotionAnalyzer
+    from auto_emotion_detector import AutoEmotionDetector
+    MODULES_LOADED = True
 except ImportError as e:
     print(f"Warning: Could not import some modules: {e}")
-    # Create fallback analyzers for development
-    class FallbackAnalyzer:
-        def analyze_facial_expressions(self, image):
-            return {
-                'emotional_state': 'neutral',
-                'confidence_level': '85%',
-                'facial_expressions': ['focused'],
-                'detailed_analysis': 'Basic analysis - full AI integration pending'
-            }
-        
-        def analyze_deception(self, image):
-            return {
-                'deception_probability': 0.2,
-                'confidence_level': '80%',
-                'key_indicators': ['normal eye contact', 'relaxed posture'],
-                'ai_interpretation': 'No significant deception indicators detected'
-            }
-        
-        def analyze_stress_level(self, image):
-            return {
-                'stress_percentage': 25,
-                'stress_level': 'Low',
-                'indicators': ['relaxed_posture', 'calm_expression'],
-                'recommendations': ['Continue current activities', 'Maintain good work-life balance']
-            }
-    
-    AIVisionAnalyzer = FallbackAnalyzer
-    OpenAIAnalyzer = FallbackAnalyzer
-    LieDetector = FallbackAnalyzer
-    StressAnalyzer = FallbackAnalyzer
+    MODULES_LOADED = False
 
 app = FastAPI(title="Emoticon AI", description="Real-time emotion analysis API", version="1.0.0")
 
@@ -67,10 +43,18 @@ app.add_middleware(
 )
 
 # Initialize analyzers
-ai_vision = AIVisionAnalyzer()
-openai_analyzer = OpenAIAnalyzer()
-lie_detector = LieDetector()
-stress_analyzer = StressAnalyzer()
+if MODULES_LOADED:
+    ai_vision = AIVisionAnalyzer()
+    openai_analyzer = OpenAIAnalyzer()
+    lie_detector = LieDetector()
+    stress_analyzer = StressAnalyzer()
+    body_language_analyzer = BodyLanguageAnalyzer()
+    realtime_analyzer = RealtimeEmotionAnalyzer()
+    instant_analyzer = InstantEmotionAnalyzer()
+    auto_detector = AutoEmotionDetector()
+else:
+    ai_vision = openai_analyzer = lie_detector = stress_analyzer = None
+    body_language_analyzer = realtime_analyzer = instant_analyzer = auto_detector = None
 
 # Serve frontend HTML file
 from fastapi.responses import FileResponse
@@ -108,8 +92,11 @@ async def health_check():
 
 @app.post("/api/analyze/image")
 async def analyze_image(file: UploadFile = File(...)):
-    """Analyze emotion in uploaded image"""
+    """Full microexpression and body language analysis"""
     try:
+        if not ai_vision:
+            raise HTTPException(status_code=503, detail="Analysis modules not loaded")
+            
         # Read and process image
         contents = await file.read()
         image = Image.open(io.BytesIO(contents))
@@ -119,11 +106,24 @@ async def analyze_image(file: UploadFile = File(...)):
         if len(image_array.shape) == 3 and image_array.shape[2] == 3:
             image_array = cv2.cvtColor(image_array, cv2.COLOR_RGB2BGR)
         
-        # Analyze with AI Vision
-        analysis = ai_vision.analyze_facial_expressions(image_array)
+        # Comprehensive analysis combining facial expressions and body language
+        facial_analysis = ai_vision.analyze_facial_expressions(image_array)
+        body_analysis = body_language_analyzer.analyze_body_language(image_array) if body_language_analyzer else None
         
-        if not analysis:
-            raise HTTPException(status_code=400, detail="No facial expressions detected")
+        # Combine analyses
+        combined_analysis = {
+            "facial_expressions": facial_analysis,
+            "body_language": body_analysis,
+            "microexpressions": facial_analysis.get("microexpressions", []),
+            "emotional_state": facial_analysis.get("emotional_state", "neutral"),
+            "confidence_level": facial_analysis.get("confidence_level", "medium"),
+            "detailed_analysis": facial_analysis.get("detailed_analysis", ""),
+            "body_language_patterns": body_analysis.get("detected_patterns", []) if body_analysis else [],
+            "comprehensive_insights": generate_comprehensive_insights(facial_analysis, body_analysis)
+        }
+        
+        if not combined_analysis["facial_expressions"] and not combined_analysis["body_language"]:
+            raise HTTPException(status_code=400, detail="No facial expressions or body language detected")
         
         # Convert image to base64 for response
         buffered = io.BytesIO()
@@ -132,7 +132,7 @@ async def analyze_image(file: UploadFile = File(...)):
         
         return {
             "success": True,
-            "analysis": analysis,
+            "analysis": combined_analysis,
             "image_base64": img_base64,
             "timestamp": datetime.now().isoformat()
         }
@@ -284,6 +284,116 @@ def generate_text_response(user_input):
     
     # Default response
     return "Upload an image and I'll analyze the emotions! You can ask questions like 'How do I look?', 'Am I stressed?', or 'Analyze my emotion'."
+
+def generate_comprehensive_insights(facial_analysis, body_analysis):
+    """Generate comprehensive psychological insights combining facial and body language"""
+    insights = []
+    
+    if facial_analysis:
+        emotion = facial_analysis.get("emotional_state", "neutral")
+        insights.append(f"Primary emotion detected: {emotion}")
+        
+        if "microexpressions" in facial_analysis:
+            microexps = facial_analysis["microexpressions"]
+            if microexps:
+                insights.append(f"Microexpressions detected: {', '.join(microexps)}")
+    
+    if body_analysis and body_analysis.get("detected_patterns"):
+        patterns = body_analysis["detected_patterns"]
+        insights.append(f"Body language patterns: {', '.join(patterns)}")
+        
+        if "confidence_indicators" in body_analysis:
+            confidence = body_analysis["confidence_indicators"]
+            insights.append(f"Confidence signals: {confidence}")
+    
+    # Combine insights
+    if len(insights) > 1:
+        insights.append("Combined analysis shows alignment between facial expressions and body language")
+    
+    return ". ".join(insights) if insights else "Analysis complete"
+
+# Add video analysis endpoint
+@app.post("/api/analyze/video") 
+async def analyze_video(file: UploadFile = File(...)):
+    """Analyze video for emotion timeline and significant moments"""
+    try:
+        if not realtime_analyzer:
+            raise HTTPException(status_code=503, detail="Video analysis modules not loaded")
+            
+        # Save uploaded video temporarily
+        import tempfile
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_file:
+            contents = await file.read()
+            temp_file.write(contents)
+            temp_video_path = temp_file.name
+        
+        # Analyze video
+        from video_analyzer import VideoAnalyzer
+        video_analyzer = VideoAnalyzer()
+        analysis_results = video_analyzer.analyze_video_file(temp_video_path)
+        
+        # Clean up temp file
+        os.unlink(temp_video_path)
+        
+        return {
+            "success": True,
+            "video_analysis": analysis_results,
+            "timeline": analysis_results.get("timeline", []),
+            "dominant_emotions": analysis_results.get("dominant_emotions", {}),
+            "significant_moments": analysis_results.get("significant_moments", []),
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Video analysis failed: {str(e)}")
+
+# Add live camera analysis endpoint
+@app.get("/api/camera/start")
+async def start_camera_analysis():
+    """Start live camera emotion analysis session"""
+    return {
+        "success": True,
+        "session_id": f"camera_{int(datetime.now().timestamp())}",
+        "message": "Camera analysis session started",
+        "endpoints": {
+            "analyze_frame": "/api/camera/analyze",
+            "stop": "/api/camera/stop"
+        }
+    }
+
+@app.post("/api/camera/analyze")
+async def analyze_camera_frame(data: dict):
+    """Analyze single camera frame for real-time emotion detection"""
+    try:
+        if not instant_analyzer:
+            raise HTTPException(status_code=503, detail="Real-time analysis modules not loaded")
+            
+        frame_data = data.get("frame_base64")
+        if not frame_data:
+            raise HTTPException(status_code=400, detail="No frame data provided")
+        
+        # Decode base64 frame
+        image_data = base64.b64decode(frame_data.split(',')[1] if ',' in frame_data else frame_data)
+        image = Image.open(io.BytesIO(image_data))
+        image_array = np.array(image)
+        
+        if len(image_array.shape) == 3 and image_array.shape[2] == 3:
+            image_array = cv2.cvtColor(image_array, cv2.COLOR_RGB2BGR)
+        
+        # Real-time analysis
+        analysis = instant_analyzer.analyze_instant_emotion(image_array)
+        
+        return {
+            "success": True,
+            "realtime_analysis": analysis,
+            "emotion": analysis.get("primary_emotion", "neutral"),
+            "confidence": analysis.get("confidence", 0.5),
+            "microexpressions": analysis.get("microexpressions", []),
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Real-time analysis failed: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn

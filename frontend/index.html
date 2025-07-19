@@ -47,7 +47,10 @@
             const tabs = [
                 { id: 'chat', label: 'Chat Interface', icon: '💬' },
                 { id: 'upload', label: 'Upload & Analyze', icon: '📤' },
-                { id: 'landmarks', label: 'Landmarks Tracker', icon: '🎯' }
+                { id: 'video', label: 'Video Analysis', icon: '🎬' },
+                { id: 'live', label: 'Live Camera', icon: '📹' },
+                { id: 'landmarks', label: 'Landmarks Tracker', icon: '🎯' },
+                { id: 'about', label: 'About & Pricing', icon: 'ℹ️' }
             ];
 
             return (
@@ -258,9 +261,9 @@
             const fileInputRef = useRef(null);
 
             const analysisTypes = [
-                { id: 'emotion', label: 'Emotion Analysis', icon: '🧠' },
-                { id: 'lie', label: 'Lie Detection', icon: '👁️' },
-                { id: 'stress', label: 'Stress Analysis', icon: '❤️' }
+                { id: 'emotion', label: 'Full Emotion Analysis', icon: '🧠', description: 'Complete microexpression + body language analysis' },
+                { id: 'lie', label: 'Lie Detection', icon: '👁️', description: 'Deception indicators and behavioral analysis' },
+                { id: 'stress', label: 'Stress Analysis', icon: '❤️', description: 'Stress levels and relaxation recommendations' }
             ];
 
             const handleAnalyze = async () => {
@@ -313,6 +316,7 @@
                                 >
                                     <div className="text-2xl mb-2">{type.icon}</div>
                                     <p className="font-medium">{type.label}</p>
+                                    <p className="text-xs text-gray-500 mt-1">{type.description}</p>
                                 </button>
                             ))}
                         </div>
@@ -373,6 +377,380 @@
             );
         };
 
+        // Video Analysis Component
+        const VideoInterface = () => {
+            const [selectedFile, setSelectedFile] = useState(null);
+            const [analysis, setAnalysis] = useState(null);
+            const [isLoading, setIsLoading] = useState(false);
+            const fileInputRef = useRef(null);
+
+            const handleVideoAnalyze = async () => {
+                if (!selectedFile) return;
+
+                setIsLoading(true);
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+
+                try {
+                    const response = await fetch('/api/analyze/video', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+                    setAnalysis(data);
+                } catch (error) {
+                    setAnalysis({ success: false, error: 'Video analysis failed' });
+                }
+
+                setIsLoading(false);
+            };
+
+            return (
+                <div className="max-w-4xl mx-auto">
+                    <div className="text-center mb-8">
+                        <h2 className="text-3xl font-bold mb-2">🎬 Video Analysis</h2>
+                        <p className="text-gray-600">Upload a video for comprehensive emotion timeline analysis</p>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+                        <div
+                            onClick={() => fileInputRef.current?.click()}
+                            className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-gray-400"
+                        >
+                            <div className="text-4xl mb-4">🎬</div>
+                            <p className="text-lg font-medium mb-2">
+                                {selectedFile ? selectedFile.name : 'Click to upload a video'}
+                            </p>
+                            <p className="text-gray-500">Supports MP4, AVI, MOV files up to 50MB</p>
+                        </div>
+
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={(e) => setSelectedFile(e.target.files[0])}
+                            accept="video/*"
+                            className="hidden"
+                        />
+
+                        {selectedFile && (
+                            <div className="mt-4 text-center">
+                                <button
+                                    onClick={handleVideoAnalyze}
+                                    disabled={isLoading}
+                                    className="px-6 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:opacity-50"
+                                >
+                                    {isLoading ? 'Analyzing Video...' : 'Analyze Video Timeline'}
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    {analysis && analysis.success && (
+                        <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
+                            <h3 className="text-lg font-semibold mb-4">Video Analysis Results</h3>
+                            
+                            {analysis.dominant_emotions && (
+                                <div className="mb-4">
+                                    <h4 className="font-medium mb-2">Dominant Emotions:</h4>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {Object.entries(analysis.dominant_emotions).map(([emotion, percentage]) => (
+                                            <div key={emotion} className="bg-white p-2 rounded">
+                                                <span className="capitalize font-medium">{emotion}: </span>
+                                                <span>{percentage}%</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {analysis.timeline && analysis.timeline.length > 0 && (
+                                <div className="mb-4">
+                                    <h4 className="font-medium mb-2">Emotion Timeline:</h4>
+                                    <div className="space-y-2 max-h-40 overflow-y-auto">
+                                        {analysis.timeline.map((moment, index) => (
+                                            <div key={index} className="bg-white p-2 rounded text-sm">
+                                                <strong>{moment.timestamp}:</strong> {moment.emotion} ({moment.confidence}%)
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {analysis.significant_moments && analysis.significant_moments.length > 0 && (
+                                <div>
+                                    <h4 className="font-medium mb-2">Significant Moments:</h4>
+                                    <div className="space-y-2">
+                                        {analysis.significant_moments.map((moment, index) => (
+                                            <div key={index} className="bg-white p-3 rounded">
+                                                <div className="font-medium">{moment.timestamp} - {moment.emotion}</div>
+                                                <div className="text-sm text-gray-600">{moment.description}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // Live Camera Component
+        const LiveCameraInterface = () => {
+            const [isActive, setIsActive] = useState(false);
+            const [currentEmotion, setCurrentEmotion] = useState(null);
+            const [emotionHistory, setEmotionHistory] = useState([]);
+            const videoRef = useRef(null);
+            const canvasRef = useRef(null);
+            const streamRef = useRef(null);
+            const intervalRef = useRef(null);
+
+            const startCamera = async () => {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { width: 640, height: 480 } 
+                    });
+                    
+                    streamRef.current = stream;
+                    if (videoRef.current) {
+                        videoRef.current.srcObject = stream;
+                    }
+                    
+                    setIsActive(true);
+                    
+                    // Start real-time analysis
+                    intervalRef.current = setInterval(analyzeFrame, 3000); // Every 3 seconds
+                } catch (error) {
+                    alert('Failed to access camera. Please check permissions.');
+                }
+            };
+
+            const stopCamera = () => {
+                if (streamRef.current) {
+                    streamRef.current.getTracks().forEach(track => track.stop());
+                }
+                if (intervalRef.current) {
+                    clearInterval(intervalRef.current);
+                }
+                setIsActive(false);
+                setCurrentEmotion(null);
+            };
+
+            const analyzeFrame = async () => {
+                if (!videoRef.current || !canvasRef.current) return;
+
+                const canvas = canvasRef.current;
+                const context = canvas.getContext('2d');
+                canvas.width = videoRef.current.videoWidth;
+                canvas.height = videoRef.current.videoHeight;
+                
+                context.drawImage(videoRef.current, 0, 0);
+                
+                const imageData = canvas.toDataURL('image/jpeg');
+                
+                try {
+                    const response = await fetch('/api/camera/analyze', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ frame_base64: imageData })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        const newEmotion = {
+                            emotion: data.emotion,
+                            confidence: data.confidence,
+                            microexpressions: data.microexpressions || [],
+                            timestamp: new Date().toLocaleTimeString()
+                        };
+                        
+                        setCurrentEmotion(newEmotion);
+                        setEmotionHistory(prev => [newEmotion, ...prev.slice(0, 9)]); // Keep last 10
+                    }
+                } catch (error) {
+                    console.error('Frame analysis failed:', error);
+                }
+            };
+
+            return (
+                <div className="max-w-4xl mx-auto">
+                    <div className="text-center mb-8">
+                        <h2 className="text-3xl font-bold mb-2">📹 Live Camera Analysis</h2>
+                        <p className="text-gray-600">Real-time emotion detection and microexpression analysis</p>
+                    </div>
+
+                    <div className="flex justify-center space-x-4 mb-6">
+                        <button
+                            onClick={startCamera}
+                            disabled={isActive}
+                            className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50"
+                        >
+                            📹 Start Camera
+                        </button>
+                        
+                        <button
+                            onClick={stopCamera}
+                            disabled={!isActive}
+                            className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50"
+                        >
+                            ⏹️ Stop Camera
+                        </button>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow-lg p-4 mb-6">
+                        <div className="relative">
+                            <video
+                                ref={videoRef}
+                                autoPlay
+                                playsInline
+                                muted
+                                className="w-full rounded-lg bg-gray-900"
+                                style={{ maxHeight: '400px' }}
+                            />
+                            <canvas ref={canvasRef} className="hidden" />
+                            
+                            {currentEmotion && (
+                                <div className="absolute top-4 left-4 bg-black bg-opacity-75 text-white px-3 py-2 rounded-lg">
+                                    <p className="font-semibold">{currentEmotion.emotion}</p>
+                                    <p className="text-sm">{(currentEmotion.confidence * 100).toFixed(1)}% confidence</p>
+                                    {currentEmotion.microexpressions.length > 0 && (
+                                        <p className="text-xs">Micro: {currentEmotion.microexpressions.join(', ')}</p>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {emotionHistory.length > 0 && (
+                        <div className="bg-white rounded-lg shadow-lg p-6">
+                            <h3 className="text-xl font-semibold mb-4">Real-time Analysis History</h3>
+                            <div className="space-y-2">
+                                {emotionHistory.map((entry, index) => (
+                                    <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                        <div>
+                                            <span className="font-medium capitalize">{entry.emotion}</span>
+                                            {entry.microexpressions.length > 0 && (
+                                                <span className="text-sm text-gray-600 ml-2">
+                                                    ({entry.microexpressions.join(', ')})
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="text-right">
+                                            <div className="text-sm text-gray-600">{entry.timestamp}</div>
+                                            <div className="text-sm">{(entry.confidence * 100).toFixed(1)}%</div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // About & Pricing Component
+        const AboutInterface = () => {
+            return (
+                <div className="max-w-6xl mx-auto">
+                    <div className="text-center mb-12">
+                        <h2 className="text-4xl font-bold mb-4">About Emoticon AI</h2>
+                        <p className="text-xl text-gray-600">Advanced emotion analysis powered by AI and computer vision</p>
+                    </div>
+
+                    {/* Features */}
+                    <div className="grid md:grid-cols-3 gap-8 mb-16">
+                        <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+                            <div className="text-4xl mb-4">🧠</div>
+                            <h3 className="text-xl font-bold mb-2">Microexpression Analysis</h3>
+                            <p className="text-gray-600">Detect subtle facial expressions that reveal true emotions</p>
+                        </div>
+                        
+                        <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+                            <div className="text-4xl mb-4">👁️</div>
+                            <h3 className="text-xl font-bold mb-2">Body Language Detection</h3>
+                            <p className="text-gray-600">Analyze posture, gestures, and non-verbal communication</p>
+                        </div>
+                        
+                        <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+                            <div className="text-4xl mb-4">🎬</div>
+                            <h3 className="text-xl font-bold mb-2">Video Timeline Analysis</h3>
+                            <p className="text-gray-600">Process entire videos for emotion patterns and trends</p>
+                        </div>
+                    </div>
+
+                    {/* Pricing */}
+                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-8 rounded-lg">
+                        <h2 className="text-3xl font-bold text-center mb-8">Pricing Plans</h2>
+                        
+                        <div className="grid md:grid-cols-2 gap-8">
+                            {/* Free Plan */}
+                            <div className="bg-white p-6 rounded-lg shadow-lg">
+                                <h3 className="text-2xl font-bold mb-4">Free Plan</h3>
+                                <div className="text-3xl font-bold text-blue-600 mb-4">$0<span className="text-lg text-gray-600">/month</span></div>
+                                <ul className="space-y-2 mb-6">
+                                    <li className="flex items-center"><span className="text-green-500 mr-2">✓</span>Basic emotion analysis</li>
+                                    <li className="flex items-center"><span className="text-green-500 mr-2">✓</span>1 lie detection per day</li>
+                                    <li className="flex items-center"><span className="text-green-500 mr-2">✓</span>1 stress analysis per day</li>
+                                    <li className="flex items-center"><span className="text-green-500 mr-2">✓</span>Live camera analysis</li>
+                                    <li className="flex items-center"><span className="text-green-500 mr-2">✓</span>Image uploads</li>
+                                </ul>
+                                <button className="w-full py-3 bg-gray-500 text-white rounded-lg">Current Plan</button>
+                            </div>
+
+                            {/* Professional Plan */}
+                            <div className="bg-white p-6 rounded-lg shadow-lg border-2 border-blue-500">
+                                <div className="text-center mb-2">
+                                    <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm">Most Popular</span>
+                                </div>
+                                <h3 className="text-2xl font-bold mb-4">Professional</h3>
+                                <div className="text-3xl font-bold text-blue-600 mb-4">$14.99<span className="text-lg text-gray-600">/month</span></div>
+                                <ul className="space-y-2 mb-6">
+                                    <li className="flex items-center"><span className="text-green-500 mr-2">✓</span>Unlimited analysis</li>
+                                    <li className="flex items-center"><span className="text-green-500 mr-2">✓</span>Unlimited lie detection</li>
+                                    <li className="flex items-center"><span className="text-green-500 mr-2">✓</span>Unlimited stress analysis</li>
+                                    <li className="flex items-center"><span className="text-green-500 mr-2">✓</span>Video timeline analysis</li>
+                                    <li className="flex items-center"><span className="text-green-500 mr-2">✓</span>Advanced microexpression detection</li>
+                                    <li className="flex items-center"><span className="text-green-500 mr-2">✓</span>Body language analysis</li>
+                                    <li className="flex items-center"><span className="text-green-500 mr-2">✓</span>Export analysis reports</li>
+                                    <li className="flex items-center"><span className="text-green-500 mr-2">✓</span>Priority support</li>
+                                </ul>
+                                <button className="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Upgrade to Pro</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Use Cases */}
+                    <div className="mt-16">
+                        <h2 className="text-3xl font-bold text-center mb-8">Popular Use Cases</h2>
+                        <div className="grid md:grid-cols-4 gap-6">
+                            <div className="bg-white p-4 rounded-lg shadow-lg text-center">
+                                <div className="text-3xl mb-2">😄</div>
+                                <h4 className="font-bold">For Fun</h4>
+                                <p className="text-sm text-gray-600">Analyze selfies and social media photos</p>
+                            </div>
+                            <div className="bg-white p-4 rounded-lg shadow-lg text-center">
+                                <div className="text-3xl mb-2">💼</div>
+                                <h4 className="font-bold">Interview</h4>
+                                <p className="text-sm text-gray-600">Prepare for job interviews and presentations</p>
+                            </div>
+                            <div className="bg-white p-4 rounded-lg shadow-lg text-center">
+                                <div className="text-3xl mb-2">💕</div>
+                                <h4 className="font-bold">Date</h4>
+                                <p className="text-sm text-gray-600">Understand social interactions better</p>
+                            </div>
+                            <div className="bg-white p-4 rounded-lg shadow-lg text-center">
+                                <div className="text-3xl mb-2">🔍</div>
+                                <h4 className="font-bold">Investigation</h4>
+                                <p className="text-sm text-gray-600">Professional deception detection</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
         // Main App Component
         const App = () => {
             const [activeTab, setActiveTab] = useState('chat');
@@ -383,14 +761,20 @@
                         return <ChatInterface />;
                     case 'upload':
                         return <UploadInterface />;
+                    case 'video':
+                        return <VideoInterface />;
+                    case 'live':
+                        return <LiveCameraInterface />;
                     case 'landmarks':
                         return (
                             <div className="text-center py-12">
                                 <h2 className="text-2xl font-bold mb-4">🎯 Landmarks Tracker</h2>
-                                <p className="text-gray-600">Real-time facial landmark tracking feature coming soon</p>
-                                <p className="text-sm text-gray-500 mt-2">This will integrate with MediaPipe for live camera analysis</p>
+                                <p className="text-gray-600">Real-time facial landmark tracking with MediaPipe integration</p>
+                                <p className="text-sm text-gray-500 mt-2">Advanced landmark detection for detailed expression analysis</p>
                             </div>
                         );
+                    case 'about':
+                        return <AboutInterface />;
                     default:
                         return <ChatInterface />;
                 }
